@@ -1,0 +1,29 @@
+# env
+.env
+.env.*
+
+# python cache
+__pycache__/
+*.py[cod]
+
+# local virtual env
+.venv/
+venv/
+
+# tool caches
+.pytest_cache/
+.mypy_cache/
+.coverage
+
+# local runtime logs
+_uvicorn_stdout.log
+_uvicorn_stderr.log
+
+# local runtime data artifacts
+apps/review-insights/data/raw/*.json
+apps/review-insights/data/processed/*.json
+apps/review-insights/data/analysis/*.json
+apps/review-insights/data/metadata/*.json
+
+# local test temp outputs
+apps/review-insights/tests/_tmp_*/
