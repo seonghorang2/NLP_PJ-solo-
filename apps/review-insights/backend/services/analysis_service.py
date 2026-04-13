@@ -134,16 +134,22 @@ def run_and_persist_analysis(
     raw_reviews: list[RawReview],
     appid: int,
     data_root: str | Path,
+    game_name: str | None = None,
 ) -> tuple[AnalysisResult, list[ProcessedReview]]:
     """Persist raw, processed, and analysis artifacts for one appid."""
     result, processed_reviews = analyze_reviews(raw_reviews, appid=appid)
     store = FileStore(data_root)
 
-    store.write_raw_reviews(appid, [review.to_dict() for review in raw_reviews])
+    store.write_raw_reviews(
+        appid,
+        [review.to_dict() for review in raw_reviews],
+        game_name=game_name,
+    )
     store.write_processed_reviews(
         appid,
         [review.to_dict() for review in processed_reviews],
+        game_name=game_name,
     )
-    store.write_analysis_result(appid, result.to_dict())
+    store.write_analysis_result(appid, result.to_dict(), game_name=game_name)
 
     return result, processed_reviews

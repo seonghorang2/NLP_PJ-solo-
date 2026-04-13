@@ -380,3 +380,32 @@ python -m unittest apps/review-insights/tests/test_preprocess.py apps/review-ins
 - ë¹„êµ íŒì •ì— í•„ìš”í•œ ê²Œì„ ë©”íƒ€ë°ì´í„° ë²”ìœ„ í™•ì¥
 - ë””ë²„ê·¸ JSON íŒ¨ë„ ì ‘ê¸°/í¼ì¹˜ê¸° UI ì¶”ê°€
 - ë¹„êµ ê²°ê³¼ë¥¼ ë” ì½ê¸° ì‰½ê²Œ ì¹´ë“œì™€ í‘œ í˜•íƒœë¡œ ë‹¤ë“¬ê¸°
+
+---
+
+## 13. Á¤±ÔÈ­ º¥Ä¡¸¶Å© ¸®Æ÷Æ®
+
+Á¤±ÔÈ­ º¥Ä¡¸¶Å© ¸®Æ÷Æ®´Â ¾Æ·¡ ½ºÅ©¸³Æ®·Î »ı¼ºÇÑ´Ù.
+
+```bash
+python apps/review-insights/scripts/batch_quality_report.py --appids 2456740 1049590
+```
+
+±âº» Ãâ·Â °æ·Î:
+
+- `apps/review-insights/data/reports/batch_quality_report.json`
+- `apps/review-insights/data/reports/batch_quality_report.md`
+
+º»¹® °è¾à°ú ±ÔÄ¢Àº `apps/review-insights/docs/normalization-benchmark.md`¸¦ ±âÁØÀ¸·Î ÇÑ´Ù.
+
+ì‹¤í—˜ìš© ì½”í˜¸íŠ¸ë¥¼ ì‚¬ìš©í•˜ë ¤ë©´ `--cohort-file` ì˜µì…˜ì„ í•¨ê»˜ ì‚¬ìš©í•œë‹¤.
+
+```bash
+python apps/review-insights/scripts/batch_quality_report.py --cohort-file apps/review-insights/data/reports/experimental_cohort.json
+```
+
+íŠ¹ì • appidë§Œ ë‹¤ì‹œ ì‹¤í–‰í•˜ê³  ì‹¶ë‹¤ë©´ `--appids`ë¥¼ ê°™ì´ ë¶™ì¸ë‹¤.
+
+```bash
+python apps/review-insights/scripts/batch_quality_report.py --cohort-file apps/review-insights/data/reports/experimental_cohort.json --appids 2456740
+```

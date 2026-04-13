@@ -25,6 +25,12 @@ LOW_QUALITY_TEXTS = {
     "굿",
     "good",
     "bad",
+    "게임아님",
+    "이거게임아님",
+    "명불허전",
+    "할만해요",
+    "이게게임이지",
+    "미친게임",
 }
 
 PROFANITY_TOKENS = {
@@ -39,6 +45,8 @@ PROFANITY_TOKENS = {
     "망겜",
     "개망",
     "노답",
+    "쓰레기겜",
+    "개쓰레기겜",
 }
 
 NOISE_TOKENS = {
@@ -53,6 +61,51 @@ NOISE_TOKENS = {
     "그냥",
     "완전",
 }
+
+GENERIC_SENTIMENT_TOKENS = {
+    "재밌다",
+    "재밌음",
+    "재밌어요",
+    "재밌습니다",
+    "재미있다",
+    "재미있음",
+    "재미있어요",
+    "재미없다",
+    "재미없음",
+    "갓겜",
+    "꿀잼",
+    "노잼",
+    "최고",
+    "최고의",
+    "최고임",
+    "추천",
+    "추천함",
+    "비추천",
+    "하지마세요",
+    "하지마셈",
+    "인생게임",
+    "인생겜",
+    "명작",
+    "goat",
+    "국밥",
+}
+
+GENERIC_SENTIMENT_PREFIXES = (
+    "재밌",
+    "재미있",
+    "재미",
+    "재미없",
+    "갓겜",
+    "꿀잼",
+    "노잼",
+    "최고",
+    "추천",
+    "비추천",
+    "인생겜",
+    "인생게임",
+    "명작",
+    "국밥",
+)
 
 TOPIC_HINT_TOKENS = {
     "버그",
@@ -72,7 +125,55 @@ TOPIC_HINT_TOKENS = {
     "난이도",
     "그래픽",
     "아트",
+    "듀오",
+    "솔로",
+    "스킨",
+    "로그인",
+    "접속불가",
+    "진행불가",
+    "어려워",
+    "매크로",
+    "mmr",
+    "노가다",
+    "파밍",
+    "숙제",
+    "폐지줍기",
+    "cc템",
+    "크리에이션클럽",
+    "몰입",
+    "여운",
+    "감동",
+    "멀미",
+    "약탈",
+    "털려",
+    "해킹",
+    "밴",
+    "킬링타임",
+    "시간순삭",
+    "고인물",
+    "다인큐",
+    "살인마",
+    "생존자",
+    "판자",
+    "발전기",
+    "검사중",
 }
+
+TOPIC_HINT_TOKENS |= {
+    "콘텐츠",
+    "볼륨",
+    "건축",
+    "부지",
+    "데크",
+    "저장",
+    "세이브",
+    "모드",
+    "커스터마이징",
+    "헤어",
+    "의상",
+    "얼리액세스",
+}
+
 
 POSITIVE_HINT_TOKENS = {
     "재밌",
@@ -103,9 +204,51 @@ FIGURATIVE_HINT_TOKENS = {
 }
 
 
+NORMALIZATION_REPLACEMENTS: tuple[tuple[str, str], ...] = (
+    ("앞서 해보기", "얼리액세스"),
+    ("앞서해보기", "얼리액세스"),
+    ("얼엑", "얼리액세스"),
+    ("컨텐츠", "콘텐츠"),
+    ("업뎃", "업데이트"),
+    ("커스타마이징", "커스터마이징"),
+    ("커마", "커스터마이징"),
+    ("발적화", "최적화문제"),
+    ("프레임 드랍", "프레임드랍"),
+    ("프레임 저하", "프레임드랍"),
+    ("게속", "계속"),
+    ("안됌", "안됨"),
+    ("않됨", "안됨"),
+    ("재밋", "재밌"),
+    ("디엘씨", "dlc"),
+    ("크리에이션 클럽", "크리에이션클럽"),
+    ("메크로", "매크로"),
+    ("컨텐츤데", "콘텐츠인데"),
+    ("시간순삭게임", "시간순삭"),
+    ("시간 순삭", "시간순삭"),
+    ("쏘쏘", "보통"),
+    ("슴슴", "심심"),
+    ("노잼", "재미없음"),
+    ("포텐셜", "잠재력"),
+    ("포텐", "잠재력"),
+    ("찍먹", "가볍게플레이"),
+    ("그리픽카드", "그래픽카드"),
+    ("밸패", "밸런스"),
+    ("할게업성", "할게없음"),
+    ("개재밌음", "재밌음"),
+    ("개재밌다", "재밌다"),
+    ("개재밌네", "재밌네"),
+    ("개재밌노", "재밌음"),
+    ("존나재밌음", "재밌음"),
+    ("시간가는줄모름", "시간순삭"),
+    ("시간 가는 줄 모름", "시간순삭"),
+)
+
+
 def normalize_text(text: str) -> str:
     """Normalize whitespace and repeated punctuation without rewriting the review."""
     normalized = WHITESPACE_PATTERN.sub(" ", text or "").strip()
+    for source, target in NORMALIZATION_REPLACEMENTS:
+        normalized = normalized.replace(source, target)
     normalized = REPEATED_CHAR_PATTERN.sub(r"\1\1", normalized)
     return normalized
 
@@ -151,6 +294,30 @@ def is_low_quality_review(text: str) -> bool:
         for token in tokens
         if token not in NOISE_TOKENS and len(token) >= 2
     ]
+    has_topic_hint = any(token in TOPIC_HINT_TOKENS for token in meaningful_tokens)
+
+    if meaningful_tokens and len(meaningful_tokens) <= 3:
+        if not has_topic_hint:
+            generic_only = all(
+                token in GENERIC_SENTIMENT_TOKENS
+                or any(token.startswith(prefix) for prefix in GENERIC_SENTIMENT_PREFIXES)
+                for token in meaningful_tokens
+            )
+            if generic_only:
+                return True
+
+    if meaningful_tokens and not has_topic_hint:
+        # 짧은 감상형 리뷰(주제 힌트 없음)는 분석 효용이 낮아 MVP에서 제외
+        if len(meaningful_tokens) <= 4 and len(_visible_chars(normalized)) <= 18:
+            generic_or_short = all(
+                token in GENERIC_SENTIMENT_TOKENS
+                or any(token.startswith(prefix) for prefix in GENERIC_SENTIMENT_PREFIXES)
+                or len(token) <= 3
+                for token in meaningful_tokens
+            )
+            if generic_or_short:
+                return True
+
     return len(meaningful_tokens) == 0
 
 

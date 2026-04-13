@@ -24,6 +24,16 @@ from storage.file_store import FileStore
 
 APP_ROOT = Path(__file__).resolve().parents[2]
 DEFAULT_DATA_ROOT = APP_ROOT / "data"
+GAME_NAME_KO_OVERRIDES: dict[int, str] = {
+    1091500: "사이버펑크 2077",
+    1174180: "레드 데드 리뎀션 2",
+    1222670: "더 심즈 4",
+    252490: "러스트",
+    230410: "워프레임",
+    1145350: "하데스 II",
+    381210: "데드 바이 데이라이트",
+    275850: "노 맨즈 스카이",
+}
 
 
 def ingest_reviews_payload(payload: dict[str, Any], data_root: str | Path = DEFAULT_DATA_ROOT) -> dict[str, Any]:
@@ -57,12 +67,14 @@ def ingest_reviews_payload(payload: dict[str, Any], data_root: str | Path = DEFA
         game_metadata = normalize_steam_game_metadata(appid, fetch_steam_game_metadata(appid))
     else:
         game_metadata = build_unknown_game_metadata(appid)
+    output_game_name = _resolve_output_game_name(appid, game_metadata.name, payload)
 
     raw_reviews = normalize_steam_reviews(appid, steam_payload)
     result, processed_reviews = run_and_persist_analysis(
         raw_reviews,
         appid=appid,
         data_root=data_root,
+        game_name=output_game_name,
     )
     store = FileStore(data_root)
     if fetched_from_steam:
@@ -78,9 +90,9 @@ def ingest_reviews_payload(payload: dict[str, Any], data_root: str | Path = DEFA
                 "all_mode_cap_reached": fetch_stats.get("all_mode_cap_reached"),
             }
         )
-        store.write_analysis_result(appid, analysis_payload)
+        store.write_analysis_result(appid, analysis_payload, game_name=output_game_name)
 
-    store.write_game_metadata(appid, game_metadata.to_dict())
+    store.write_game_metadata(appid, game_metadata.to_dict(), game_name=output_game_name)
 
     return {
         "appid": appid,
@@ -101,7 +113,21 @@ def ingest_reviews_payload(payload: dict[str, Any], data_root: str | Path = DEFA
         "metadata_collected": game_metadata.release_stage != "unknown" or bool(game_metadata.genres),
         "price_model": game_metadata.price_model,
         "release_stage": game_metadata.release_stage,
+        "output_file_game_name": output_game_name,
     }
+
+
+def _resolve_output_game_name(
+    appid: int,
+    metadata_name: str | None,
+    payload: dict[str, Any],
+) -> str | None:
+    explicit_name = payload.get("file_game_name_ko")
+    if isinstance(explicit_name, str) and explicit_name.strip():
+        return explicit_name.strip()
+    if appid in GAME_NAME_KO_OVERRIDES:
+        return GAME_NAME_KO_OVERRIDES[appid]
+    return metadata_name
 
 
 def _parse_review_pages(value: Any) -> int | str:
@@ -127,13 +153,13 @@ def _parse_review_pages(value: Any) -> int | str:
 def load_analysis_result(appid: int, data_root: str | Path = DEFAULT_DATA_ROOT) -> dict[str, Any]:
     """Load a stored analysis result for one game."""
     store = FileStore(data_root)
-    return store.read_json(Path("analysis") / f"{appid}.json")
+    return store.read_analysis_result(appid)
 
 
 def load_raw_reviews(appid: int, data_root: str | Path = DEFAULT_DATA_ROOT) -> list[dict[str, Any]]:
     """Load stored raw review records for one game."""
     store = FileStore(data_root)
-    return store.read_json(Path("raw") / f"{appid}.json")
+    return store.read_raw_reviews(appid)
 
 
 def load_processed_reviews(
@@ -142,13 +168,13 @@ def load_processed_reviews(
 ) -> list[dict[str, Any]]:
     """Load stored processed review records for one game."""
     store = FileStore(data_root)
-    return store.read_json(Path("processed") / f"{appid}.json")
+    return store.read_processed_reviews(appid)
 
 
 def load_game_metadata(appid: int, data_root: str | Path = DEFAULT_DATA_ROOT) -> dict[str, Any]:
     """Load stored game metadata for one game."""
     store = FileStore(data_root)
-    return store.read_json(Path("metadata") / f"{appid}.json")
+    return store.read_game_metadata(appid)
 
 
 def load_comparison_result(
