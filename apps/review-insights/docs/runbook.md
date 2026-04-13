@@ -6,7 +6,7 @@
 
 현재 구현 범위:
 
-- Steam 리뷰 1페이지 fetch 또는 수동 `steam_payload` 주입
+- Steam 리뷰 다중 페이지 fetch(기본 all) 또는 수동 `steam_payload` 주입
 - Steam appdetails 기반 게임 메타데이터 수집
 - 결정론적 전처리
 - 멀티 라벨 카테고리 분류
@@ -76,8 +76,9 @@ uvicorn app:app --app-dir apps/review-insights/backend --host 127.0.0.1 --port 8
 1. 서버를 실행한다.
 2. 브라우저에서 `/` 경로를 연다.
 3. `단일 분석 appid`에 Steam appid를 입력한다.
-4. `분석 실행` 버튼을 누른다.
-5. 아래 결과를 확인한다.
+4. `review pages`(all / 1p / 4p / 10p)를 선택한다.
+5. `분석 실행` 버튼을 누른다.
+6. 아래 결과를 확인한다.
 
 표시 항목:
 
@@ -127,7 +128,7 @@ uvicorn app:app --app-dir apps/review-insights/backend --host 127.0.0.1 --port 8
 #### 방식 A: `appid`만 전달
 
 백엔드가 Steam Store 리뷰 API와 appdetails API에서 직접 데이터를 가져온다.
-이때 리뷰 수집 언어 기본값은 `koreana`다.
+리뷰 수집 언어 기본값은 `koreana`, 페이지 수 기본값은 `all`이다.
 
 예시:
 
@@ -170,6 +171,20 @@ uvicorn app:app --app-dir apps/review-insights/backend --host 127.0.0.1 --port 8
 
 비교 판정 품질을 테스트하려면 appdetails 형태의 메타데이터 payload도 함께 넣을 수 있다.
 
+#### 방식 D: `review_pages`로 수집 페이지 수 조절
+
+기본값은 `all`이며, `all` 모드는 내부적으로 최대 `200페이지`까지만 수집한다.  
+필요 시 `1`부터 `10`까지 지정할 수 있다.
+
+예시:
+
+```json
+{
+  "appid": 1551360,
+  "review_pages": "all"
+}
+```
+
 응답 예시:
 
 ```json
@@ -180,11 +195,21 @@ uvicorn app:app --app-dir apps/review-insights/backend --host 127.0.0.1 --port 8
   "included_review_count": 1,
   "sample_size_tier": "very_small",
   "trend_status": "limited",
+  "review_pages": "all",
+  "fetched_pages": 3,
+  "fetched_review_count": 217,
+  "fetch_timeout_seconds": 20,
+  "fetch_filter": "recent",
+  "all_mode_page_cap": 200,
+  "all_mode_cap_reached": false,
   "metadata_collected": true,
   "price_model": "paid",
   "release_stage": "released"
 }
 ```
+
+`review_pages="all"` 실행 시 응답에는 수집 진행 확인용 메타데이터(`fetched_pages`, `fetched_review_count`, `fetch_timeout_seconds`, `fetch_filter`, `all_mode_page_cap`, `all_mode_cap_reached`)가 포함된다.
+같은 ingest로 저장된 `GET /api/games/{appid}/analysis` 결과에도 `all_mode_page_cap`, `all_mode_cap_reached`가 함께 포함된다.
 
 ### 6.2 `GET /api/games/{appid}/metadata`
 
@@ -334,7 +359,7 @@ python -m unittest apps/review-insights/tests/test_preprocess.py apps/review-ins
 
 ## 10. 현재 한계
 
-- Steam fetch는 현재 1페이지 기준이다.
+- Steam fetch 기본값은 `all`이며, `all` 모드 최대 수집량은 `200페이지`로 제한된다. 필요 시 `1~10` 페이지를 명시할 수 있다.
 - 비교 상태는 메타데이터가 있어도 여전히 보수적으로 판정한다.
 - 대시보드는 내부 확인용 최소 화면이다.
 

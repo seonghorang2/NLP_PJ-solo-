@@ -126,6 +126,13 @@ class ApiFlowTests(unittest.TestCase):
         self.assertEqual(response["included_review_count"], 2)
         self.assertEqual(response["price_model"], "paid")
         self.assertEqual(response["release_stage"], "released")
+        self.assertEqual(response["review_pages"], "all")
+        self.assertIsNone(response["fetched_pages"])
+        self.assertIsNone(response["fetched_review_count"])
+        self.assertIsNone(response["fetch_timeout_seconds"])
+        self.assertIsNone(response["fetch_filter"])
+        self.assertIsNone(response["all_mode_page_cap"])
+        self.assertIsNone(response["all_mode_cap_reached"])
 
     def test_load_analysis_result_returns_saved_payload(self):
         TEST_OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
@@ -136,6 +143,31 @@ class ApiFlowTests(unittest.TestCase):
         self.assertEqual(analysis["appid"], 570)
         self.assertIn("issue_signals", analysis)
         self.assertIn("warnings", analysis)
+
+    def test_load_analysis_result_includes_all_mode_cap_metadata(self):
+        TEST_OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
+
+        steam_payload = dict(make_request_payload()["steam_payload"])
+        steam_payload["_fetch_stats"] = {
+            "pages_fetched": 200,
+            "deduped_review_count": 2,
+            "request_timeout_seconds": 20,
+            "filter_type": "recent",
+            "all_mode_page_cap": 200,
+            "all_mode_cap_reached": True,
+        }
+
+        with patch("api.routes.fetch_steam_reviews", return_value=steam_payload), patch(
+            "api.routes.fetch_steam_game_metadata",
+            return_value=make_request_payload()["game_metadata_payload"],
+        ):
+            ingest_reviews_payload({"appid": 570}, data_root=TEST_OUTPUT_DIR)
+
+        analysis = load_analysis_result(570, data_root=TEST_OUTPUT_DIR)
+
+        self.assertTrue(analysis["all_mode_cap_reached"])
+        self.assertEqual(analysis["all_mode_page_cap"], 200)
+        self.assertEqual(analysis["fetched_pages"], 200)
 
     def test_load_raw_reviews_returns_saved_records(self):
         TEST_OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
@@ -185,6 +217,28 @@ class ApiFlowTests(unittest.TestCase):
                 data_root=TEST_OUTPUT_DIR,
             )
 
+        with self.assertRaises(ValueError):
+            ingest_reviews_payload(
+                {"appid": 570, "review_pages": 0, "steam_payload": make_request_payload()["steam_payload"]},
+                data_root=TEST_OUTPUT_DIR,
+            )
+
+        with self.assertRaises(ValueError):
+            ingest_reviews_payload(
+                {"appid": 570, "review_pages": "everything", "steam_payload": make_request_payload()["steam_payload"]},
+                data_root=TEST_OUTPUT_DIR,
+            )
+
+    def test_ingest_reviews_payload_accepts_numeric_review_pages(self):
+        TEST_OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
+
+        response = ingest_reviews_payload(
+            {"appid": 570, "review_pages": 1, "steam_payload": make_request_payload()["steam_payload"]},
+            data_root=TEST_OUTPUT_DIR,
+        )
+
+        self.assertEqual(response["review_pages"], 1)
+
     def test_ingest_reviews_payload_can_fetch_from_steam_services_when_payload_missing(self):
         TEST_OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
 
@@ -197,6 +251,39 @@ class ApiFlowTests(unittest.TestCase):
         self.assertEqual(response["appid"], 570)
         self.assertEqual(response["raw_review_count"], 2)
         self.assertTrue(response["metadata_collected"])
+        self.assertEqual(response["review_pages"], "all")
+        self.assertIsNone(response["fetched_pages"])
+        self.assertIsNone(response["fetched_review_count"])
+        self.assertIsNone(response["fetch_timeout_seconds"])
+        self.assertIsNone(response["fetch_filter"])
+        self.assertIsNone(response["all_mode_page_cap"])
+        self.assertIsNone(response["all_mode_cap_reached"])
+
+    def test_ingest_reviews_payload_returns_fetch_stats_when_collected_from_steam(self):
+        TEST_OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
+
+        steam_payload = dict(make_request_payload()["steam_payload"])
+        steam_payload["_fetch_stats"] = {
+            "pages_fetched": 3,
+            "deduped_review_count": 2,
+            "request_timeout_seconds": 20,
+            "filter_type": "recent",
+            "all_mode_page_cap": 200,
+            "all_mode_cap_reached": False,
+        }
+
+        with patch("api.routes.fetch_steam_reviews", return_value=steam_payload), patch(
+            "api.routes.fetch_steam_game_metadata",
+            return_value=make_request_payload()["game_metadata_payload"],
+        ):
+            response = ingest_reviews_payload({"appid": 570}, data_root=TEST_OUTPUT_DIR)
+
+        self.assertEqual(response["fetched_pages"], 3)
+        self.assertEqual(response["fetched_review_count"], 2)
+        self.assertEqual(response["fetch_timeout_seconds"], 20)
+        self.assertEqual(response["fetch_filter"], "recent")
+        self.assertEqual(response["all_mode_page_cap"], 200)
+        self.assertFalse(response["all_mode_cap_reached"])
 
     def test_load_comparison_result_returns_status_payload(self):
         TEST_OUTPUT_DIR.mkdir(parents=True, exist_ok=True)

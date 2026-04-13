@@ -7,6 +7,7 @@ import shutil
 import sys
 import unittest
 from pathlib import Path
+from unittest.mock import patch
 
 BACKEND_DIR = Path(__file__).resolve().parents[1] / "backend"
 TEST_OUTPUT_DIR = Path(__file__).resolve().parent / "_tmp_storage"
@@ -16,6 +17,8 @@ if str(BACKEND_DIR) not in sys.path:
 from models.schemas import RawReview
 from services.analysis_service import run_and_persist_analysis
 from services.steam_reviews import (
+    ALL_MODE_PAGE_CAP,
+    fetch_steam_reviews,
     normalize_steam_game_metadata,
     normalize_steam_review,
     normalize_steam_reviews,
@@ -160,6 +163,28 @@ class IngestionAndStorageTests(unittest.TestCase):
         finally:
             if TEST_OUTPUT_DIR.exists():
                 shutil.rmtree(TEST_OUTPUT_DIR)
+
+    def test_fetch_steam_reviews_all_mode_is_capped_at_200_pages(self):
+        def fake_page(*_args, **kwargs):
+            cursor = kwargs.get("cursor", "*")
+            if cursor == "*":
+                next_cursor = "cursor-1"
+            else:
+                current = int(str(cursor).split("-")[1])
+                next_cursor = f"cursor-{current + 1}"
+            return {
+                "success": 1,
+                "cursor": next_cursor,
+                "reviews": [{"recommendationid": next_cursor, "review": "테스트"}],
+            }
+
+        with patch("services.steam_reviews.fetch_steam_reviews_page", side_effect=fake_page) as mock_fetch:
+            payload = fetch_steam_reviews(570, max_pages=None)
+
+        self.assertEqual(mock_fetch.call_count, ALL_MODE_PAGE_CAP)
+        self.assertEqual(payload["_fetch_stats"]["pages_fetched"], ALL_MODE_PAGE_CAP)
+        self.assertTrue(payload["_fetch_stats"]["all_mode_cap_reached"])
+        self.assertEqual(payload["_fetch_stats"]["all_mode_page_cap"], ALL_MODE_PAGE_CAP)
 
 
 if __name__ == "__main__":

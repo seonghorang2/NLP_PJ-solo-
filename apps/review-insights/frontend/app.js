@@ -3,12 +3,16 @@ const compareForm = document.getElementById("compare-form");
 const appidInput = document.getElementById("appid-input");
 const compareAppid1Input = document.getElementById("compare-appid-1");
 const compareAppid2Input = document.getElementById("compare-appid-2");
+const reviewPagesSelect = document.getElementById("review-pages-select");
 const runButton = document.getElementById("run-button");
 const compareButton = document.getElementById("compare-button");
 const statusPanel = document.getElementById("status-panel");
 const sampleTier = document.getElementById("sample-tier");
 const trendStatus = document.getElementById("trend-status");
 const issueCount = document.getElementById("issue-count");
+const collectionStatusCard = document.getElementById("collection-status-card");
+const collectionStatusBadge = document.getElementById("collection-status-badge");
+const collectionStatusDetail = document.getElementById("collection-status-detail");
 const warningsList = document.getElementById("warnings-list");
 const issueSignals = document.getElementById("issue-signals");
 const summaryPanel = document.getElementById("summary-panel");
@@ -26,6 +30,50 @@ let latestProcessedReviews = [];
 function setStatus(message, type = "info") {
   statusPanel.textContent = message;
   statusPanel.className = `status-panel ${type}`;
+}
+
+function getReviewPages() {
+  if (!reviewPagesSelect) {
+    return "all";
+  }
+
+  const rawValue = reviewPagesSelect.value;
+  if (rawValue === "all") {
+    return "all";
+  }
+
+  const parsed = Number(rawValue);
+  if (!Number.isInteger(parsed) || parsed < 1 || parsed > 10) {
+    return "all";
+  }
+  return parsed;
+}
+
+function buildAllModeProgressMessage(result, appid) {
+  if (!result || result.review_pages !== "all") {
+    return null;
+  }
+
+  const pages = result.fetched_pages ?? "-";
+  const reviews = result.raw_review_count ?? "-";
+  const timeout = result.fetch_timeout_seconds ?? "-";
+  const filterType = result.fetch_filter || "recent";
+  const cap = result.all_mode_page_cap ?? 200;
+  const capReached = result.all_mode_cap_reached === true;
+
+  const lines = [
+    `[ingest:${appid}] review fetch complete`,
+    `pages fetched: ${pages}`,
+    `cumulative raw reviews: ${reviews}`,
+    `order filter: ${filterType}`,
+    `request timeout(sec): ${timeout}`,
+    `all mode page cap: ${cap}`,
+    "loading analysis artifacts...",
+  ];
+  if (capReached) {
+    lines.splice(lines.length - 1, 0, `cap reached: yes (${cap} pages)`);
+  }
+  return lines.join("\n");
 }
 
 function renderWarnings(warnings) {
@@ -107,9 +155,6 @@ function getVisibleProcessedReviews() {
   if (mode === "excluded") {
     return latestProcessedReviews.filter((review) => !review.included_in_analysis);
   }
-  if (mode === "all") {
-    return latestProcessedReviews;
-  }
   return latestProcessedReviews;
 }
 
@@ -134,10 +179,29 @@ function renderResult(result) {
   sampleTier.textContent = result.sample_size_tier || "-";
   trendStatus.textContent = result.trend_status || "-";
   issueCount.textContent = Object.keys(result.issue_signals || {}).length.toString();
+  renderCollectionStatus(result);
   renderWarnings(result.warnings || []);
   renderIssueSignals(result.issue_signals || {});
   renderSummary(result.summary || {});
   jsonView.textContent = JSON.stringify(result, null, 2);
+}
+
+function renderCollectionStatus(result) {
+  if (!collectionStatusCard || !collectionStatusBadge || !collectionStatusDetail) {
+    return;
+  }
+
+  const capReached = result?.all_mode_cap_reached === true;
+  if (!capReached) {
+    collectionStatusCard.classList.add("hidden");
+    return;
+  }
+
+  const cap = result?.all_mode_page_cap ?? 200;
+  collectionStatusCard.classList.remove("hidden");
+  collectionStatusBadge.textContent = "PARTIAL";
+  collectionStatusBadge.className = "collection-badge partial";
+  collectionStatusDetail.textContent = `${cap}-page cap reached`;
 }
 
 function renderComparison(comparison) {
@@ -207,13 +271,13 @@ function renderComparison(comparison) {
   `;
 }
 
-async function runIngestion(appid) {
+async function runIngestion(appid, reviewPages) {
   const ingestResponse = await fetch("/api/ingest", {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
     },
-    body: JSON.stringify({ appid }),
+    body: JSON.stringify({ appid, review_pages: reviewPages }),
   });
 
   if (!ingestResponse.ok) {
@@ -258,16 +322,21 @@ form.addEventListener("submit", async (event) => {
   event.preventDefault();
 
   const appid = Number(appidInput.value);
+  const reviewPages = getReviewPages();
   if (!appid) {
     setStatus("유효한 appid를 입력해 주세요.", "error");
     return;
   }
 
   runButton.disabled = true;
-  setStatus("리뷰를 수집하고 분석 중입니다...", "loading");
+  setStatus(`리뷰를 수집하고 분석 중입니다... (pages=${reviewPages})`, "loading");
 
   try {
-    await runIngestion(appid);
+    const ingestResult = await runIngestion(appid, reviewPages);
+    const progressMessage = buildAllModeProgressMessage(ingestResult, appid);
+    if (progressMessage) {
+      setStatus(progressMessage, "loading");
+    }
     const [analysis, rawReviews, processedReviews] = await Promise.all([
       loadAnalysis(appid),
       loadRaw(appid),
@@ -289,6 +358,7 @@ compareForm.addEventListener("submit", async (event) => {
 
   const appid1 = Number(compareAppid1Input.value);
   const appid2 = Number(compareAppid2Input.value);
+  const reviewPages = getReviewPages();
 
   if (!appid1 || !appid2) {
     setStatus("비교할 두 appid를 모두 입력해 주세요.", "error");
@@ -296,10 +366,30 @@ compareForm.addEventListener("submit", async (event) => {
   }
 
   compareButton.disabled = true;
-  setStatus("두 게임을 분석한 뒤 비교 결과를 불러오는 중입니다...", "loading");
+  setStatus(`두 게임을 분석한 뒤 비교 결과를 불러오는 중입니다... (pages=${reviewPages})`, "loading");
 
   try {
-    await Promise.all([runIngestion(appid1), runIngestion(appid2)]);
+    const [ingestResult1, ingestResult2] = await Promise.all([
+      runIngestion(appid1, reviewPages),
+      runIngestion(appid2, reviewPages),
+    ]);
+    if (reviewPages === "all") {
+      const game1Pages = ingestResult1?.fetched_pages ?? "-";
+      const game1Reviews = ingestResult1?.raw_review_count ?? "-";
+      const game2Pages = ingestResult2?.fetched_pages ?? "-";
+      const game2Reviews = ingestResult2?.raw_review_count ?? "-";
+      const game1CapReached = ingestResult1?.all_mode_cap_reached ? "yes" : "no";
+      const game2CapReached = ingestResult2?.all_mode_cap_reached ? "yes" : "no";
+      setStatus(
+        [
+          "[compare] review fetch complete",
+          `appid ${appid1}: pages=${game1Pages}, cumulative raw reviews=${game1Reviews}, cap_reached=${game1CapReached}`,
+          `appid ${appid2}: pages=${game2Pages}, cumulative raw reviews=${game2Reviews}, cap_reached=${game2CapReached}`,
+          "loading comparison result...",
+        ].join("\n"),
+        "loading",
+      );
+    }
     const comparison = await loadComparison(appid1, appid2);
     renderComparison(comparison);
     setStatus("비교 결과를 불러왔습니다.", "success");

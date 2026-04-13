@@ -12,6 +12,7 @@ from models.schemas import GameMetadata, RawReview
 
 STEAM_REVIEW_ENDPOINT = "https://store.steampowered.com/appreviews/{appid}"
 STEAM_APP_DETAILS_ENDPOINT = "https://store.steampowered.com/api/appdetails"
+ALL_MODE_PAGE_CAP = 200
 
 
 def normalize_steam_review(appid: int, payload: dict[str, Any]) -> RawReview:
@@ -94,6 +95,70 @@ def fetch_steam_reviews(
     purchase_type: str = "all",
     num_per_page: int = 100,
     cursor: str = "*",
+    max_pages: int | None = None,
+    timeout: int = 20,
+) -> dict[str, Any]:
+    """Fetch Steam reviews with cursor pagination.
+
+    ``max_pages=None`` means "all mode", capped by ``ALL_MODE_PAGE_CAP``.
+    """
+    if max_pages is not None and max_pages < 1:
+        raise ValueError("max_pages must be >= 1")
+    effective_max_pages = max_pages if max_pages is not None else ALL_MODE_PAGE_CAP
+
+    pages: list[dict[str, Any]] = []
+    current_cursor = cursor
+    seen_cursors: set[str] = set()
+
+    page_count = 0
+    while True:
+        if page_count >= effective_max_pages:
+            break
+
+        payload = fetch_steam_reviews_page(
+            appid,
+            language=language,
+            filter_type=filter_type,
+            review_type=review_type,
+            purchase_type=purchase_type,
+            num_per_page=num_per_page,
+            cursor=current_cursor,
+            timeout=timeout,
+        )
+        pages.append(payload)
+        page_count += 1
+
+        next_cursor = payload.get("cursor")
+        reviews = payload.get("reviews", []) or []
+        if not next_cursor or not reviews or str(next_cursor) in seen_cursors:
+            break
+
+        seen_cursors.add(str(next_cursor))
+        current_cursor = str(next_cursor)
+
+    merged = _merge_review_pages(pages)
+    all_mode_cap_reached = max_pages is None and page_count >= ALL_MODE_PAGE_CAP
+    merged["_fetch_stats"] = {
+        "pages_fetched": page_count,
+        "deduped_review_count": len(merged.get("reviews", [])),
+        "request_timeout_seconds": timeout,
+        "filter_type": filter_type,
+        "language": language,
+        "all_mode_page_cap": ALL_MODE_PAGE_CAP if max_pages is None else None,
+        "all_mode_cap_reached": all_mode_cap_reached,
+    }
+    return merged
+
+
+def fetch_steam_reviews_page(
+    appid: int,
+    *,
+    language: str = "koreana",
+    filter_type: str = "recent",
+    review_type: str = "all",
+    purchase_type: str = "all",
+    num_per_page: int = 100,
+    cursor: str = "*",
     timeout: int = 20,
 ) -> dict[str, Any]:
     """Fetch one page of Steam reviews from the public store endpoint."""
@@ -150,6 +215,29 @@ def _fetch_json(url: str, label: str) -> dict[str, Any]:
         raise RuntimeError(f"{label} request failed with status {exc.code}") from exc
     except URLError as exc:  # pragma: no cover - network is mocked in tests.
         raise RuntimeError(f"{label} request failed due to a network error") from exc
+
+
+def _merge_review_pages(pages: list[dict[str, Any]]) -> dict[str, Any]:
+    """Merge paginated Steam responses into one payload with deduplicated reviews."""
+    if not pages:
+        return {"success": 1, "reviews": [], "cursor": "*"}
+
+    merged = dict(pages[0])
+    merged_reviews: list[dict[str, Any]] = []
+    seen_ids: set[str] = set()
+
+    for page in pages:
+        for review in page.get("reviews", []) or []:
+            review_id = str(review.get("recommendationid", ""))
+            if review_id and review_id in seen_ids:
+                continue
+            if review_id:
+                seen_ids.add(review_id)
+            merged_reviews.append(review)
+
+    merged["reviews"] = merged_reviews
+    merged["cursor"] = pages[-1].get("cursor", merged.get("cursor", "*"))
+    return merged
 
 
 def _extract_appdetails_data(appid: int, payload: dict[str, Any]) -> dict[str, Any]:

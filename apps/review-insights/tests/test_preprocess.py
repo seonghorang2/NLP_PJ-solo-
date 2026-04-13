@@ -77,6 +77,16 @@ class PreprocessReviewTests(unittest.TestCase):
         self.assertTrue(review.included_in_analysis)
         self.assertIn("ambiguous_sentiment", review.ambiguity_flags)
 
+    def test_flags_included_but_unclassified_review(self):
+        review = preprocess_review(
+            make_raw_review("재미있고 손이 자주 간다")
+        )
+
+        self.assertTrue(review.included_in_analysis)
+        self.assertEqual(review.rule_decision, "include")
+        self.assertEqual(review.category_tags, [])
+        self.assertIn("unclassified_included", review.ambiguity_flags)
+
 
 if __name__ == "__main__":
     unittest.main()

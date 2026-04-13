@@ -31,13 +31,19 @@ def ingest_reviews_payload(payload: dict[str, Any], data_root: str | Path = DEFA
     appid = payload.get("appid")
     steam_payload = payload.get("steam_payload")
     game_metadata_payload = payload.get("game_metadata_payload")
+    review_pages = _parse_review_pages(payload.get("review_pages", "all"))
 
     if not isinstance(appid, int):
         raise ValueError("appid must be provided as an integer.")
 
     fetched_from_steam = False
+    fetch_stats: dict[str, Any] = {}
     if steam_payload is None:
-        steam_payload = fetch_steam_reviews(appid)
+        steam_payload = fetch_steam_reviews(
+            appid,
+            max_pages=None if review_pages == "all" else review_pages,
+        )
+        fetch_stats = steam_payload.get("_fetch_stats", {}) if isinstance(steam_payload, dict) else {}
         fetched_from_steam = True
     elif not isinstance(steam_payload, dict):
         raise ValueError("steam_payload must be provided as an object when supplied.")
@@ -58,8 +64,23 @@ def ingest_reviews_payload(payload: dict[str, Any], data_root: str | Path = DEFA
         appid=appid,
         data_root=data_root,
     )
+    store = FileStore(data_root)
+    if fetched_from_steam:
+        analysis_payload = result.to_dict()
+        analysis_payload.update(
+            {
+                "review_pages": review_pages,
+                "fetched_pages": fetch_stats.get("pages_fetched"),
+                "fetched_review_count": fetch_stats.get("deduped_review_count"),
+                "fetch_timeout_seconds": fetch_stats.get("request_timeout_seconds"),
+                "fetch_filter": fetch_stats.get("filter_type"),
+                "all_mode_page_cap": fetch_stats.get("all_mode_page_cap"),
+                "all_mode_cap_reached": fetch_stats.get("all_mode_cap_reached"),
+            }
+        )
+        store.write_analysis_result(appid, analysis_payload)
 
-    FileStore(data_root).write_game_metadata(appid, game_metadata.to_dict())
+    store.write_game_metadata(appid, game_metadata.to_dict())
 
     return {
         "appid": appid,
@@ -70,10 +91,37 @@ def ingest_reviews_payload(payload: dict[str, Any], data_root: str | Path = DEFA
         ),
         "sample_size_tier": result.sample_size_tier,
         "trend_status": result.trend_status,
+        "review_pages": review_pages,
+        "fetched_pages": fetch_stats.get("pages_fetched") if fetched_from_steam else None,
+        "fetched_review_count": fetch_stats.get("deduped_review_count") if fetched_from_steam else None,
+        "fetch_timeout_seconds": fetch_stats.get("request_timeout_seconds") if fetched_from_steam else None,
+        "fetch_filter": fetch_stats.get("filter_type") if fetched_from_steam else None,
+        "all_mode_page_cap": fetch_stats.get("all_mode_page_cap") if fetched_from_steam else None,
+        "all_mode_cap_reached": fetch_stats.get("all_mode_cap_reached") if fetched_from_steam else None,
         "metadata_collected": game_metadata.release_stage != "unknown" or bool(game_metadata.genres),
         "price_model": game_metadata.price_model,
         "release_stage": game_metadata.release_stage,
     }
+
+
+def _parse_review_pages(value: Any) -> int | str:
+    if value is None:
+        return "all"
+
+    if isinstance(value, str):
+        normalized = value.strip().lower()
+        if normalized == "all":
+            return "all"
+        if normalized.isdigit():
+            value = int(normalized)
+        else:
+            raise ValueError("review_pages must be 'all' or an integer between 1 and 10.")
+
+    if isinstance(value, bool) or not isinstance(value, int):
+        raise ValueError("review_pages must be 'all' or an integer between 1 and 10.")
+    if value < 1 or value > 10:
+        raise ValueError("review_pages must be 'all' or an integer between 1 and 10.")
+    return value
 
 
 def load_analysis_result(appid: int, data_root: str | Path = DEFAULT_DATA_ROOT) -> dict[str, Any]:

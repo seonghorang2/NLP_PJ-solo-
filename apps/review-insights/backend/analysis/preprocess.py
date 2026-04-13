@@ -40,6 +40,8 @@ def preprocess_review(raw_review: RawReview) -> ProcessedReview:
         included_in_analysis = True
 
     category_tags = extract_category_tags(normalized_text) if included_in_analysis else []
+    if included_in_analysis and not category_tags and "unclassified_included" not in ambiguity_flags:
+        ambiguity_flags.append("unclassified_included")
 
     return ProcessedReview(
         review_id=raw_review.review_id,

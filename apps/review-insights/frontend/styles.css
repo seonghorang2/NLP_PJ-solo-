@@ -112,13 +112,15 @@ h1 {
 }
 
 input,
+select,
 button {
   border-radius: 14px;
   border: 1px solid var(--line);
   font: inherit;
 }
 
-input {
+input,
+select {
   flex: 1;
   padding: 14px 16px;
   background: var(--panel-strong);
@@ -148,6 +150,7 @@ button:disabled {
   margin-top: 18px;
   padding: 14px 18px;
   color: var(--ink);
+  white-space: pre-line;
 }
 
 .status-panel.hidden {
@@ -192,6 +195,34 @@ button:disabled {
 
 .metric strong {
   font-size: clamp(1.4rem, 2vw, 2.1rem);
+}
+
+.metric-note {
+  margin: 10px 0 0;
+  color: var(--muted);
+  font-size: 0.9rem;
+  line-height: 1.5;
+}
+
+.collection-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: fit-content;
+  padding: 6px 12px;
+  border-radius: 999px;
+  font-size: 0.82rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.collection-badge.partial {
+  background: rgba(177, 77, 47, 0.14);
+  color: var(--accent);
+}
+
+.hidden {
+  display: none !important;
 }
 
 .layout {
