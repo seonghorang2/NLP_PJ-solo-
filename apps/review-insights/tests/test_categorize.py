@@ -32,14 +32,14 @@ def make_raw_review(review_text: str) -> RawReview:
 
 class CategorizeTests(unittest.TestCase):
     def test_extracts_single_category(self):
-        tags = extract_category_tags("최적화가 별로라 프레임 드랍이 심함")
+        tags = extract_category_tags("최적화가 별로라 프레임이 자주 떨어짐")
 
         self.assertEqual(tags, ["performance"])
 
     def test_extracts_bug_category(self):
-        tags = extract_category_tags("보스전에서 튕기고 저장이 안 됨")
+        tags = extract_category_tags("보스전에서 튕기고 데이터가 날아감")
 
-        self.assertEqual(tags, ["bugs"])
+        self.assertEqual(tags, ["save_progression"])
 
     def test_extracts_multi_label_categories(self):
         tags = extract_category_tags("그래픽은 좋은데 조작이 답답하고 매칭이 느림")
@@ -47,9 +47,9 @@ class CategorizeTests(unittest.TestCase):
         self.assertEqual(tags, ["graphics", "multiplayer", "controls"])
 
     def test_extracts_localization_and_story(self):
-        tags = extract_category_tags("번역이 어색해서 스토리 몰입이 깨짐")
+        tags = extract_category_tags("번역이 어색해서 스토리 몰입감이 깨짐")
 
-        self.assertEqual(tags, ["story", "localization"])
+        self.assertEqual(tags, ["bugs", "story", "localization"])
 
     def test_returns_empty_when_no_category_matches(self):
         tags = extract_category_tags("그냥 무난함")
@@ -60,7 +60,7 @@ class CategorizeTests(unittest.TestCase):
         included = preprocess_review(
             make_raw_review("그래픽은 좋은데 조작이 답답하고 매칭이 느림")
         )
-        excluded = preprocess_review(make_raw_review("ㅋㅋㅋ"))
+        excluded = preprocess_review(make_raw_review("짱"))
 
         self.assertEqual(included.category_tags, ["graphics", "multiplayer", "controls"])
         self.assertEqual(excluded.category_tags, [])

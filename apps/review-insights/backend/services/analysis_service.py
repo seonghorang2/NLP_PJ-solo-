@@ -31,6 +31,9 @@ def enrich_processed_reviews(processed_reviews: list[ProcessedReview]) -> list[P
         if not review.included_in_analysis:
             enriched_reviews.append(review)
             continue
+        if review.canonical_theme is not None:
+            enriched_reviews.append(review)
+            continue
 
         review_themes = extract_review_themes(review)
         canonical_theme = next(iter(review_themes.values()), None)
@@ -93,9 +96,12 @@ def _build_issue_signals(processed_reviews: list[ProcessedReview]) -> dict[str, 
     return issue_signals
 
 
-def analyze_reviews(raw_reviews: list[RawReview], appid: int) -> tuple[AnalysisResult, list[ProcessedReview]]:
-    """Run the deterministic pipeline and assemble an analysis result."""
-    processed_reviews = enrich_processed_reviews(preprocess_reviews(raw_reviews))
+def build_analysis_result_from_processed(
+    processed_reviews: list[ProcessedReview],
+    *,
+    appid: int,
+) -> AnalysisResult:
+    """Assemble a final analysis snapshot from processed reviews."""
     included_reviews = [review for review in processed_reviews if review.included_in_analysis]
     sample_size_tier = calculate_sample_size_tier(len(included_reviews))
     issue_signals = _build_issue_signals(processed_reviews)
@@ -115,17 +121,21 @@ def analyze_reviews(raw_reviews: list[RawReview], appid: int) -> tuple[AnalysisR
         trend_status=overall_trend_status,
     )
 
-    result = AnalysisResult(
+    return AnalysisResult(
         appid=appid,
         sample_size_tier=sample_size_tier,
         trend_status=overall_trend_status,
         trend_reason=trend_reason,
-        comparison_status=None,
-        comparison_reason=None,
         warnings=warnings,
         issue_signals=issue_signals,
         summary=summary,
     )
+
+
+def analyze_reviews(raw_reviews: list[RawReview], appid: int) -> tuple[AnalysisResult, list[ProcessedReview]]:
+    """Run the deterministic pipeline and assemble an analysis result."""
+    processed_reviews = enrich_processed_reviews(preprocess_reviews(raw_reviews))
+    result = build_analysis_result_from_processed(processed_reviews, appid=appid)
 
     return result, processed_reviews
 

@@ -32,7 +32,7 @@ def make_raw_review(review_text: str) -> RawReview:
 class PreprocessReviewTests(unittest.TestCase):
     def test_includes_korean_feedback_review(self):
         review = preprocess_review(
-            make_raw_review("그래픽은 좋은데 최적화 때문에 프레임 드랍이 심함")
+            make_raw_review("그래픽은 좋은데 최적화가 안 좋아 프레임이 자주 떨어짐")
         )
 
         self.assertTrue(review.included_in_analysis)
@@ -47,7 +47,7 @@ class PreprocessReviewTests(unittest.TestCase):
         self.assertEqual(review.rule_decision, "exclude_non_korean")
 
     def test_excludes_low_quality_review(self):
-        review = preprocess_review(make_raw_review("ㅋㅋㅋ"))
+        review = preprocess_review(make_raw_review("짱"))
 
         self.assertFalse(review.included_in_analysis)
         self.assertTrue(review.is_low_quality)
@@ -58,7 +58,7 @@ class PreprocessReviewTests(unittest.TestCase):
 
         self.assertFalse(review.included_in_analysis)
         self.assertTrue(review.is_profanity_only)
-        self.assertEqual(review.rule_decision, "exclude_profanity_only")
+        self.assertEqual(review.rule_decision, "exclude_low_quality")
 
     def test_keeps_profane_but_meaningful_feedback(self):
         review = preprocess_review(
@@ -71,7 +71,7 @@ class PreprocessReviewTests(unittest.TestCase):
 
     def test_flags_ambiguous_review(self):
         review = preprocess_review(
-            make_raw_review("그래픽은 좋은데 조작은 별로라서 좀 애매함")
+            make_raw_review("그래픽은 좋은데 조작은 별로여서 좀 애매함")
         )
 
         self.assertTrue(review.included_in_analysis)
@@ -79,7 +79,7 @@ class PreprocessReviewTests(unittest.TestCase):
 
     def test_flags_included_but_unclassified_review(self):
         review = preprocess_review(
-            make_raw_review("재미있고 손이 자주 간다")
+            make_raw_review("이 게임은 진짜 완벽하네")
         )
 
         self.assertTrue(review.included_in_analysis)

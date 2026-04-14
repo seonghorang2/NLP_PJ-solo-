@@ -31,17 +31,17 @@ def create_app():
 
         @app.get("/")
         def index():
-            """Serve the internal dashboard."""
+            """Serve the consumer-facing report page."""
             return FileResponse(FRONTEND_DIR / "index.html")
 
         @app.get("/app.js")
         def frontend_js():
-            """Serve the dashboard script."""
+            """Serve the frontend script."""
             return FileResponse(FRONTEND_DIR / "app.js", media_type="text/javascript")
 
         @app.get("/styles.css")
         def frontend_css():
-            """Serve the dashboard stylesheet."""
+            """Serve the report stylesheet."""
             return FileResponse(FRONTEND_DIR / "styles.css", media_type="text/css")
 
     return app

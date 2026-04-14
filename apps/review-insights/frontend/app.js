@@ -1,407 +1,229 @@
-const form = document.getElementById("ingest-form");
-const compareForm = document.getElementById("compare-form");
-const appidInput = document.getElementById("appid-input");
-const compareAppid1Input = document.getElementById("compare-appid-1");
-const compareAppid2Input = document.getElementById("compare-appid-2");
-const reviewPagesSelect = document.getElementById("review-pages-select");
-const runButton = document.getElementById("run-button");
-const compareButton = document.getElementById("compare-button");
-const statusPanel = document.getElementById("status-panel");
-const sampleTier = document.getElementById("sample-tier");
-const trendStatus = document.getElementById("trend-status");
-const issueCount = document.getElementById("issue-count");
-const collectionStatusCard = document.getElementById("collection-status-card");
-const collectionStatusBadge = document.getElementById("collection-status-badge");
-const collectionStatusDetail = document.getElementById("collection-status-detail");
-const warningsList = document.getElementById("warnings-list");
-const issueSignals = document.getElementById("issue-signals");
-const summaryPanel = document.getElementById("summary-panel");
-const jsonView = document.getElementById("json-view");
-const rawView = document.getElementById("raw-view");
-const processedView = document.getElementById("processed-view");
-const processedFilterMode = document.getElementById("processed-filter-mode");
-const processedCount = document.getElementById("processed-count");
-const comparisonPanel = document.getElementById("comparison-panel");
-const comparisonView = document.getElementById("comparison-view");
+const form = document.getElementById("report-form");
+const gameSelect = document.getElementById("game-select");
+const loadButton = document.getElementById("load-button");
 
-let latestRawReviews = [];
-let latestProcessedReviews = [];
+const gameName = document.getElementById("game-name");
+const buyBadge = document.getElementById("buy-badge");
+const headline = document.getElementById("headline");
+const buyTimingSummary = document.getElementById("buy-timing-summary");
+const recentStateSummary = document.getElementById("recent-state-summary");
+const recentStateStatus = document.getElementById("recent-state-status");
+const buyRecommendation = document.getElementById("buy-recommendation");
+const generatedAt = document.getElementById("generated-at");
+const goodForList = document.getElementById("good-for-list");
+const notGoodForList = document.getElementById("not-good-for-list");
+const strengths = document.getElementById("strengths");
+const risks = document.getElementById("risks");
+const recentStateLine = document.getElementById("recent-state-line");
+const evidenceList = document.getElementById("evidence-list");
+const disclaimer = document.getElementById("disclaimer");
+const statusLine = document.getElementById("status-line");
 
-function setStatus(message, type = "info") {
-  statusPanel.textContent = message;
-  statusPanel.className = `status-panel ${type}`;
+function setStatus(message) {
+  statusLine.textContent = message;
 }
 
-function getReviewPages() {
-  if (!reviewPagesSelect) {
-    return "all";
-  }
-
-  const rawValue = reviewPagesSelect.value;
-  if (rawValue === "all") {
-    return "all";
-  }
-
-  const parsed = Number(rawValue);
-  if (!Number.isInteger(parsed) || parsed < 1 || parsed > 10) {
-    return "all";
-  }
-  return parsed;
-}
-
-function buildAllModeProgressMessage(result, appid) {
-  if (!result || result.review_pages !== "all") {
-    return null;
-  }
-
-  const pages = result.fetched_pages ?? "-";
-  const reviews = result.raw_review_count ?? "-";
-  const timeout = result.fetch_timeout_seconds ?? "-";
-  const filterType = result.fetch_filter || "recent";
-  const cap = result.all_mode_page_cap ?? 200;
-  const capReached = result.all_mode_cap_reached === true;
-
-  const lines = [
-    `[ingest:${appid}] review fetch complete`,
-    `pages fetched: ${pages}`,
-    `cumulative raw reviews: ${reviews}`,
-    `order filter: ${filterType}`,
-    `request timeout(sec): ${timeout}`,
-    `all mode page cap: ${cap}`,
-    "loading analysis artifacts...",
-  ];
-  if (capReached) {
-    lines.splice(lines.length - 1, 0, `cap reached: yes (${cap} pages)`);
-  }
-  return lines.join("\n");
-}
-
-function renderWarnings(warnings) {
-  warningsList.innerHTML = "";
-
-  if (!warnings || warnings.length === 0) {
-    warningsList.innerHTML = '<li class="placeholder">표시할 경고가 없습니다.</li>';
-    return;
-  }
-
-  warnings.forEach((warning) => {
-    const item = document.createElement("li");
-    item.textContent = warning;
-    warningsList.appendChild(item);
-  });
-}
-
-function renderIssueSignals(signals) {
-  issueSignals.innerHTML = "";
-  const entries = Object.entries(signals || {});
-
-  if (entries.length === 0) {
-    issueSignals.innerHTML = '<p class="placeholder">표시할 이슈 신호가 없습니다.</p>';
-    return;
-  }
-
-  entries.forEach(([category, signal]) => {
-    const card = document.createElement("article");
-    card.className = "issue-card";
-    card.innerHTML = `
-      <div class="issue-card-head">
-        <h3>${category}</h3>
-        <span class="trend-pill ${signal.recent_trend}">${signal.recent_trend}</span>
-      </div>
-      <p class="issue-meta">언급 수 ${signal.mention_count}건 · 부정 비율 ${(signal.negative_ratio * 100).toFixed(0)}%</p>
-      <p class="issue-meta">숙련 유저 비중 ${(signal.experienced_player_share * 100).toFixed(0)}%</p>
-      <p class="issue-label">대표 테마</p>
-      <p class="issue-value">${(signal.themes || []).join(", ") || "없음"}</p>
-      <p class="issue-label">대표 리뷰</p>
-      <p class="issue-value">${(signal.sample_reviews || []).join(" / ") || "없음"}</p>
-    `;
-    issueSignals.appendChild(card);
-  });
-}
-
-function prettifySummaryKey(key) {
-  const labelMap = {
-    what_players_like: "플레이어가 좋아하는 점",
-    what_players_dislike: "플레이어가 불편해하는 점",
-    recent_change: "최근 변화",
-    fit_for: "어떤 플레이어에게 맞는지",
-    risks: "주의할 리스크",
+function recommendationLabel(value) {
+  const labels = {
+    buy_now: "지금 구매 추천",
+    buy_on_sale: "할인 구매 추천",
+    wait: "업데이트 관망 추천",
+    not_recommended: "현재 비추천",
   };
-  return labelMap[key] || key;
+  return labels[value] || "-";
 }
 
-function renderSummary(summary) {
-  summaryPanel.innerHTML = "";
-  const entries = Object.entries(summary || {});
+function recentStateLabel(value) {
+  const labels = {
+    improving: "개선 중",
+    stable: "안정",
+    declining: "악화 중",
+    mixed: "혼재",
+    insufficient_data: "판단 보류",
+  };
+  return labels[value] || "-";
+}
 
-  if (entries.length === 0) {
-    summaryPanel.innerHTML = '<p class="placeholder">아직 요약 결과가 없습니다.</p>';
+function buyBadgeClass(value) {
+  const map = {
+    buy_now: "buy-now",
+    buy_on_sale: "buy-sale",
+    wait: "buy-wait",
+    not_recommended: "buy-avoid",
+  };
+  return map[value] || "neutral";
+}
+
+function toList(values) {
+  return Array.isArray(values) ? values : [];
+}
+
+function renderBullets(container, values) {
+  container.innerHTML = "";
+  const list = toList(values);
+  if (list.length === 0) {
+    const li = document.createElement("li");
+    li.textContent = "데이터가 충분하지 않습니다.";
+    container.appendChild(li);
     return;
   }
-
-  entries.forEach(([key, value]) => {
-    const block = document.createElement("div");
-    block.className = "summary-block";
-    block.innerHTML = `<strong>${prettifySummaryKey(key)}</strong><p>${value || "-"}</p>`;
-    summaryPanel.appendChild(block);
+  list.forEach((value) => {
+    const li = document.createElement("li");
+    li.textContent = value;
+    container.appendChild(li);
   });
 }
 
-function getVisibleProcessedReviews() {
-  const mode = processedFilterMode ? processedFilterMode.value : "all";
-  if (mode === "included") {
-    return latestProcessedReviews.filter((review) => review.included_in_analysis);
-  }
-  if (mode === "excluded") {
-    return latestProcessedReviews.filter((review) => !review.included_in_analysis);
-  }
-  return latestProcessedReviews;
-}
-
-function renderProcessedView() {
-  const visible = getVisibleProcessedReviews();
-  processedView.textContent = JSON.stringify(visible, null, 2);
-
-  if (processedCount) {
-    processedCount.textContent = `${visible.length} / ${latestProcessedReviews.length}`;
-  }
-}
-
-function renderDebugViews(rawReviews, processedReviews) {
-  latestRawReviews = rawReviews || [];
-  latestProcessedReviews = processedReviews || [];
-
-  rawView.textContent = JSON.stringify(latestRawReviews, null, 2);
-  renderProcessedView();
-}
-
-function renderResult(result) {
-  sampleTier.textContent = result.sample_size_tier || "-";
-  trendStatus.textContent = result.trend_status || "-";
-  issueCount.textContent = Object.keys(result.issue_signals || {}).length.toString();
-  renderCollectionStatus(result);
-  renderWarnings(result.warnings || []);
-  renderIssueSignals(result.issue_signals || {});
-  renderSummary(result.summary || {});
-  jsonView.textContent = JSON.stringify(result, null, 2);
-}
-
-function renderCollectionStatus(result) {
-  if (!collectionStatusCard || !collectionStatusBadge || !collectionStatusDetail) {
+function renderCards(container, values) {
+  container.innerHTML = "";
+  const list = toList(values);
+  if (list.length === 0) {
+    container.innerHTML = '<p class="placeholder">합의 신호가 부족합니다.</p>';
     return;
   }
 
-  const capReached = result?.all_mode_cap_reached === true;
-  if (!capReached) {
-    collectionStatusCard.classList.add("hidden");
-    return;
-  }
-
-  const cap = result?.all_mode_page_cap ?? 200;
-  collectionStatusCard.classList.remove("hidden");
-  collectionStatusBadge.textContent = "PARTIAL";
-  collectionStatusBadge.className = "collection-badge partial";
-  collectionStatusDetail.textContent = `${cap}-page cap reached`;
-}
-
-function renderComparison(comparison) {
-  comparisonView.textContent = JSON.stringify(comparison || {}, null, 2);
-
-  if (!comparison) {
-    comparisonPanel.innerHTML = '<p class="placeholder">비교 결과가 없습니다.</p>';
-    return;
-  }
-
-  const warnings = comparison.warnings || [];
-  const shared = comparison.shared_issue_categories || [];
-  const unique1 = comparison.unique_to_game_1 || [];
-  const unique2 = comparison.unique_to_game_2 || [];
-  const game1 = comparison.game_1 || {};
-  const game2 = comparison.game_2 || {};
-  const metadata1 = game1.metadata || {};
-  const metadata2 = game2.metadata || {};
-
-  comparisonPanel.innerHTML = `
-    <div class="comparison-block">
-      <strong>비교 상태</strong>
-      <p>${comparison.comparison_status || "-"} / ${comparison.comparison_reason || "-"}</p>
-    </div>
-    <div class="comparison-block">
-      <strong>비교 요약</strong>
-      <p>${comparison.comparison_summary || "-"}</p>
-    </div>
-    <div class="comparison-grid">
-      <div class="comparison-card">
-        <strong>게임 1 (${game1.appid || "-"})</strong>
-        <p>표본 등급: ${game1.sample_size_tier || "-"}</p>
-        <p>트렌드 상태: ${game1.trend_status || "-"}</p>
-        <p>이슈 수: ${game1.issue_count ?? "-"}</p>
-        <p>장르: ${(metadata1.genres || []).join(", ") || "-"}</p>
-        <p>가격 모델: ${metadata1.price_model || "-"}</p>
-        <p>출시 단계: ${metadata1.release_stage || "-"}</p>
-      </div>
-      <div class="comparison-card">
-        <strong>게임 2 (${game2.appid || "-"})</strong>
-        <p>표본 등급: ${game2.sample_size_tier || "-"}</p>
-        <p>트렌드 상태: ${game2.trend_status || "-"}</p>
-        <p>이슈 수: ${game2.issue_count ?? "-"}</p>
-        <p>장르: ${(metadata2.genres || []).join(", ") || "-"}</p>
-        <p>가격 모델: ${metadata2.price_model || "-"}</p>
-        <p>출시 단계: ${metadata2.release_stage || "-"}</p>
-      </div>
-    </div>
-    <div class="comparison-grid">
-      <div class="comparison-card">
-        <strong>공통 이슈</strong>
-        <p>${shared.join(", ") || "없음"}</p>
-      </div>
-      <div class="comparison-card">
-        <strong>게임 1만 있는 이슈</strong>
-        <p>${unique1.join(", ") || "없음"}</p>
-      </div>
-      <div class="comparison-card">
-        <strong>게임 2만 있는 이슈</strong>
-        <p>${unique2.join(", ") || "없음"}</p>
-      </div>
-    </div>
-    <div class="comparison-block">
-      <strong>경고</strong>
-      <p>${warnings.join(" / ") || "없음"}</p>
-    </div>
-  `;
-}
-
-async function runIngestion(appid, reviewPages) {
-  const ingestResponse = await fetch("/api/ingest", {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify({ appid, review_pages: reviewPages }),
+  list.slice(0, 3).forEach((value) => {
+    const card = document.createElement("article");
+    card.className = "mini-card";
+    card.innerHTML = `
+      <h3>${value.title || "-"}</h3>
+      <p>${value.summary || "-"}</p>
+    `;
+    container.appendChild(card);
   });
+}
 
-  if (!ingestResponse.ok) {
-    const errorPayload = await ingestResponse.json().catch(() => ({}));
-    throw new Error(errorPayload.detail || "분석 실행에 실패했습니다.");
+function renderEvidence(values) {
+  evidenceList.innerHTML = "";
+  const list = toList(values);
+  if (list.length === 0) {
+    evidenceList.innerHTML = '<p class="placeholder">표시할 근거 리뷰가 없습니다.</p>';
+    return;
   }
 
-  return ingestResponse.json();
+  list.slice(0, 8).forEach((item) => {
+    const stance =
+      item.stance === "negative"
+        ? "주의 리뷰"
+        : item.stance === "positive"
+          ? "긍정 리뷰"
+          : "혼합 리뷰";
+    const aspect = item.aspect_label || item.aspect || "-";
+
+    const card = document.createElement("article");
+    card.className = "evidence-card";
+    card.innerHTML = `
+      <p class="evidence-meta">${stance} · ${aspect}</p>
+      <p class="evidence-text">${item.snippet || "-"}</p>
+    `;
+    evidenceList.appendChild(card);
+  });
+}
+
+function renderReport(report) {
+  const game = report.game || {};
+  const recommendation = report.buy_recommendation || "";
+  const recentState = report.recent_state || {};
+
+  gameName.textContent = game.name || `appid ${report.appid}`;
+  headline.textContent = report.headline || "-";
+
+  buyBadge.textContent = recommendationLabel(recommendation);
+  buyBadge.className = `buy-badge ${buyBadgeClass(recommendation)}`;
+
+  buyTimingSummary.textContent = report.buy_timing_summary || "-";
+  recentStateSummary.textContent = recentState.summary || "-";
+  recentStateStatus.textContent = `상태: ${recentStateLabel(recentState.status)}`;
+  buyRecommendation.textContent = recommendationLabel(recommendation);
+  generatedAt.textContent = report.generated_at
+    ? `업데이트: ${new Date(report.generated_at).toLocaleString("ko-KR")}`
+    : "업데이트 정보 없음";
+
+  renderBullets(goodForList, report.good_for);
+  renderBullets(notGoodForList, report.not_good_for);
+  renderCards(strengths, report.top_strengths);
+  renderCards(risks, report.top_risks);
+
+  recentStateLine.textContent = recentState.summary || report.buy_timing_summary || "-";
+  renderEvidence(report.evidence_reviews);
+  disclaimer.textContent = report.disclaimer || "";
 }
 
 async function loadJson(url, fallbackMessage) {
   const response = await fetch(url);
-
   if (!response.ok) {
     const errorPayload = await response.json().catch(() => ({}));
     throw new Error(errorPayload.detail || fallbackMessage);
   }
-
   return response.json();
 }
 
-async function loadAnalysis(appid) {
-  return loadJson(`/api/games/${appid}/analysis`, "분석 결과를 불러오지 못했습니다.");
+async function loadDemoGames() {
+  const payload = await loadJson("/api/games", "게임 목록을 불러오지 못했습니다.");
+  const games = toList(payload.games).filter((item) => item.report_ready);
+
+  gameSelect.innerHTML = "";
+  if (games.length === 0) {
+    const option = document.createElement("option");
+    option.value = "";
+    option.textContent = "준비된 리포트가 없습니다.";
+    gameSelect.appendChild(option);
+    return null;
+  }
+
+  games.forEach((game, index) => {
+    const option = document.createElement("option");
+    option.value = String(game.appid);
+    option.textContent = `${game.name} (${game.appid})`;
+    if (index === 0) {
+      option.selected = true;
+    }
+    gameSelect.appendChild(option);
+  });
+
+  return Number(gameSelect.value);
 }
 
-async function loadRaw(appid) {
-  return loadJson(`/api/games/${appid}/raw`, "raw 데이터를 불러오지 못했습니다.");
+async function loadReport(appid) {
+  return loadJson(`/api/games/${appid}/report`, "리포트를 불러오지 못했습니다.");
 }
 
-async function loadProcessed(appid) {
-  return loadJson(`/api/games/${appid}/processed`, "processed 데이터를 불러오지 못했습니다.");
-}
+async function openReport(appid) {
+  if (!appid) {
+    setStatus("리포트 대상 게임을 선택해 주세요.");
+    return;
+  }
 
-async function loadComparison(appid1, appid2) {
-  return loadJson(
-    `/api/compare?appid1=${appid1}&appid2=${appid2}`,
-    "비교 결과를 불러오지 못했습니다.",
-  );
+  loadButton.disabled = true;
+  setStatus("구매 판단 리포트를 불러오는 중입니다...");
+  try {
+    const report = await loadReport(appid);
+    renderReport(report);
+    setStatus("불러오기 완료");
+  } catch (error) {
+    setStatus(error.message || "리포트 로드에 실패했습니다.");
+  } finally {
+    loadButton.disabled = false;
+  }
 }
 
 form.addEventListener("submit", async (event) => {
   event.preventDefault();
-
-  const appid = Number(appidInput.value);
-  const reviewPages = getReviewPages();
-  if (!appid) {
-    setStatus("유효한 appid를 입력해 주세요.", "error");
-    return;
-  }
-
-  runButton.disabled = true;
-  setStatus(`리뷰를 수집하고 분석 중입니다... (pages=${reviewPages})`, "loading");
-
-  try {
-    const ingestResult = await runIngestion(appid, reviewPages);
-    const progressMessage = buildAllModeProgressMessage(ingestResult, appid);
-    if (progressMessage) {
-      setStatus(progressMessage, "loading");
-    }
-    const [analysis, rawReviews, processedReviews] = await Promise.all([
-      loadAnalysis(appid),
-      loadRaw(appid),
-      loadProcessed(appid),
-    ]);
-
-    renderResult(analysis);
-    renderDebugViews(rawReviews, processedReviews);
-    setStatus("분석 결과와 디버그 데이터를 불러왔습니다.", "success");
-  } catch (error) {
-    setStatus(error.message || "알 수 없는 오류가 발생했습니다.", "error");
-  } finally {
-    runButton.disabled = false;
-  }
+  await openReport(Number(gameSelect.value));
 });
 
-compareForm.addEventListener("submit", async (event) => {
-  event.preventDefault();
-
-  const appid1 = Number(compareAppid1Input.value);
-  const appid2 = Number(compareAppid2Input.value);
-  const reviewPages = getReviewPages();
-
-  if (!appid1 || !appid2) {
-    setStatus("비교할 두 appid를 모두 입력해 주세요.", "error");
-    return;
-  }
-
-  compareButton.disabled = true;
-  setStatus(`두 게임을 분석한 뒤 비교 결과를 불러오는 중입니다... (pages=${reviewPages})`, "loading");
-
+async function bootstrap() {
+  setStatus("게임 목록 준비 중...");
   try {
-    const [ingestResult1, ingestResult2] = await Promise.all([
-      runIngestion(appid1, reviewPages),
-      runIngestion(appid2, reviewPages),
-    ]);
-    if (reviewPages === "all") {
-      const game1Pages = ingestResult1?.fetched_pages ?? "-";
-      const game1Reviews = ingestResult1?.raw_review_count ?? "-";
-      const game2Pages = ingestResult2?.fetched_pages ?? "-";
-      const game2Reviews = ingestResult2?.raw_review_count ?? "-";
-      const game1CapReached = ingestResult1?.all_mode_cap_reached ? "yes" : "no";
-      const game2CapReached = ingestResult2?.all_mode_cap_reached ? "yes" : "no";
-      setStatus(
-        [
-          "[compare] review fetch complete",
-          `appid ${appid1}: pages=${game1Pages}, cumulative raw reviews=${game1Reviews}, cap_reached=${game1CapReached}`,
-          `appid ${appid2}: pages=${game2Pages}, cumulative raw reviews=${game2Reviews}, cap_reached=${game2CapReached}`,
-          "loading comparison result...",
-        ].join("\n"),
-        "loading",
-      );
+    const firstAppid = await loadDemoGames();
+    if (firstAppid) {
+      await openReport(firstAppid);
+      return;
     }
-    const comparison = await loadComparison(appid1, appid2);
-    renderComparison(comparison);
-    setStatus("비교 결과를 불러왔습니다.", "success");
+    setStatus("표시 가능한 게임이 없습니다.");
   } catch (error) {
-    setStatus(error.message || "비교 중 알 수 없는 오류가 발생했습니다.", "error");
-  } finally {
-    compareButton.disabled = false;
+    setStatus(error.message || "초기화에 실패했습니다.");
   }
-});
-
-if (processedFilterMode) {
-  processedFilterMode.addEventListener("change", () => {
-    renderProcessedView();
-  });
 }
+
+bootstrap();

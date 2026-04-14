@@ -5,6 +5,7 @@ from __future__ import annotations
 from analysis.categorize import extract_category_tags
 from analysis.rules import (
     calculate_hangul_ratio,
+    calculate_rule_confidence,
     detect_ambiguity_flags,
     is_low_quality_review,
     is_profanity_only_review,
@@ -42,6 +43,15 @@ def preprocess_review(raw_review: RawReview) -> ProcessedReview:
     category_tags = extract_category_tags(normalized_text) if included_in_analysis else []
     if included_in_analysis and not category_tags and "unclassified_included" not in ambiguity_flags:
         ambiguity_flags.append("unclassified_included")
+    rule_confidence = calculate_rule_confidence(
+        text=normalized_text,
+        hangul_ratio=hangul_ratio,
+        is_low_quality=low_quality,
+        is_profanity_only=profanity_only,
+        category_tags=category_tags,
+        ambiguity_flags=ambiguity_flags,
+    )
+    final_decision = "include" if included_in_analysis else "exclude"
 
     return ProcessedReview(
         review_id=raw_review.review_id,
@@ -61,9 +71,12 @@ def preprocess_review(raw_review: RawReview) -> ProcessedReview:
         ambiguity_flags=ambiguity_flags,
         included_in_analysis=included_in_analysis,
         rule_decision=rule_decision,
+        rule_confidence=rule_confidence,
         llm_invoked=False,
         llm_decision=None,
+        llm_confidence=None,
         final_decision_source="rule",
+        final_decision=final_decision,
         category_tags=category_tags,
         canonical_theme=None,
     )

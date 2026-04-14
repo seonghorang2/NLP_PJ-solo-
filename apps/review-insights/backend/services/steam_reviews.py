@@ -44,7 +44,7 @@ def normalize_steam_reviews(appid: int, payload: dict[str, Any]) -> list[RawRevi
 
 
 def normalize_steam_game_metadata(appid: int, payload: dict[str, Any]) -> GameMetadata:
-    """Normalize Steam appdetails payload into minimal comparison metadata."""
+    """Normalize Steam appdetails payload into report-context metadata."""
     app_data = _extract_appdetails_data(appid, payload)
     genres = [
         str(entry.get("description", "")).strip()
@@ -79,11 +79,6 @@ def normalize_steam_game_metadata(appid: int, payload: dict[str, Any]) -> GameMe
         is_free=bool(is_free) if is_free is not None else None,
         coming_soon=coming_soon,
     )
-
-
-def build_unknown_game_metadata(appid: int) -> GameMetadata:
-    """Return a placeholder metadata object when no appdetails payload is available."""
-    return GameMetadata(appid=appid)
 
 
 def fetch_steam_reviews(

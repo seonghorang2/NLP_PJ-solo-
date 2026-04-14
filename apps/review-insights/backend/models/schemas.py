@@ -27,7 +27,7 @@ class RawReview:
 
 @dataclass(slots=True)
 class GameMetadata:
-    """Minimal game metadata used to improve comparison decisions."""
+    """Minimal game metadata for report context."""
 
     appid: int
     name: str | None = None
@@ -63,9 +63,12 @@ class ProcessedReview:
     ambiguity_flags: list[str] = field(default_factory=list)
     included_in_analysis: bool = False
     rule_decision: str = ""
+    rule_confidence: float = 0.0
     llm_invoked: bool = False
     llm_decision: str | None = None
+    llm_confidence: float | None = None
     final_decision_source: str = "rule"
+    final_decision: str = "unknown"
     category_tags: list[str] = field(default_factory=list)
     canonical_theme: str | None = None
 
@@ -96,8 +99,6 @@ class AnalysisResult:
     sample_size_tier: str
     trend_status: str
     trend_reason: str | None = None
-    comparison_status: str | None = None
-    comparison_reason: str | None = None
     warnings: list[str] = field(default_factory=list)
     issue_signals: dict[str, IssueSignal] = field(default_factory=dict)
     summary: dict[str, str] = field(default_factory=dict)

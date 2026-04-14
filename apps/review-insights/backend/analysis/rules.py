@@ -379,3 +379,32 @@ def detect_ambiguity_flags(
         flags.append("ambiguous_quality")
 
     return flags
+
+
+def calculate_rule_confidence(
+    *,
+    text: str,
+    hangul_ratio: float,
+    is_low_quality: bool,
+    is_profanity_only: bool,
+    category_tags: list[str],
+    ambiguity_flags: list[str],
+) -> float:
+    """Return a simple deterministic confidence score in [0.0, 1.0]."""
+    if is_low_quality or is_profanity_only or hangul_ratio < 0.20:
+        return 0.98
+
+    visible_length = len(_visible_chars(text))
+    score = 0.45
+    score += min(hangul_ratio, 0.90) * 0.25
+    score += min(visible_length / 120.0, 1.0) * 0.20
+    score += 0.10 if category_tags else -0.05
+
+    if ambiguity_flags:
+        score -= min(0.05 * len(ambiguity_flags), 0.25)
+
+    if score < 0.0:
+        return 0.0
+    if score > 1.0:
+        return 1.0
+    return round(score, 4)

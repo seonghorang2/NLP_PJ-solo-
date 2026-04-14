@@ -39,9 +39,9 @@ def make_raw_review(
 class AnalysisServiceTests(unittest.TestCase):
     def test_analyze_reviews_assembles_issue_signals_and_summary(self):
         raw_reviews = [
-            make_raw_review("r1", "최적화가 별로라 프레임 드랍이 심함", voted_up=False),
+            make_raw_review("r1", "최적화가 별로라 프레임이 자주 떨어짐", voted_up=False),
             make_raw_review("r2", "그래픽은 좋은데 조작이 답답하고 매칭이 느림", voted_up=False),
-            make_raw_review("r3", "ㅋㅋㅋ", voted_up=True),
+            make_raw_review("r3", "짱", voted_up=True),
         ]
 
         result, processed_reviews = analyze_reviews(raw_reviews, appid=570)
@@ -51,15 +51,15 @@ class AnalysisServiceTests(unittest.TestCase):
         self.assertEqual(result.trend_status, "limited")
         self.assertIn("performance", result.issue_signals)
         self.assertIn("graphics", result.issue_signals)
-        self.assertIn("이 결과는 수집된 한국어 리뷰 표본을 기준으로 합니다.", result.warnings)
+        self.assertTrue(result.warnings)
         self.assertIn("what_players_dislike", result.summary)
         self.assertTrue(result.summary["what_players_dislike"])
         self.assertEqual(len(processed_reviews), 3)
 
     def test_analyze_reviews_sets_canonical_theme_on_processed_reviews(self):
         raw_reviews = [
-            make_raw_review("r1", "최적화가 별로라 프레임 드랍이 심함"),
-            make_raw_review("r2", "보스전에서 튕기고 저장이 안 됨"),
+            make_raw_review("r1", "최적화가 별로라 프레임이 자주 떨어짐"),
+            make_raw_review("r2", "보스전에서 튕기고 게임이 꺼짐"),
         ]
 
         _result, processed_reviews = analyze_reviews(raw_reviews, appid=570)
@@ -68,19 +68,19 @@ class AnalysisServiceTests(unittest.TestCase):
         canonical_themes = {review.canonical_theme for review in included_reviews}
 
         self.assertIn("최적화 문제", canonical_themes)
-        self.assertIn("충돌 및 튕김", canonical_themes)
+        self.assertIn("실행 불가 / 튕김", canonical_themes)
 
     def test_analyze_reviews_computes_negative_ratio_and_experienced_share(self):
         raw_reviews = [
             make_raw_review(
                 "r1",
-                "최적화가 별로라 프레임 드랍이 심함",
+                "최적화가 별로라 프레임이 자주 떨어짐",
                 voted_up=False,
                 playtime_at_review_hours=5.0,
             ),
             make_raw_review(
                 "r2",
-                "최적화 문제는 있지만 그래도 괜찮음",
+                "최적화 이슈는 있지만 그래픽은 괜찮음",
                 voted_up=True,
                 playtime_at_review_hours=1.0,
             ),

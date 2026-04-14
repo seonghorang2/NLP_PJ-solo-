@@ -38,14 +38,14 @@ class ThemeExtractionTests(unittest.TestCase):
 
         themes = extract_review_themes(review)
 
-        self.assertEqual(themes["graphics"], "그래픽 품질")
+        self.assertEqual(themes["graphics"], "그래픽 / 비주얼 호평")
         self.assertEqual(themes["controls"], "조작감 문제")
-        self.assertEqual(themes["multiplayer"], "매칭 지연")
+        self.assertEqual(themes["multiplayer"], "매칭 / 서버 문제")
 
     def test_collect_top_keywords_returns_frequent_keywords(self):
         reviews = [
             preprocess_review(
-                make_raw_review("r1", "최적화가 별로라 프레임 드랍이 심함")
+                make_raw_review("r1", "최적화가 별로라 프레임이 자주 떨어짐")
             ),
             preprocess_review(
                 make_raw_review("r2", "최적화 문제 때문에 프레임이 자주 끊김")
@@ -59,10 +59,10 @@ class ThemeExtractionTests(unittest.TestCase):
     def test_collect_top_themes_aggregates_by_category(self):
         reviews = [
             preprocess_review(
-                make_raw_review("r1", "최적화가 별로라 프레임 드랍이 심함")
+                make_raw_review("r1", "최적화가 별로라 프레임이 자주 떨어짐")
             ),
             preprocess_review(
-                make_raw_review("r2", "최적화 문제 때문에 렉이 자주 생김")
+                make_raw_review("r2", "최적화 문제 때문에 렉이 자주 발생함")
             ),
             preprocess_review(
                 make_raw_review("r3", "그래픽은 좋은데 조작이 너무 답답함")
