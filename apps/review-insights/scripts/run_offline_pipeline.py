@@ -4,16 +4,37 @@ from __future__ import annotations
 
 import argparse
 import json
+import os
 import sys
 from pathlib import Path
 
+from dotenv import load_dotenv
+
 APP_DIR = Path(__file__).resolve().parents[1]
 BACKEND_DIR = APP_DIR / "backend"
+REPO_ROOT = APP_DIR.parents[1]
 
 if str(BACKEND_DIR) not in sys.path:
     sys.path.insert(0, str(BACKEND_DIR))
 
 from pipeline.offline_pipeline import run_offline_pipeline_for_appid
+
+
+def _load_env() -> None:
+    """Load environment variables from common .env locations."""
+    for path in (REPO_ROOT / ".env", APP_DIR / ".env"):
+        if path.exists():
+            load_dotenv(dotenv_path=path, override=False)
+
+
+def _print_precheck(*, use_llm_fallback: bool) -> None:
+    """Print one-line runtime precheck for LLM settings."""
+    key_status = "set" if bool(os.getenv("OPENAI_API_KEY")) else "missing"
+    model = os.getenv("OPENAI_MODEL", "gpt-4o-mini")
+    print(
+        f"[offline-pipeline] precheck: llm_requested={use_llm_fallback} "
+        f"openai_key={key_status} model={model}"
+    )
 
 
 def parse_args() -> argparse.Namespace:
@@ -34,7 +55,7 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument(
         "--use-llm-fallback",
         action="store_true",
-        help="애매한 리뷰 subset에 대해 LLM fallback 사용",
+        help="애매한 리뷰 subset에 대해서만 LLM fallback 사용",
     )
     parser.add_argument(
         "--max-llm-reviews",
@@ -63,13 +84,15 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument(
         "--game-name",
         default=None,
-        help="저장 파일명에 사용할 게임명(선택)",
+        help="Steam 게임명이 비어 있을 때만 파일명에 사용할 보조 이름(선택)",
     )
     return parser.parse_args()
 
 
 def main() -> int:
+    _load_env()
     args = parse_args()
+    _print_precheck(use_llm_fallback=bool(args.use_llm_fallback))
     try:
         summary = run_offline_pipeline_for_appid(
             args.appid,
@@ -92,3 +115,4 @@ def main() -> int:
 
 if __name__ == "__main__":  # pragma: no cover - CLI surface.
     raise SystemExit(main())
+

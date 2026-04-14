@@ -55,7 +55,9 @@ def run_offline_pipeline_for_appid(
     metadata_payload = fetch_steam_game_metadata(appid)
 
     metadata = normalize_steam_game_metadata(appid, metadata_payload)
-    output_game_name = game_name or metadata.name
+    # Keep saved filenames aligned with Steam appdetails name by default.
+    # Use manual name only when Steam metadata name is unavailable.
+    output_game_name = metadata.name or game_name
 
     raw_reviews: list[RawReview] = normalize_steam_reviews(appid, steam_payload)
     deterministic_processed = preprocess_reviews(raw_reviews)

@@ -14,7 +14,7 @@ except Exception:  # pragma: no cover - optional dependency
 SYSTEM_PROMPT = """
 You are writing a Korean purchase-decision report for one Steam game.
 
-This is NOT an internal dashboard summary.
+This is NOT an analytics dashboard.
 This is a consumer decision report.
 
 Primary goal:
@@ -22,21 +22,22 @@ Primary goal:
 
 Critical rules:
 1) Consensus first
-- High-consensus aspects are primary.
-- Medium-consensus aspects are secondary support.
-- Low-consensus aspects must not become main points.
-- Do not let one dramatic review dominate.
+- High-consensus signals are primary.
+- Do not let rare or isolated opinions dominate.
+- Evidence blocks must represent repeated opinions only.
 
 2) Grounding
 - Use only information provided in input JSON.
-- Strengths and risks must be supported by repeated evidence.
 - Do not invent facts, features, trends, or player opinions.
 
-3) Writing quality
-- Avoid generic filler phrases.
-- Keep sentences concise and specific.
-- Vary sentence openings and rhythm naturally.
-- Make the text feel like it came from reading many reviews.
+3) Evidence format (MANDATORY)
+- evidence_reviews is NOT a raw review list.
+- It must be a list of insight blocks.
+- Each block must include:
+  title, explanation, stance, consensus_level, mention_count, evidence_snippets
+- stance must be either positive or negative.
+- Do not mix positive and negative snippets in the same block.
+- Each block must include 2~3 short snippets.
 
 4) Output contract
 - Return valid JSON only.
@@ -84,7 +85,8 @@ class OpenAIReportWriter:
         user_prompt = (
             "아래 JSON을 기반으로 한국어 구매 판단 리포트를 생성하세요.\n"
             "고합의 신호를 우선하고, 저빈도 의견은 메인에서 제외하세요.\n"
-            "출력은 반드시 JSON만 반환하세요.\n\n"
+            "evidence_reviews는 반드시 insight block 구조로 작성하세요.\n"
+            "출력은 JSON만 반환하세요.\n\n"
             f"{json.dumps(consensus_payload, ensure_ascii=False)}"
         )
 
@@ -145,8 +147,30 @@ def _validate_report_payload(payload: Any) -> bool:
         return False
     if not isinstance(payload.get("top_risks"), list):
         return False
-    if not isinstance(payload.get("evidence_reviews"), list):
+
+    evidence_reviews = payload.get("evidence_reviews")
+    if not isinstance(evidence_reviews, list):
         return False
+    for block in evidence_reviews:
+        if not isinstance(block, dict):
+            return False
+        if not isinstance(block.get("title"), str):
+            return False
+        if not isinstance(block.get("explanation"), str):
+            return False
+        if block.get("stance") not in {"positive", "negative"}:
+            return False
+        if block.get("consensus_level") not in {"high", "medium"}:
+            return False
+        if not isinstance(block.get("mention_count"), int):
+            return False
+        snippets = block.get("evidence_snippets")
+        if not isinstance(snippets, list):
+            return False
+        if len(snippets) < 2 or len(snippets) > 3:
+            return False
+        if any(not isinstance(snippet, str) for snippet in snippets):
+            return False
 
     recent_state = payload.get("recent_state")
     if not isinstance(recent_state, dict):

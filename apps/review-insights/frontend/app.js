@@ -15,7 +15,8 @@ const notGoodForList = document.getElementById("not-good-for-list");
 const strengths = document.getElementById("strengths");
 const risks = document.getElementById("risks");
 const recentStateLine = document.getElementById("recent-state-line");
-const evidenceList = document.getElementById("evidence-list");
+const evidencePositiveList = document.getElementById("evidence-positive-list");
+const evidenceNegativeList = document.getElementById("evidence-negative-list");
 const disclaimer = document.getElementById("disclaimer");
 const statusLine = document.getElementById("status-line");
 
@@ -58,6 +59,17 @@ function toList(values) {
   return Array.isArray(values) ? values : [];
 }
 
+function clampText(value, maxLength) {
+  const text = String(value || "").trim().replace(/\s+/g, " ");
+  if (!text) {
+    return "";
+  }
+  if (text.length <= maxLength) {
+    return text;
+  }
+  return `${text.slice(0, maxLength - 1).trim()}…`;
+}
+
 function renderBullets(container, values) {
   container.innerHTML = "";
   const list = toList(values);
@@ -93,31 +105,155 @@ function renderCards(container, values) {
   });
 }
 
-function renderEvidence(values) {
-  evidenceList.innerHTML = "";
+function normalizeEvidenceBlocks(values) {
   const list = toList(values);
   if (list.length === 0) {
-    evidenceList.innerHTML = '<p class="placeholder">표시할 근거 리뷰가 없습니다.</p>';
+    return [];
+  }
+
+  // New structure: insight+evidence blocks
+  if (
+    typeof list[0] === "object" &&
+    list[0] !== null &&
+    Array.isArray(list[0].evidence_snippets)
+  ) {
+    return list;
+  }
+
+  // Backward compatibility: old raw snippet list
+  const grouped = new Map();
+  list.forEach((item) => {
+    if (!item || typeof item !== "object") {
+      return;
+    }
+    const stance = item.stance === "negative" ? "negative" : "positive";
+    const key = `${stance}::${item.aspect_label || item.aspect || "핵심 의견"}`;
+    if (!grouped.has(key)) {
+      grouped.set(key, {
+        title: `[${item.aspect_label || item.aspect || "핵심 의견"}] 대표 의견`,
+        explanation:
+          stance === "negative"
+            ? "반복적으로 등장한 불만 의견입니다."
+            : "반복적으로 등장한 긍정 의견입니다.",
+        stance,
+        consensus_level: "medium",
+        mention_count: 0,
+        evidence_snippets: [],
+      });
+    }
+    const block = grouped.get(key);
+    const snippet = String(item.snippet || "").trim();
+    if (snippet && !block.evidence_snippets.includes(snippet)) {
+      block.evidence_snippets.push(snippet);
+    }
+    block.mention_count += 1;
+  });
+
+  return [...grouped.values()]
+    .filter((block) => block.evidence_snippets.length >= 1)
+    .map((block) => ({
+      ...block,
+      evidence_snippets: block.evidence_snippets.slice(0, 3),
+    }))
+    .slice(0, 4);
+}
+
+function normalizeEvidenceSections(report) {
+  const sections = report && typeof report === "object" ? report.evidence_sections : null;
+  if (
+    sections &&
+    typeof sections === "object" &&
+    Array.isArray(sections.loved) &&
+    Array.isArray(sections.complained)
+  ) {
+    return {
+      loved: normalizeEvidenceBlocks(sections.loved)
+        .filter((block) => block.stance === "positive")
+        .map(normalizeEvidenceBlock)
+        .filter(Boolean)
+        .slice(0, 3),
+      complained: normalizeEvidenceBlocks(sections.complained)
+        .filter((block) => block.stance === "negative")
+        .map(normalizeEvidenceBlock)
+        .filter(Boolean)
+        .slice(0, 3),
+    };
+  }
+
+  const blocks = normalizeEvidenceBlocks(report ? report.evidence_reviews : []);
+  return {
+    loved: blocks
+      .filter((block) => block.stance === "positive")
+      .map(normalizeEvidenceBlock)
+      .filter(Boolean)
+      .slice(0, 3),
+    complained: blocks
+      .filter((block) => block.stance === "negative")
+      .map(normalizeEvidenceBlock)
+      .filter(Boolean)
+      .slice(0, 3),
+  };
+}
+
+function normalizeEvidenceBlock(block) {
+  if (!block || typeof block !== "object") {
+    return null;
+  }
+  const title = clampText(block.title, 60);
+  const explanation = clampText(block.explanation, 150);
+  const snippets = toList(block.evidence_snippets)
+    .map((snippet) => clampText(snippet, 120))
+    .filter(Boolean)
+    .slice(0, 2);
+
+  if (!title || !explanation || snippets.length < 2) {
+    return null;
+  }
+
+  return {
+    ...block,
+    title,
+    explanation,
+    evidence_snippets: snippets,
+  };
+}
+
+function renderEvidenceSection(container, blocks, emptyMessage) {
+  container.innerHTML = "";
+  if (blocks.length === 0) {
+    container.innerHTML = `<p class="placeholder">${emptyMessage}</p>`;
     return;
   }
 
-  list.slice(0, 8).forEach((item) => {
-    const stance =
-      item.stance === "negative"
-        ? "주의 리뷰"
-        : item.stance === "positive"
-          ? "긍정 리뷰"
-          : "혼합 리뷰";
-    const aspect = item.aspect_label || item.aspect || "-";
-
+  blocks.forEach((block) => {
+    const snippets = toList(block.evidence_snippets);
     const card = document.createElement("article");
     card.className = "evidence-card";
+
+    const snippetsHtml = snippets.map((snippet) => `<li>"${snippet}"</li>`).join("");
+
     card.innerHTML = `
-      <p class="evidence-meta">${stance} · ${aspect}</p>
-      <p class="evidence-text">${item.snippet || "-"}</p>
+      <p class="evidence-meta">${block.consensus_level || "high"} consensus · ${block.mention_count || 0}건</p>
+      <h3>${block.title || "-"}</h3>
+      <p class="evidence-text">${block.explanation || "-"}</p>
+      <ul class="evidence-snippets">${snippetsHtml}</ul>
     `;
-    evidenceList.appendChild(card);
+    container.appendChild(card);
   });
+}
+
+function renderEvidence(report) {
+  const sections = normalizeEvidenceSections(report);
+  renderEvidenceSection(
+    evidencePositiveList,
+    sections.loved,
+    "표시할 긍정 근거 리뷰가 없습니다."
+  );
+  renderEvidenceSection(
+    evidenceNegativeList,
+    sections.complained,
+    "표시할 부정 근거 리뷰가 없습니다."
+  );
 }
 
 function renderReport(report) {
@@ -145,7 +281,7 @@ function renderReport(report) {
   renderCards(risks, report.top_risks);
 
   recentStateLine.textContent = recentState.summary || report.buy_timing_summary || "-";
-  renderEvidence(report.evidence_reviews);
+  renderEvidence(report);
   disclaimer.textContent = report.disclaimer || "";
 }
 

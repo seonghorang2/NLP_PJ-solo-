@@ -3,10 +3,12 @@
 from __future__ import annotations
 
 import os
+import re
 from datetime import datetime, timezone
 from typing import Any
 
 from models.schemas import AnalysisResult, GameMetadata, ProcessedReview, RawReview
+from services.evidence_snippet_llm import OpenAIEvidenceSnippetCompressor
 from services.report_writer_llm import OpenAIReportWriter
 
 REQUIRED_REPORT_KEYS = {
@@ -47,19 +49,19 @@ GOOD_FOR_PHRASES = {
     "story": "서사와 연출 몰입감을 중요하게 보는 플레이어",
     "graphics": "비주얼 완성도를 구매 기준으로 보는 플레이어",
     "customization": "캐릭터/빌드 커스터마이징을 즐기는 플레이어",
-    "content_depth": "장시간 파고들 수 있는 성장 루프를 선호하는 플레이어",
-    "difficulty": "학습 곡선이 있어도 숙련해 가는 재미를 좋아하는 플레이어",
+    "content_depth": "장시간 성장 루프를 선호하는 플레이어",
+    "difficulty": "숙련형 플레이를 선호하는 플레이어",
 }
 
 NOT_GOOD_FOR_PHRASES = {
     "performance": "프레임 저하나 끊김에 민감한 플레이어",
     "bugs": "버그/충돌 허용 범위가 낮은 플레이어",
     "difficulty": "초반 진입장벽이 낮은 게임을 원하는 플레이어",
-    "difficulty_onboarding": "튜토리얼 완성도가 중요한 플레이어",
+    "difficulty_onboarding": "튜토리얼 완성도를 중요하게 보는 플레이어",
     "save_progression": "진행 데이터 안정성을 최우선으로 보는 플레이어",
-    "mod_support": "모드 생태계 활용을 핵심으로 생각하는 플레이어",
+    "mod_support": "모드 활용이 필수인 플레이어",
     "matchmaking": "멀티 매칭 안정성을 최우선으로 보는 플레이어",
-    "multiplayer": "팀플레이 환경 품질에 민감한 플레이어",
+    "multiplayer": "팀플레이 품질에 민감한 플레이어",
     "balance": "메타/밸런스 변동에 스트레스를 크게 받는 플레이어",
 }
 
@@ -80,7 +82,7 @@ NEGATIVE_THEME_HINTS = {
     "하락",
     "느림",
     "불안정",
-    "매칭 지연",
+    "매칭",
     "서버",
 }
 
@@ -104,7 +106,14 @@ def is_consumer_report_payload(payload: Any) -> bool:
     """Return True when payload already matches consumer report shape."""
     if not isinstance(payload, dict):
         return False
-    return REQUIRED_REPORT_KEYS.issubset(set(payload.keys()))
+    if not REQUIRED_REPORT_KEYS.issubset(set(payload.keys())):
+        return False
+    if not _is_evidence_block_list(payload.get("evidence_reviews")):
+        return False
+    evidence_sections = payload.get("evidence_sections")
+    if evidence_sections is None:
+        return True
+    return _is_evidence_sections_map(evidence_sections)
 
 
 def build_report_ready_data(
@@ -137,8 +146,12 @@ def build_report_ready_data(
         if is_consumer_report_payload(llm_report):
             report_payload = llm_report
 
+    # Offline stage only: compress all evidence snippets with LLM (fallback to rules).
+    report_payload = _compress_evidence_reviews(report_payload, use_llm=True)
+    report_payload = _attach_evidence_sections(report_payload)
+
     return {
-        "report_version": "v2-consensus-decision",
+        "report_version": "v3-insight-evidence",
         "appid": appid,
         "pipeline_run_id": pipeline_run_id,
         "generated_at": datetime.now(timezone.utc).isoformat(),
@@ -178,8 +191,12 @@ def build_consumer_report_from_snapshot(
     )
     report_payload = _build_report_deterministic(consensus_payload)
 
+    # Read-only path: keep deterministic compression only (no online LLM call).
+    report_payload = _compress_evidence_reviews(report_payload, use_llm=False)
+    report_payload = _attach_evidence_sections(report_payload)
+
     return {
-        "report_version": "v2-consensus-decision",
+        "report_version": "v3-insight-evidence",
         "appid": appid,
         "pipeline_run_id": pipeline_run_id,
         "generated_at": datetime.now(timezone.utc).isoformat(),
@@ -197,6 +214,15 @@ def build_consumer_report_from_snapshot(
 
 def _should_use_llm_report_writer() -> bool:
     return os.getenv("USE_LLM_REPORT_WRITER", "true").strip().lower() in {"1", "true", "yes", "on"}
+
+
+def _should_use_llm_evidence_compression() -> bool:
+    return os.getenv("USE_LLM_EVIDENCE_COMPRESSION", "true").strip().lower() in {
+        "1",
+        "true",
+        "yes",
+        "on",
+    }
 
 
 def _build_consensus_payload(
@@ -218,13 +244,13 @@ def _build_consensus_payload(
             continue
 
         consensus_level = "high" if mention_count >= high_min else "medium"
-        evidence_group = _collect_grouped_evidence(
-            processed_reviews,
-            aspect,
-            list(signal.get("sample_reviews", []) or []),
-        )
         negative_ratio = round(float(signal.get("negative_ratio", 0.0)), 4)
         themes = list(signal.get("themes", []) or [])
+        evidence_group = _collect_grouped_evidence(
+            processed_reviews=processed_reviews,
+            aspect=aspect,
+            fallback_snippets=list(signal.get("sample_reviews", []) or []),
+        )
 
         consensus_aspects.append(
             {
@@ -241,12 +267,8 @@ def _build_consensus_payload(
         )
 
     consensus_aspects.sort(
-        key=lambda item: (
-            -_consensus_rank(item["consensus_level"]),
-            -int(item["mention_count"]),
-        )
+        key=lambda item: (-_consensus_rank(item["consensus_level"]), -int(item["mention_count"]))
     )
-
     return {
         "game_context": {
             "appid": appid,
@@ -260,9 +282,6 @@ def _build_consensus_payload(
             "medium_min_mentions": medium_min,
         },
         "consensus_aspects": consensus_aspects,
-        "style_control": {
-            "variation_seed": f"appid-{appid}-consensus-v2",
-        },
     }
 
 
@@ -295,6 +314,7 @@ def _infer_aspect_tone(negative_ratio: float, themes: list[str]) -> str:
 
 
 def _collect_grouped_evidence(
+    *,
     processed_reviews: list[dict[str, Any]],
     aspect: str,
     fallback_snippets: list[str],
@@ -310,7 +330,7 @@ def _collect_grouped_evidence(
         if aspect not in tags:
             continue
 
-        snippet = _truncate_text(str(review.get("review_text", "")), limit=180)
+        snippet = _prepare_evidence_source_text(str(review.get("review_text", "")), limit=1200)
         if not snippet or snippet in seen:
             continue
         seen.add(snippet)
@@ -321,12 +341,12 @@ def _collect_grouped_evidence(
         else:
             negative.append(item)
 
-        if len(positive) >= 3 and len(negative) >= 3:
+        if len(positive) >= 4 and len(negative) >= 4:
             break
 
     if not positive and not negative:
         for index, snippet in enumerate(fallback_snippets[:3]):
-            normalized = _truncate_text(str(snippet), limit=180)
+            normalized = _prepare_evidence_source_text(str(snippet), limit=1200)
             if normalized:
                 negative.append(
                     {
@@ -335,7 +355,7 @@ def _collect_grouped_evidence(
                     }
                 )
 
-    return {"positive": positive[:3], "negative": negative[:3]}
+    return {"positive": positive[:4], "negative": negative[:4]}
 
 
 def _build_report_deterministic(consensus_payload: dict[str, Any]) -> dict[str, Any]:
@@ -345,11 +365,11 @@ def _build_report_deterministic(consensus_payload: dict[str, Any]) -> dict[str, 
 
     selected_strengths = _select_strengths(high, medium)
     selected_risks = _select_risks(high, medium)
-
     recent_state = _derive_recent_state(selected_risks, high, medium)
     recommendation = _derive_recommendation(selected_risks, recent_state["status"])
     headline = _build_headline(recommendation, selected_strengths, selected_risks)
     buy_timing_summary = _build_timing_summary(recommendation, recent_state, selected_risks)
+    evidence_blocks = _build_evidence_blocks(consensus_payload)
 
     good_for = _build_fit(
         selected_strengths,
@@ -371,7 +391,7 @@ def _build_report_deterministic(consensus_payload: dict[str, Any]) -> dict[str, 
         "top_strengths": [_to_strength_item(item) for item in selected_strengths[:3]],
         "top_risks": [_to_risk_item(item) for item in selected_risks[:3]],
         "recent_state": recent_state,
-        "evidence_reviews": _collect_evidence(selected_strengths, selected_risks),
+        "evidence_reviews": evidence_blocks,
     }
 
 
@@ -549,56 +569,313 @@ def _to_risk_item(item: dict[str, Any]) -> dict[str, str]:
     }
 
 
-def _collect_evidence(
-    strengths: list[dict[str, Any]],
-    risks: list[dict[str, Any]],
-) -> list[dict[str, Any]]:
-    evidence: list[dict[str, Any]] = []
+def _build_evidence_blocks(consensus_payload: dict[str, Any]) -> list[dict[str, Any]]:
+    """Build insight+evidence blocks from high-consensus repeated opinions."""
+    aspects = list(consensus_payload.get("consensus_aspects", []) or [])
+    high_min = int(
+        (consensus_payload.get("consensus_thresholds", {}) or {}).get("high_min_mentions", 12)
+    )
+    high_items = [item for item in aspects if item.get("consensus_level") == "high"]
+    if not high_items:
+        return []
 
-    for item in risks[:2]:
-        evidence.extend(_collect_evidence_for_item(item, "negative"))
-    for item in strengths[:2]:
-        evidence.extend(_collect_evidence_for_item(item, "positive"))
-
-    deduped: list[dict[str, Any]] = []
-    seen: set[str] = set()
-    for item in evidence:
-        snippet = item.get("snippet", "")
-        if not snippet or snippet in seen:
+    grouped: dict[tuple[str, str], dict[str, Any]] = {}
+    for item in high_items:
+        stance = _block_stance(item)
+        if stance not in {"positive", "negative"}:
             continue
-        seen.add(snippet)
-        deduped.append(item)
-        if len(deduped) >= 8:
-            break
-    return deduped
 
-
-def _collect_evidence_for_item(item: dict[str, Any], stance: str) -> list[dict[str, Any]]:
-    aspect = str(item.get("aspect", ""))
-    aspect_label = CATEGORY_DISPLAY.get(aspect, aspect)
-    grouped = item.get("evidence_group", {}) or {}
-
-    snippets = list(grouped.get(stance, []) or [])
-    if not snippets:
-        snippets = list(grouped.get("negative", []) or []) + list(grouped.get("positive", []) or [])
-
-    result: list[dict[str, Any]] = []
-    for snippet in snippets[:2]:
-        result.append(
+        theme = _pick_block_theme(item, stance) or str(item.get("aspect_label", "핵심 의견"))
+        key = (stance, theme)
+        bucket = grouped.setdefault(
+            key,
             {
-                "review_id": str(snippet.get("review_id", "")),
-                "aspect": aspect,
-                "aspect_label": aspect_label,
-                "stance": stance if stance in {"positive", "negative"} else "mixed",
-                "snippet": _truncate_text(str(snippet.get("snippet", "")), limit=200),
+                "stance": stance,
+                "theme": theme,
+                "mention_count": 0,
+                "aspect_labels": [],
+                "snippets": [],
+            },
+        )
+
+        bucket["mention_count"] += int(item.get("mention_count", 0))
+        aspect_label = str(item.get("aspect_label", ""))
+        if aspect_label and aspect_label not in bucket["aspect_labels"]:
+            bucket["aspect_labels"].append(aspect_label)
+
+        evidence_group = item.get("evidence_group", {}) or {}
+        stance_snippets = list(evidence_group.get(stance, []) or [])
+        for snippet in stance_snippets[:3]:
+            text = _prepare_evidence_source_text(str(snippet.get("snippet", "")), limit=1200)
+            if text and text not in bucket["snippets"]:
+                bucket["snippets"].append(text)
+
+    blocks: list[dict[str, Any]] = []
+    for bucket in sorted(grouped.values(), key=lambda b: (-int(b["mention_count"]), b["theme"])):
+        if int(bucket["mention_count"]) < high_min:
+            continue
+        if len(bucket["snippets"]) < 2:
+            continue
+
+        title = _build_block_title(bucket["theme"], bucket["aspect_labels"])
+        explanation = _build_block_explanation(
+            stance=bucket["stance"],
+            theme=bucket["theme"],
+            mention_count=int(bucket["mention_count"]),
+            aspect_labels=bucket["aspect_labels"],
+        )
+        blocks.append(
+            {
+                "title": title,
+                "explanation": explanation,
+                "stance": bucket["stance"],
+                "consensus_level": "high",
+                "mention_count": int(bucket["mention_count"]),
+                "evidence_snippets": bucket["snippets"][:3],
             }
         )
+        if len(blocks) >= 4:
+            break
+    return blocks
+
+
+def _block_stance(item: dict[str, Any]) -> str:
+    tone = str(item.get("tone", "mixed"))
+    negative_ratio = float(item.get("negative_ratio", 0.0))
+    if tone == "negative" or negative_ratio >= 0.55:
+        return "negative"
+    if tone == "positive" or negative_ratio <= 0.40:
+        return "positive"
+    return "mixed"
+
+
+def _pick_block_theme(item: dict[str, Any], stance: str) -> str | None:
+    themes = [str(theme) for theme in list(item.get("themes", []) or []) if str(theme).strip()]
+    if not themes:
+        return None
+    if stance == "negative":
+        return _choose_negative_theme(themes)
+    return _choose_positive_theme(themes)
+
+
+def _build_block_title(theme: str, aspect_labels: list[str]) -> str:
+    base = aspect_labels[0] if aspect_labels else "핵심 의견"
+    return f"[{base}] {theme}"
+
+
+def _build_block_explanation(
+    *,
+    stance: str,
+    theme: str,
+    mention_count: int,
+    aspect_labels: list[str],
+) -> str:
+    aspect_text = ", ".join(aspect_labels[:2]) if aspect_labels else "핵심 경험"
+    if stance == "negative":
+        return (
+            f"{aspect_text} 영역에서 '{theme}' 불만이 반복적으로 관찰됩니다. "
+            f"동일한 문제 제기가 {mention_count}건 이상 누적되어 구매 리스크로 해석됩니다."
+        )
+    return (
+        f"{aspect_text} 영역에서 '{theme}' 호평이 반복됩니다. "
+        f"유사한 긍정 신호가 {mention_count}건 이상 확인되어 만족 포인트로 볼 수 있습니다."
+    )
+
+
+def _compress_evidence_reviews(
+    report_payload: dict[str, Any],
+    *,
+    use_llm: bool,
+) -> dict[str, Any]:
+    """Compress evidence snippets into readable 1~4 sentence snippets."""
+    evidence_blocks = report_payload.get("evidence_reviews")
+    if not isinstance(evidence_blocks, list):
+        return report_payload
+
+    compressor = (
+        OpenAIEvidenceSnippetCompressor()
+        if use_llm and _should_use_llm_evidence_compression()
+        else None
+    )
+    llm_enabled = bool(compressor and compressor.available)
+
+    compressed_blocks: list[dict[str, Any]] = []
+    for block in evidence_blocks:
+        if not isinstance(block, dict):
+            continue
+        snippets = block.get("evidence_snippets")
+        if not isinstance(snippets, list):
+            continue
+
+        rewritten: list[str] = []
+        seen: set[str] = set()
+        for raw in snippets:
+            raw_text = str(raw or "").strip()
+            if not raw_text:
+                continue
+
+            compressed: str | None = None
+            if llm_enabled and compressor is not None:
+                compressed = compressor.compress(
+                    raw_text=raw_text,
+                    stance=str(block.get("stance", "mixed")),
+                    context_title=str(block.get("title", "핵심 의견")),
+                    timeout_seconds=15,
+                    retry_limit=1,
+                )
+            if not compressed:
+                compressed = _fallback_compress_snippet(raw_text)
+
+            normalized = _normalize_compressed_snippet(compressed)
+            if _looks_cutoff(normalized):
+                normalized = _normalize_compressed_snippet(_fallback_compress_snippet(raw_text))
+            if not normalized or _looks_cutoff(normalized):
+                continue
+
+            if normalized not in seen:
+                seen.add(normalized)
+                rewritten.append(normalized)
+            if len(rewritten) >= 3:
+                break
+
+        # Keep only blocks with enough readable evidence.
+        if len(rewritten) < 2:
+            continue
+
+        next_block = dict(block)
+        next_block["evidence_snippets"] = rewritten[:3]
+        compressed_blocks.append(next_block)
+
+    next_payload = dict(report_payload)
+    next_payload["evidence_reviews"] = compressed_blocks
+    return next_payload
+
+
+def _attach_evidence_sections(report_payload: dict[str, Any]) -> dict[str, Any]:
+    """Attach strictly separated positive/negative evidence sections."""
+    blocks = report_payload.get("evidence_reviews")
+    if not isinstance(blocks, list):
+        next_payload = dict(report_payload)
+        next_payload["evidence_sections"] = {"loved": [], "complained": []}
+        return next_payload
+
+    loved = [block for block in blocks if isinstance(block, dict) and block.get("stance") == "positive"]
+    complained = [
+        block for block in blocks if isinstance(block, dict) and block.get("stance") == "negative"
+    ]
+    next_payload = dict(report_payload)
+    next_payload["evidence_sections"] = {
+        "loved": loved,
+        "complained": complained,
+    }
+    return next_payload
+
+
+def _fallback_compress_snippet(raw_text: str) -> str:
+    """Deterministic fallback: keep 1~4 full sentences."""
+    source = _prepare_evidence_source_text(raw_text, limit=700)
+    if not source:
+        return ""
+    sentences = _split_sentences(source)
+    if not sentences:
+        return source
+
+    selected = sentences[:4]
+    result = " ".join(selected).strip()
+    if len(result) > 360:
+        result = _prepare_evidence_source_text(result, limit=360)
     return result
 
 
-def _truncate_text(text: str, limit: int = 220) -> str:
+def _prepare_evidence_source_text(text: str, limit: int = 1200) -> str:
+    """Keep source text readable and avoid mid-sentence truncation."""
     compact = " ".join((text or "").split())
+    if not compact:
+        return ""
     if len(compact) <= limit:
         return compact
-    return compact[: limit - 1].rstrip() + "…"
 
+    sentences = _split_sentences(compact)
+    if not sentences:
+        return compact[:limit].rstrip()
+
+    selected: list[str] = []
+    total = 0
+    for sentence in sentences:
+        extra = len(sentence) + (1 if selected else 0)
+        if total + extra > limit:
+            break
+        selected.append(sentence)
+        total += extra
+
+    if selected:
+        return " ".join(selected)
+    return sentences[0][:limit].rstrip()
+
+
+def _split_sentences(text: str) -> list[str]:
+    chunks = re.split(r"(?<=[.!?\u3002\uff01\uff1f])\s+", text)
+    return [chunk.strip() for chunk in chunks if chunk.strip()]
+
+
+def _normalize_compressed_snippet(text: str) -> str:
+    normalized = " ".join((text or "").split())
+    if not normalized:
+        return ""
+    normalized = normalized.replace("…", ".")
+    normalized = normalized.replace("...", ".")
+    normalized = re.sub(r"\s*\.\s*\.\s*", ". ", normalized)
+    return " ".join(normalized.split()).strip()
+
+
+def _looks_cutoff(text: str) -> bool:
+    target = (text or "").strip()
+    if not target:
+        return True
+    if target.endswith("…") or target.endswith("..."):
+        return True
+    if target.endswith(",") or target.endswith("，"):
+        return True
+    return False
+
+
+def _is_evidence_block_list(value: Any) -> bool:
+    if not isinstance(value, list):
+        return False
+    for item in value:
+        if not isinstance(item, dict):
+            return False
+        if not isinstance(item.get("title"), str):
+            return False
+        if not isinstance(item.get("explanation"), str):
+            return False
+        if item.get("stance") not in {"positive", "negative"}:
+            return False
+        if item.get("consensus_level") not in {"high", "medium"}:
+            return False
+        if not isinstance(item.get("mention_count"), int):
+            return False
+        snippets = item.get("evidence_snippets")
+        if not isinstance(snippets, list):
+            return False
+        if len(snippets) < 2 or len(snippets) > 3:
+            return False
+        if any(not isinstance(snippet, str) for snippet in snippets):
+            return False
+    return True
+
+
+def _is_evidence_sections_map(value: Any) -> bool:
+    if not isinstance(value, dict):
+        return False
+    loved = value.get("loved")
+    complained = value.get("complained")
+    if not _is_evidence_block_list(loved):
+        return False
+    if not _is_evidence_block_list(complained):
+        return False
+    if any(item.get("stance") != "positive" for item in loved):
+        return False
+    if any(item.get("stance") != "negative" for item in complained):
+        return False
+    return True

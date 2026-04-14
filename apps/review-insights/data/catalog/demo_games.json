@@ -1,10 +1,7 @@
 [
-  { "appid": 2456740, "name": "인조이", "enabled_for_demo": true },
-  { "appid": 1049590, "name": "이터널 리턴", "enabled_for_demo": true },
-  { "appid": 252490, "name": "러스트", "enabled_for_demo": true },
-  { "appid": 230410, "name": "워프레임", "enabled_for_demo": true },
-  { "appid": 381210, "name": "데드 바이 데이라이트", "enabled_for_demo": true },
-  { "appid": 413150, "name": "스타듀 밸리", "enabled_for_demo": true },
-  { "appid": 292030, "name": "위쳐 3 와일드 헌트", "enabled_for_demo": true },
-  { "appid": 1086940, "name": "발더스 게이트 3", "enabled_for_demo": true }
+  {
+    "appid": 2456740,
+    "name": "inZOI (인조이)",
+    "enabled_for_demo": true
+  }
 ]
