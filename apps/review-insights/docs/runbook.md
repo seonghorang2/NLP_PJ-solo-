@@ -55,7 +55,7 @@
 
 ### 4.3 안전장치
 
-- 배치당 `max_llm_reviews`
+- 배치당 `max_llm_reviews` (기본값: `50`)
 - 호출 timeout
 - retry max 2
 - schema invalid 시 rule fallback
@@ -96,6 +96,10 @@ curl -X POST http://localhost:8000/api/admin/ingest \
   -H "Content-Type: application/json" \
   -d "{\"appid\":2456740,\"review_pages\":\"all\",\"use_llm_fallback\":true}"
 ```
+
+기본 동작:
+
+- `max_llm_reviews` 미지정 시 기본값은 `50`
 
 ---
 

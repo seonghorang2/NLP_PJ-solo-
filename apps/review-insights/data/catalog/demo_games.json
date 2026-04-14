@@ -8,5 +8,10 @@
     "appid": 1174180,
     "name": "Red Dead Redemption 2",
     "enabled_for_demo": true
+  },
+  {
+    "appid": 1245620,
+    "name": "ELDEN RING",
+    "enabled_for_demo": true
   }
 ]
