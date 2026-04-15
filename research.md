@@ -1,340 +1,219 @@
-# Steam 리뷰 리포트 시스템 쉽게 이해하기 (research.md)
+# Steam 리뷰 기반 구매 의사결정 리포트 시스템 리서치
 
 작성일: 2026-04-15  
 대상: 이 프로젝트를 처음 보는 개발자/기획자
 
 ---
 
-## 1. 이 시스템이 하는 일 (한 줄 요약)
+## 1. 한 줄 정의
 
-이 서비스는 **Steam 게임 리뷰를 미리(오프라인) 분석해 저장해 두고**, 사용자가 게임을 선택하면 **저장된 결과를 바로 보여주는 구매 판단 리포트 서비스**입니다.
+이 시스템은 **Steam 게임 리뷰를 오프라인에서 미리 분석**해 두고,  
+사용자가 게임을 선택하면 **즉시 구매 의사결정 리포트**를 보여주는 서비스다.
 
----
-
-## 2. 먼저 용어부터 쉽게 정리
-
-- `오프라인 파이프라인`: 운영자가 수동으로 돌리는 분석 작업
-- `온라인 조회`: 사용자가 화면에서 리포트만 보는 작업
-- `Raw 리뷰`: Steam에서 가져온 원본 리뷰
-- `Processed 리뷰`: 전처리 규칙을 통과하면서 태그가 붙은 리뷰
-- `Analysis`: Processed 리뷰를 집계해서 만든 통계/요약
-- `Report`: 사용자가 읽기 쉬운 최종 구매 판단 문서
-- `LLM fallback`: 규칙으로 애매한 리뷰만 LLM으로 보조 판단하는 단계
+핵심 질문:
+- 지금 사도 되는가?
+- 나와 맞는 게임인가?
+- 감수해야 할 리스크는 무엇인가?
 
 ---
 
-## 3. 전체 구조 (중요)
+## 2. 시스템 구성 요약
 
-현재 구조는 아래처럼 **2개 경로가 완전히 분리**되어 있습니다.
+### 2.1 오프라인 파이프라인 (무거운 작업)
 
-1. 운영 경로(무거운 작업)
-- Steam API 호출
-- 전처리/분석/리포트 생성
-- 파일 저장
+파일: `apps/review-insights/backend/pipeline/offline_pipeline.py`
 
-2. 사용자 경로(가벼운 작업)
-- 저장된 파일 읽기
-- 화면에 리포트 렌더링
+1. Steam 리뷰/메타데이터 수집
+2. 결정론적 전처리
+3. 분석 집계(카테고리/테마/트렌드)
+4. 리포트 재료 정제(선택적 LLM)
+5. 리포트 JSON 생성
+6. 결과 파일 저장
 
-즉, 사용자가 버튼을 눌렀다고 Steam API를 다시 부르거나, LLM 분석을 새로 돌리지 않습니다.
+### 2.2 온라인 조회 (가벼운 작업)
 
----
+파일: `apps/review-insights/backend/api/routes.py`
 
-## 4. 실제 동작 순서
-
-## 4.1 운영자(오프라인) 실행 순서
-
-기준 코드: `apps/review-insights/backend/pipeline/offline_pipeline.py`
-
-1. Steam에서 리뷰/메타데이터를 수집
-- 함수: `fetch_steam_reviews()`, `fetch_steam_game_metadata()`
-- 기본값:
-  - 언어: `koreana`
-  - 정렬: `recent` (최신순)
-  - `all` 모드 최대 200페이지
-
-2. 원본 형식을 내부 표준 형식으로 변환
-- `RawReview`, `GameMetadata`로 변환
-
-3. 규칙 기반 전처리
-- 텍스트 정규화
-- 한글 비율 계산
-- 저품질/욕설-only/비한국어 제외
-- 카테고리 태깅
-- 애매함 플래그(`ambiguity_flags`) 부여
-- 규칙 confidence 계산
-
-4. 선택적 LLM fallback
-- 오직 애매한 리뷰 subset만 호출
-- 호출 상한: `max_llm_reviews` (기본 50)
-- confidence 미달이면 규칙 결과 유지
-- schema 이상이면 규칙 결과 유지
-
-5. 분석 집계
-- 카테고리별 언급량/부정비율/최근추세
-- 테마 추출
-- 요약 문장 생성
-
-6. 구매 판단 리포트 생성
-- `report_plan` + `report_display` + `evidence_sections`
-- 무료 게임/유료 게임 추천 문구 분리
-- 한국어 교정(규칙 + 선택적 LLM)
-
-7. 파일 저장
-- `data/raw`
-- `data/processed`
-- `data/analysis`
-- `data/metadata`
-- `data/report`
+- 저장된 snapshot/report만 조회
+- 사용자 요청에서 Steam API/전처리/LLM 실행 없음
 
 ---
 
-## 4.2 사용자(온라인) 조회 순서
+## 3. 데이터 흐름
 
-기준 코드: `apps/review-insights/backend/api/routes.py`, `frontend/app.js`
-
-1. `/api/games`로 게임 목록 조회
-2. 사용자가 게임 선택
-3. `/api/games/{appid}/report` 조회
-4. 저장된 리포트 JSON을 화면에 즉시 렌더링
-
-핵심:
-- 사용자 경로에서는 Steam fetch 없음
-- 사용자 경로에서는 전처리/분석 없음
-- 사용자 경로에서는 리뷰 LLM 분류 없음
+저장 경로(`apps/review-insights/data`):
+- `raw/`: 수집 원문 리뷰
+- `processed/`: 전처리 결과
+- `analysis/`: 집계 결과 + 운영 메타
+- `metadata/`: 게임 메타데이터
+- `report/`: 최종 사용자 리포트
+- `catalog/demo_games.json`: 데모 게임 목록
 
 ---
 
-## 5. 전처리 규칙 (MVP 핵심)
+## 4. 전처리(결정론적) 원칙
 
-기준 코드: `analysis/preprocess.py`, `analysis/rules.py`, `analysis/categorize.py`
+파일: `analysis/preprocess.py`, `analysis/rules.py`, `analysis/categorize.py`
 
-리뷰 한 건마다 아래를 수행합니다.
+규칙:
+- 저품질 리뷰 제외
+- 욕설-only 리뷰 제외
+- 한국어 비율이 낮은 리뷰 제외
+- 멀티라벨 카테고리 태깅
+- `rule_decision`, `rule_confidence`, `final_decision_source` 등 흔적 보존
 
-1. 텍스트 정리
-2. 한글 비율 계산
-3. 제외 판정
-- `exclude_low_quality`
-- `exclude_profanity_only`
-- `exclude_non_korean` (한글 비율 0.20 미만)
-4. 포함 리뷰는 카테고리 멀티태그
-5. 애매성 플래그
-6. `rule_confidence` 계산
-
-추가 규칙:
-- 포함됐는데 카테고리 태그가 비어 있으면 `unclassified_included` 플래그를 붙임
+주의:
+- 이 단계는 설명 가능한 규칙 기반이 중심이다.
 
 ---
 
-## 6. LLM이 들어가는 지점 (정확히)
+## 5. 분석/집계 단계
 
-## 6.1 리뷰 전처리 fallback LLM
+파일: `services/analysis_service.py`
 
-파일: `services/llm_classifier.py`, `analysis/llm_fallback.py`
+산출:
+- 카테고리별 언급량/부정비율/최근 추세
+- 상위 테마
+- 요약 문장
 
-역할:
-- 규칙으로 애매한 리뷰를 include/exclude + category/theme 보조 판정
+결과는 `AnalysisResult` 형태로 저장된다.
 
-안전장치:
-- 호출 수 제한
+---
+
+## 6. LLM 사용 지점 (중요)
+
+### 6.1 리포트 재료 정제 LLM (신규 구조)
+
+파일: `services/report_material_refiner.py`
+
+기존(변경 전):
+- 전처리 중 애매한 리뷰를 LLM으로 include/exclude 보조 판정
+
+변경 후:
+- **분석 집계 완료 후**
+- **리포트 쓰임새가 높은 리뷰 최대 50개만 선별**
+- LLM으로 `refined_text`(1~4문장) 생성
+- 이 정제 재료를 리포트 생성 단계에 전달
+
+선별 기준(다중 키):
+1. category/theme 정보 유무
+2. 플레이타임
+3. 작성자 리뷰 수
+4. 텍스트 길이
+5. 최신성
+
+운영 안전장치:
+- `max_llm_reviews`
 - timeout/retry
-- confidence 임계치
-- 실패 시 규칙 결과 유지
+- 동일 텍스트 캐시
+- schema invalid/저신뢰 시 deterministic fallback
 
-## 6.2 리포트 생성 LLM
+### 6.2 리포트 생성 LLM
 
 파일: `services/report_writer_llm.py`
 
 역할:
-- 리포트의 문장/섹션 품질 개선
-- `report_plan`, `report_display`를 JSON 계약에 맞게 생성
+- `report_plan`
+- `report_display`
+- `evidence_sections`
 
-## 6.3 근거 문장 압축 LLM
+을 JSON 계약으로 생성/보정한다.
+
+### 6.3 근거 문장 압축 LLM
 
 파일: `services/evidence_snippet_llm.py`
 
 역할:
-- 긴 리뷰를 1~4문장 핵심 근거로 압축
+- evidence 스니펫을 읽기 좋은 짧은 문장으로 정리
 
-## 6.4 한국어 교정 LLM
+### 6.4 한국어 교정 LLM
 
 파일: `services/korean_report_proofreader.py`
 
 역할:
 - 조사/띄어쓰기/문법 보정
-- 의미를 바꾸지 않게 길이 변화 비율로 안전검증
+- 의미 변경 없이 표현 품질 개선
 
 ---
 
-## 7. 데이터 모델 요약
+## 7. 리포트 생성 구조
 
-기준 코드: `backend/models/schemas.py`
+파일: `services/report_view.py`
 
-## 7.1 RawReview
+생성 결과:
+- `report_plan`: 어떤 근거로 어떤 섹션을 구성할지
+- `report_display`: 사용자에게 바로 보여줄 핵심 문구
+- `evidence_sections`: 강점/리스크별 근거 블록
 
-- 리뷰 원문 + 추천/비추천 + 작성시간 + 플레이시간 + 작성자 리뷰수
-
-## 7.2 ProcessedReview
-
-- Raw + 전처리 결과
-- `included_in_analysis`
-- `rule_decision`, `rule_confidence`
-- `llm_invoked`, `llm_decision`, `llm_confidence`
-- `final_decision_source`, `final_decision`
-- `category_tags`, `canonical_theme`
-
-## 7.3 AnalysisResult
-
-- 표본 크기 단계
-- 추세 상태
-- 카테고리별 신호(`issue_signals`)
-- 요약 문장
+중요:
+- evidence는 원문 덤프가 아니라
+  - 제목
+  - 왜 중요한지
+  - 2~3개 근거 스니펫
+  구조로 제공된다.
 
 ---
 
-## 8. 리포트 JSON 구조 (사용자 화면용)
+## 8. API 구조
 
-기준 코드: `services/report_writer_llm.py`, `services/report_view.py`
-
-핵심 3개:
-
-1. `report_plan`
-- 추천 판단 축, 섹션 개수, 우선 테마
-
-2. `report_display`
-- headline
-- buy_recommendation
-- buy_timing_summary
-- good_for / not_good_for
-- top_strengths / top_risks
-- recent_state
-
-3. `evidence_sections`
-- `strengths[]`, `risks[]`
-- 각 블록은 제목/의미/설명/근거 스니펫 포함
-
----
-
-## 9. API 구조
-
-## 9.1 사용자용 read-only API
-
+사용자 read-only:
 - `GET /api/games`
 - `GET /api/games/{appid}/report`
 - `GET /api/games/{appid}/analysis`
 - `GET /api/games/{appid}/metadata`
-- `GET /api/games/{appid}/raw` (디버그)
-- `GET /api/games/{appid}/processed` (디버그)
 
-## 9.2 운영자용 API
-
+관리자 수동 실행:
 - `POST /api/admin/ingest`
 
-제한:
-- `demo_games.json`에 등록된 appid만 허용
+---
+
+## 9. 데모 운영 원칙
+
+- 단일 게임 리포트 중심
+- 고정 카탈로그 게임만 제공
+- 자동 재분석 대신 수동 실행
+- “신규 리뷰 n개 이상이면 재분석 필요”는 정책/판정 로직 중심
 
 ---
 
-## 10. 프론트엔드 화면 구조
+## 10. 실행 방법
 
-기준 코드: `frontend/index.html`, `frontend/app.js`
-
-현재 화면 구성:
-
-1. 게임 선택
-2. 헤드라인 + 추천 배지
-3. 지금 사도 될지(타이밍)
-4. 현재 상태
-5. 최종 추천
-6. 잘 맞는 유저 / 주의할 유저
-7. 강점 카드 / 리스크 카드
-8. 강점 근거 / 리스크 근거 리뷰
-
-즉, 분석 대시보드보다 **구매 의사결정 리포트** 형태에 맞춰져 있습니다.
-
----
-
-## 11. 실제 실행 방법
-
-## 11.1 오프라인 분석 실행
+오프라인 실행:
 
 ```bash
-python apps/review-insights/scripts/run_offline_pipeline.py ^
-  --appid 3551340 ^
-  --review-pages all ^
-  --use-llm-fallback
+python apps/review-insights/scripts/run_offline_pipeline.py --appid 578080 --review-pages all --use-llm-fallback
 ```
 
-## 11.2 서버 실행
+서버 실행:
 
 ```bash
 uvicorn app:app --app-dir apps/review-insights/backend --reload
 ```
 
-## 11.3 브라우저 확인
-
+브라우저:
 - `http://localhost:8000`
 
 ---
 
-## 12. 환경변수(자주 쓰는 것)
+## 11. 환경변수
 
 - `OPENAI_API_KEY`
 - `OPENAI_MODEL` (기본 `gpt-4o-mini`)
-- `USE_LLM_REPORT_WRITER` (기본 true)
-- `USE_LLM_EVIDENCE_COMPRESSION` (기본 true)
-- `USE_LLM_REPORT_PROOFREAD` (기본 true)
-- `REPORT_PROOFREAD_MAX_LLM_TEXTS` (기본 24)
+- `USE_LLM_REPORT_WRITER`
+- `USE_LLM_EVIDENCE_COMPRESSION`
+- `USE_LLM_REPORT_PROOFREAD`
 
 ---
 
-## 13. 현재 데모 게임 목록
+## 12. 현재 구조의 장점/주의점
 
-기준 파일: `apps/review-insights/data/catalog/demo_games.json`
+장점:
+- 사용자 응답 속도가 빠름
+- 사용자 경로 안정성 높음(외부 API 실패 영향 축소)
+- LLM 비용 통제 가능
 
-- 2456740 inZOI
-- 1174180 Red Dead Redemption 2
-- 1245620 ELDEN RING
-- 578080 PUBG: BATTLEGROUNDS
-- 413150 Stardew Valley
-- 3551340 Football Manager 26
-
----
-
-## 14. 테스트 현황
-
-2026-04-15 기준 실행 결과:
-
-- `python -m unittest discover -s apps/review-insights/tests`
-- 결과: **58개 테스트 통과**
-
----
-
-## 15. 지금 구조의 장점/주의점
-
-## 장점
-
-- 사용자 속도가 빠름(읽기 전용)
-- 비용 통제 쉬움(LLM 호출이 오프라인에 집중)
-- 문제 추적 쉬움(파일 산출물 확인 가능)
-
-## 주의점
-
-- 파일 기반이라 대규모 트래픽에는 한계
-- 리포트 품질은 전처리 규칙/테마 사전 품질에 영향 받음
-- 오프라인 작업을 수동으로 돌려야 최신 상태 유지
-
----
-
-## 16. 최종 요약
-
-이 프로젝트는 “사용자가 요청할 때마다 분석하는 서비스”가 아니라,  
-**운영자가 미리 분석해 둔 결과를 사용자에게 빠르게 보여주는 구매 판단 리포트 시스템**입니다.
-
-핵심은 다음 2개입니다.
-
-1. 무거운 작업은 오프라인으로
-2. 사용자 경로는 읽기 전용으로
-
-이 원칙이 지금 코드 전반에 반영되어 있습니다.
+주의:
+- 파일 기반 저장이라 대규모 운영에는 한계
+- 오프라인 파이프라인을 누가/언제 돌릴지 운영 룰 필요
+- 품질 튜닝은 규칙 사전 + 리포트 재료 정제가 핵심
 

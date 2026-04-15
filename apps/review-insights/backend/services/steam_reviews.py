@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import json
+from collections.abc import Callable
 from typing import Any
 from urllib.error import HTTPError, URLError
 from urllib.parse import urlencode
@@ -92,6 +93,7 @@ def fetch_steam_reviews(
     cursor: str = "*",
     max_pages: int | None = None,
     timeout: int = 20,
+    progress_callback: Callable[[dict[str, Any]], None] | None = None,
 ) -> dict[str, Any]:
     """Fetch Steam reviews with cursor pagination.
 
@@ -104,6 +106,7 @@ def fetch_steam_reviews(
     pages: list[dict[str, Any]] = []
     current_cursor = cursor
     seen_cursors: set[str] = set()
+    seen_review_ids: set[str] = set()
 
     page_count = 0
     while True:
@@ -125,6 +128,29 @@ def fetch_steam_reviews(
 
         next_cursor = payload.get("cursor")
         reviews = payload.get("reviews", []) or []
+        new_unique_reviews = 0
+        for review in reviews:
+            review_id = str(review.get("recommendationid", ""))
+            if not review_id:
+                continue
+            if review_id in seen_review_ids:
+                continue
+            seen_review_ids.add(review_id)
+            new_unique_reviews += 1
+
+        if progress_callback is not None:
+            progress_callback(
+                {
+                    "appid": appid,
+                    "page": page_count,
+                    "max_pages": effective_max_pages,
+                    "all_mode": max_pages is None,
+                    "page_review_count": len(reviews),
+                    "page_new_unique_reviews": new_unique_reviews,
+                    "cumulative_unique_reviews": len(seen_review_ids),
+                }
+            )
+
         if not next_cursor or not reviews or str(next_cursor) in seen_cursors:
             break
 

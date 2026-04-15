@@ -6,17 +6,17 @@ from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
 
-from analysis.llm_fallback import (
-    LLMFallbackConfig,
-    apply_selective_llm_fallback,
-)
 from analysis.preprocess import preprocess_reviews
 from models.schemas import RawReview
 from services.analysis_service import (
     build_analysis_result_from_processed,
     enrich_processed_reviews,
 )
-from services.llm_classifier import OpenAILLMClassifier
+from services.report_material_refiner import (
+    OpenAIReportMaterialRefiner,
+    ReportMaterialRefinerConfig,
+    build_report_materials,
+)
 from services.report_view import build_report_ready_data
 from services.steam_reviews import (
     fetch_steam_game_metadata,
@@ -42,6 +42,7 @@ def run_offline_pipeline_for_appid(
     llm_retry_limit: int = 2,
     llm_min_confidence: float = 0.70,
     game_name: str | None = None,
+    log_fetch_progress: bool = False,
 ) -> dict[str, Any]:
     """Run full offline pipeline for one appid and persist artifacts."""
     parsed_pages = _parse_review_pages(review_pages)
@@ -50,6 +51,11 @@ def run_offline_pipeline_for_appid(
     steam_payload = fetch_steam_reviews(
         appid,
         max_pages=None if parsed_pages == "all" else parsed_pages,
+        progress_callback=(
+            _build_fetch_progress_callback(appid, parsed_pages)
+            if log_fetch_progress
+            else None
+        ),
     )
     fetch_stats = steam_payload.get("_fetch_stats", {}) if isinstance(steam_payload, dict) else {}
     metadata_payload = fetch_steam_game_metadata(appid)
@@ -61,38 +67,37 @@ def run_offline_pipeline_for_appid(
 
     raw_reviews: list[RawReview] = normalize_steam_reviews(appid, steam_payload)
     deterministic_processed = preprocess_reviews(raw_reviews)
+    processed_reviews = enrich_processed_reviews(deterministic_processed)
+    analysis = build_analysis_result_from_processed(processed_reviews, appid=appid)
 
     llm_stats = {
         "considered": 0,
+        "selected": 0,
         "invoked": 0,
         "success": 0,
         "schema_invalid": 0,
         "low_confidence": 0,
         "cache_hits": 0,
-        "skipped_hard_exclusion": 0,
-        "skipped_no_semantic_signal": 0,
-        "skipped_no_uncertainty_signal": 0,
+        "fallback_used": 0,
     }
+    report_materials: list[dict[str, Any]] = []
 
-    processed_reviews = list(deterministic_processed)
     if use_llm_fallback:
-        llm_config = LLMFallbackConfig(
+        llm_config = ReportMaterialRefinerConfig(
             enabled=True,
             max_llm_reviews=max_llm_reviews,
             timeout_seconds=llm_timeout_seconds,
             retry_limit=llm_retry_limit,
             min_confidence=llm_min_confidence,
         )
-        classifier = OpenAILLMClassifier()
-        processed_reviews, stats = apply_selective_llm_fallback(
+        refiner = OpenAIReportMaterialRefiner()
+        report_materials, stats = build_report_materials(
             processed_reviews,
-            classifier=classifier,
+            analysis=analysis,
             config=llm_config,
+            refiner=refiner,
         )
         llm_stats = stats.to_dict()
-
-    processed_reviews = enrich_processed_reviews(processed_reviews)
-    analysis = build_analysis_result_from_processed(processed_reviews, appid=appid)
 
     analysis_payload = analysis.to_dict()
     analysis_payload.update(
@@ -108,6 +113,13 @@ def run_offline_pipeline_for_appid(
             "all_mode_page_cap": fetch_stats.get("all_mode_page_cap"),
             "all_mode_cap_reached": fetch_stats.get("all_mode_cap_reached"),
             "llm_stats": llm_stats,
+            "report_material_refiner": {
+                "enabled": bool(use_llm_fallback),
+                "max_llm_reviews": int(max_llm_reviews),
+                "llm_min_confidence": float(llm_min_confidence),
+                "material_count": len(report_materials),
+                "stats": llm_stats,
+            },
         }
     )
 
@@ -117,6 +129,7 @@ def run_offline_pipeline_for_appid(
         analysis=analysis,
         raw_reviews=raw_reviews,
         processed_reviews=processed_reviews,
+        report_materials=report_materials,
         pipeline_run_id=pipeline_run_id,
     )
 
@@ -157,6 +170,7 @@ def run_offline_pipeline_for_appid(
         ),
         "review_pages": parsed_pages,
         "llm_stats": llm_stats,
+        "report_material_count": len(report_materials),
         "output_file_game_name": output_game_name,
     }
 
@@ -185,3 +199,25 @@ def _parse_review_pages(value: Any) -> int | str:
             f"review_pages must be 'all' or an integer between 1 and {MAX_NUMERIC_REVIEW_PAGES}."
         )
     return value
+
+
+def _build_fetch_progress_callback(appid: int, parsed_pages: int | str):
+    max_pages_display = (
+        MAX_NUMERIC_REVIEW_PAGES if parsed_pages == "all" else int(parsed_pages)
+    )
+
+    def _callback(progress: dict[str, Any]) -> None:
+        current_page = int(progress.get("page", 0))
+        cumulative = int(progress.get("cumulative_unique_reviews", 0))
+        page_count = int(progress.get("page_review_count", 0))
+        page_new = int(progress.get("page_new_unique_reviews", 0))
+        print(
+            "[offline-pipeline] fetch-progress "
+            f"appid={appid} "
+            f"page={current_page}/{max_pages_display} "
+            f"page_reviews={page_count} "
+            f"new_unique={page_new} "
+            f"cumulative_unique={cumulative}"
+        )
+
+    return _callback

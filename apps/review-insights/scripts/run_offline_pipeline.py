@@ -104,6 +104,7 @@ def main() -> int:
             llm_retry_limit=args.llm_retry_limit,
             llm_min_confidence=args.llm_min_confidence,
             game_name=args.game_name,
+            log_fetch_progress=True,
         )
     except Exception as exc:  # pragma: no cover - CLI surface.
         print(f"[offline-pipeline] failed: {exc}", file=sys.stderr)
@@ -115,4 +116,3 @@ def main() -> int:
 
 if __name__ == "__main__":  # pragma: no cover - CLI surface.
     raise SystemExit(main())
-

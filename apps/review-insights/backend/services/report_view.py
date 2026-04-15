@@ -154,6 +154,7 @@ def build_report_ready_data(
     analysis: AnalysisResult,
     raw_reviews: list[RawReview],
     processed_reviews: list[ProcessedReview],
+    report_materials: list[dict[str, Any]] | None = None,
     pipeline_run_id: str,
 ) -> dict[str, Any]:
     """Build and return a purchase decision report payload."""
@@ -167,6 +168,7 @@ def build_report_ready_data(
         metadata=metadata_payload,
         analysis=analysis_payload,
         processed_reviews=processed_payload,
+        report_materials=report_materials or [],
         included_count=included_count,
     )
 
@@ -202,6 +204,7 @@ def build_consumer_report_from_snapshot(
     metadata: dict[str, Any] | None,
     analysis: dict[str, Any] | None,
     processed_reviews: list[dict[str, Any]] | None = None,
+    report_materials: list[dict[str, Any]] | None = None,
     pipeline_run_id: str | None = None,
     source_review_count: int | None = None,
 ) -> dict[str, Any]:
@@ -216,6 +219,7 @@ def build_consumer_report_from_snapshot(
         metadata=metadata_payload,
         analysis=analysis_payload,
         processed_reviews=processed_payload,
+        report_materials=report_materials or [],
         included_count=included_count,
     )
     structured_report = _build_structured_report_bundle(
@@ -699,11 +703,13 @@ def _build_consensus_payload(
     metadata: dict[str, Any],
     analysis: dict[str, Any],
     processed_reviews: list[dict[str, Any]],
+    report_materials: list[dict[str, Any]],
     included_count: int,
 ) -> dict[str, Any]:
     issue_signals = analysis.get("issue_signals", {}) or {}
     high_min = max(12, int(round(included_count * 0.06)))
     medium_min = max(6, int(round(included_count * 0.03)))
+    refined_material_map = _build_refined_material_map(report_materials)
 
     consensus_aspects: list[dict[str, Any]] = []
     for aspect, signal in issue_signals.items():
@@ -717,6 +723,7 @@ def _build_consensus_payload(
         evidence_group = _collect_grouped_evidence(
             processed_reviews=processed_reviews,
             aspect=aspect,
+            refined_material_map=refined_material_map,
             fallback_snippets=list(signal.get("sample_reviews", []) or []),
         )
 
@@ -751,6 +758,7 @@ def _build_consensus_payload(
             "high_min_mentions": high_min,
             "medium_min_mentions": medium_min,
         },
+        "report_materials": list(report_materials or [])[:50],
         "consensus_aspects": consensus_aspects,
     }
 
@@ -787,6 +795,7 @@ def _collect_grouped_evidence(
     *,
     processed_reviews: list[dict[str, Any]],
     aspect: str,
+    refined_material_map: dict[str, dict[str, Any]],
     fallback_snippets: list[str],
 ) -> dict[str, list[dict[str, Any]]]:
     positive: list[dict[str, Any]] = []
@@ -800,15 +809,23 @@ def _collect_grouped_evidence(
         if aspect not in tags:
             continue
 
-        snippet = _prepare_evidence_source_text(str(review.get("review_text", "")), limit=1200)
+        review_id = str(review.get("review_id", ""))
+        material = refined_material_map.get(review_id, {})
+        refined_text = str(material.get("refined_text", ""))
+        snippet_source = refined_text if refined_text else str(review.get("review_text", ""))
+        snippet = _prepare_evidence_source_text(snippet_source, limit=1200)
         if not snippet or snippet in seen:
             continue
         if _is_noisy_evidence_text(snippet):
             continue
         seen.add(snippet)
 
-        item = {"review_id": str(review.get("review_id", "")), "snippet": snippet}
-        stance = _classify_snippet_stance(snippet, voted_up=bool(review.get("voted_up", False)))
+        item = {"review_id": review_id, "snippet": snippet}
+        material_stance = str(material.get("stance", "")).strip().lower()
+        if material_stance in {"positive", "negative"}:
+            stance = material_stance
+        else:
+            stance = _classify_snippet_stance(snippet, voted_up=bool(review.get("voted_up", False)))
         if stance == "positive":
             positive.append(item)
         elif stance == "negative":
@@ -831,6 +848,22 @@ def _collect_grouped_evidence(
                 )
 
     return {"positive": positive[:4], "negative": negative[:4]}
+
+
+def _build_refined_material_map(report_materials: list[dict[str, Any]]) -> dict[str, dict[str, Any]]:
+    result: dict[str, dict[str, Any]] = {}
+    for material in list(report_materials or []):
+        if not isinstance(material, dict):
+            continue
+        review_id = str(material.get("review_id", "")).strip()
+        refined_text = str(material.get("refined_text", "")).strip()
+        if not review_id or not refined_text:
+            continue
+        result[review_id] = {
+            "refined_text": refined_text,
+            "stance": str(material.get("stance", "")).strip().lower(),
+        }
+    return result
 
 
 def _build_report_deterministic(consensus_payload: dict[str, Any]) -> dict[str, Any]:

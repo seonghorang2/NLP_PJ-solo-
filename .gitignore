@@ -19,11 +19,5 @@ venv/
 _uvicorn_stdout.log
 _uvicorn_stderr.log
 
-# local runtime data artifacts
-apps/review-insights/data/raw/*.json
-apps/review-insights/data/processed/*.json
-apps/review-insights/data/analysis/*.json
-apps/review-insights/data/metadata/*.json
-
 # local test temp outputs
 apps/review-insights/tests/_tmp_*/
