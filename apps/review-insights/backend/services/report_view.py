@@ -8,6 +8,7 @@ from datetime import datetime, timezone
 from typing import Any
 
 from models.schemas import AnalysisResult, GameMetadata, ProcessedReview, RawReview
+from services.evidence_relevance_judge import OpenAIEvidenceRelevanceJudge
 from services.evidence_snippet_llm import OpenAIEvidenceSnippetCompressor
 from services.korean_report_proofreader import KoreanReportProofreader
 from services.report_writer_llm import OpenAIReportWriter, validate_structured_report_payload
@@ -257,6 +258,15 @@ def _should_use_llm_evidence_compression() -> bool:
     }
 
 
+def _should_use_llm_evidence_judge() -> bool:
+    return os.getenv("USE_LLM_EVIDENCE_JUDGE", "false").strip().lower() in {
+        "1",
+        "true",
+        "yes",
+        "on",
+    }
+
+
 def _build_structured_report_bundle(
     *,
     consensus_payload: dict[str, Any],
@@ -298,7 +308,18 @@ def _build_structured_report_bundle(
         seed_evidence_sections,
         use_llm=enable_llm_evidence_compression,
     )
+    evidence_sections = _apply_evidence_relevance_judge(
+        evidence_sections=evidence_sections,
+        consensus_payload=consensus_payload,
+        use_llm=bool(enable_llm_sections),
+    )
     evidence_sections = _truncate_evidence_sections_by_plan(evidence_sections, report_plan)
+    evidence_sections = _ensure_non_empty_evidence_sections(
+        evidence_sections=evidence_sections,
+        consensus_payload=consensus_payload,
+        report_plan=report_plan,
+        report_display=report_display,
+    )
 
     payload = {
         "report_plan": report_plan,
@@ -327,6 +348,12 @@ def _build_structured_report_bundle(
             seed_plan,
         ),
     }
+    fallback["evidence_sections"] = _ensure_non_empty_evidence_sections(
+        evidence_sections=dict(fallback.get("evidence_sections", {}) or {}),
+        consensus_payload=consensus_payload,
+        report_plan=seed_plan,
+        report_display=dict(fallback.get("report_display", {}) or {}),
+    )
     fallback = _apply_price_aware_recommendation_to_payload(
         payload=fallback,
         consensus_payload=consensus_payload,
@@ -500,7 +527,13 @@ def _apply_final_language_polish(
     report_plan["decision_anchor"] = decision_anchor
 
     if isinstance(report_display.get("headline"), str):
-        report_display["headline"] = _fix(str(report_display.get("headline", "")))
+        report_display["headline"] = _fix(
+            _rewrite_headline_as_advice(
+                report_display=report_display,
+                report_plan=report_plan,
+                is_free_game=is_free_game,
+            )
+        )
     if isinstance(report_display.get("buy_timing_summary"), str):
         report_display["buy_timing_summary"] = _fix(str(report_display.get("buy_timing_summary", "")))
 
@@ -515,24 +548,32 @@ def _apply_final_language_polish(
     report_display["not_good_for"] = not_good_for
 
     top_strengths = []
+    strength_priorities = list((report_plan.get("theme_priorities", {}) or {}).get("strengths", []) or [])
     for item in list(report_display.get("top_strengths", []) or []):
         if not isinstance(item, dict):
             continue
         next_item = dict(item)
-        if isinstance(next_item.get("title"), str):
-            next_item["title"] = _fix(str(next_item.get("title", "")))
+        aspect = ""
+        if len(strength_priorities) > len(top_strengths) and isinstance(
+            strength_priorities[len(top_strengths)], dict
+        ):
+            aspect = str(strength_priorities[len(top_strengths)].get("aspect", ""))
+        next_item["title"] = _fix(_strength_outcome_title(aspect=aspect or "gameplay"))
         if isinstance(next_item.get("summary"), str):
             next_item["summary"] = _fix(str(next_item.get("summary", "")))
         top_strengths.append(next_item)
     report_display["top_strengths"] = top_strengths
 
     top_risks = []
+    risk_priorities = list((report_plan.get("theme_priorities", {}) or {}).get("risks", []) or [])
     for item in list(report_display.get("top_risks", []) or []):
         if not isinstance(item, dict):
             continue
         next_item = dict(item)
-        if isinstance(next_item.get("title"), str):
-            next_item["title"] = _fix(str(next_item.get("title", "")))
+        aspect = ""
+        if len(risk_priorities) > len(top_risks) and isinstance(risk_priorities[len(top_risks)], dict):
+            aspect = str(risk_priorities[len(top_risks)].get("aspect", ""))
+        next_item["title"] = _fix(_risk_outcome_title(aspect=aspect or "performance"))
         if isinstance(next_item.get("summary"), str):
             next_item["summary"] = _fix(str(next_item.get("summary", "")))
         top_risks.append(next_item)
@@ -559,6 +600,12 @@ def _apply_final_language_polish(
             for snippet in list(next_block.get("evidence_snippets", []) or []):
                 snippets.append(_fix(str(snippet)))
             next_block["evidence_snippets"] = snippets
+            full_texts = [str(item) for item in list(next_block.get("evidence_full_text", []) or []) if str(item)]
+            if not full_texts:
+                full_texts = [str(item) for item in list(next_block.get("evidence_snippets", []) or []) if str(item)]
+            pair_count = min(len(next_block["evidence_snippets"]), len(full_texts))
+            next_block["evidence_snippets"] = list(next_block["evidence_snippets"])[:pair_count]
+            next_block["evidence_full_text"] = full_texts[:pair_count]
             fixed.append(next_block)
         return fixed
 
@@ -574,6 +621,91 @@ def _apply_final_language_polish(
     return merged
 
 
+def _strength_outcome_title(*, aspect: str) -> str:
+    key = str(aspect or "").strip().lower()
+    mapping = {
+        "difficulty": "처음에는 어렵지만, 반복 플레이를 통해 실력이 눈에 띄게 늘어나는 구조",
+        "difficulty_onboarding": "초반에 헤맬 수 있지만, 흐름을 익히면 플레이 리듬이 빠르게 붙는 구조",
+        "gameplay": "전투 리듬에 익숙해질수록 손에 붙는 재미가 커지는 구조",
+        "story": "진행할수록 서사 몰입이 깊어져 한 챕터를 더 넘기게 되는 구조",
+        "graphics": "플레이를 이어갈수록 월드 연출의 몰입감이 커지는 구조",
+        "content_depth": "짧게 끝나지 않고, 할수록 파고들 거리가 늘어나는 구조",
+        "customization": "시간을 들일수록 내 취향에 맞는 플레이 스타일이 완성되는 구조",
+    }
+    return mapping.get(key, "진행할수록 장점이 체감되는 플레이 경험")
+
+
+def _risk_outcome_title(*, aspect: str) -> str:
+    key = str(aspect or "").strip().lower()
+    mapping = {
+        "performance": "교전이 치열해질수록 끊김이 체감되어 흐름이 깨질 수 있는 구조",
+        "bugs": "몰입 중 예기치 않은 오류로 진행 리듬이 멈출 수 있는 구조",
+        "difficulty": "초반 적응 구간에서 좌절감을 크게 느낄 수 있는 구조",
+        "difficulty_onboarding": "핵심 규칙을 스스로 파악해야 해 초반 피로가 커질 수 있는 구조",
+        "monetization": "비용 대비 만족을 엄격히 보면 아쉬움이 남을 수 있는 구조",
+        "matchmaking": "매칭 품질이 흔들리면 플레이 만족이 크게 내려갈 수 있는 구조",
+    }
+    return mapping.get(key, "플레이 과정에서 피로가 누적될 수 있는 리스크 구조")
+
+
+def _positive_headline_clause(aspect: str) -> str:
+    key = str(aspect or "").strip().lower()
+    mapping = {
+        "gameplay": "손에 익기 시작하면 전투 몰입이 빠르게 올라오고",
+        "difficulty": "초반 벽을 넘기면 실력 상승 체감이 크게 돌아오고",
+        "difficulty_onboarding": "초반 적응만 지나면 플레이 속도가 눈에 띄게 붙고",
+        "story": "진행할수록 스토리 몰입이 깊어지고",
+        "graphics": "플레이할수록 월드 연출의 몰입감이 살아나고",
+        "content_depth": "짧게 끝나지 않아 오래 붙잡고 즐기기 좋고",
+    }
+    return mapping.get(key, "진행할수록 장점 체감이 커지고")
+
+
+def _negative_headline_clause(aspect: str) -> str:
+    key = str(aspect or "").strip().lower()
+    mapping = {
+        "performance": "교전이 길어질 때 성능 변동으로 답답함이 생길 수 있습니다.",
+        "bugs": "진행 중 오류가 나오면 몰입이 쉽게 끊길 수 있습니다.",
+        "difficulty": "초반 적응 구간에서 좌절감이 크게 올 수 있습니다.",
+        "difficulty_onboarding": "핵심 규칙 안내가 부족해 초반 피로가 높을 수 있습니다.",
+        "monetization": "비용 대비 만족 기준이 높은 플레이어에게는 아쉬움이 남을 수 있습니다.",
+    }
+    return mapping.get(key, "일부 구간에서 피로를 느낄 가능성은 남아 있습니다.")
+
+
+def _rewrite_headline_as_advice(
+    *,
+    report_display: dict[str, Any],
+    report_plan: dict[str, Any],
+    is_free_game: bool,
+) -> str:
+    recommendation = str(report_display.get("buy_recommendation", "")).strip()
+    priorities = report_plan.get("theme_priorities", {}) if isinstance(report_plan, dict) else {}
+    strength_aspect = ""
+    risk_aspect = ""
+    strengths = list(priorities.get("strengths", []) or [])
+    risks = list(priorities.get("risks", []) or [])
+    if strengths and isinstance(strengths[0], dict):
+        strength_aspect = str(strengths[0].get("aspect", "")).strip()
+    if risks and isinstance(risks[0], dict):
+        risk_aspect = str(risks[0].get("aspect", "")).strip()
+
+    positive = _positive_headline_clause(strength_aspect)
+    negative = _negative_headline_clause(risk_aspect)
+
+    if recommendation in {"free_play_recommended", "play_now"}:
+        return f"초반에는 변수로 답답할 수 있지만, {positive} 지금 무료로 시작해볼 가치는 충분합니다."
+    if recommendation == "try_lightly":
+        return f"처음엔 적응이 필요할 수 있지만, {positive} 무료로 짧게 시작해 맞는지 확인해보는 선택이 안전합니다."
+    if recommendation == "buy_now":
+        return f"초반 적응 비용은 조금 있지만, {positive} 지금 구매해도 후회 가능성은 낮은 편입니다."
+    if recommendation == "buy_on_sale":
+        return f"{positive} {negative} 할인 구간에서 진입하면 만족 대비 리스크를 더 잘 관리할 수 있습니다."
+    if recommendation == "wait":
+        return f"{positive} 다만 {negative} 업데이트 방향을 한 번 더 확인한 뒤 결정하는 편이 안전합니다."
+    return f"{positive} 다만 {negative} 지금은 구매보다 관망이 더 합리적인 선택에 가깝습니다."
+
+
 def _build_evidence_sections_from_blocks(blocks: list[dict[str, Any]]) -> dict[str, list[dict[str, Any]]]:
     strengths: list[dict[str, Any]] = []
     risks: list[dict[str, Any]] = []
@@ -585,8 +717,14 @@ def _build_evidence_sections_from_blocks(blocks: list[dict[str, Any]]) -> dict[s
             continue
         stance = str(block.get("stance", ""))
         snippets = [str(item) for item in list(block.get("evidence_snippets", []) or []) if str(item)]
-        if len(snippets) < 2:
+        full_texts = [str(item) for item in list(block.get("evidence_full_text", []) or []) if str(item)]
+        if not full_texts:
+            full_texts = list(snippets)
+        pair_count = min(len(snippets), len(full_texts))
+        if pair_count < 2:
             continue
+        snippets = snippets[:pair_count]
+        full_texts = full_texts[:pair_count]
         if stance == "positive":
             strengths.append(
                 {
@@ -600,6 +738,7 @@ def _build_evidence_sections_from_blocks(blocks: list[dict[str, Any]]) -> dict[s
                     "consensus_level": str(block.get("consensus_level", "high")),
                     "mention_count": int(block.get("mention_count", 0)),
                     "evidence_snippets": snippets[:3],
+                    "evidence_full_text": full_texts[:3],
                 }
             )
             strength_index += 1
@@ -616,6 +755,7 @@ def _build_evidence_sections_from_blocks(blocks: list[dict[str, Any]]) -> dict[s
                     "consensus_level": str(block.get("consensus_level", "high")),
                     "mention_count": int(block.get("mention_count", 0)),
                     "evidence_snippets": snippets[:3],
+                    "evidence_full_text": full_texts[:3],
                 }
             )
             risk_index += 1
@@ -642,23 +782,219 @@ def _truncate_evidence_sections_by_plan(
     clipped_strengths = []
     for block in list(evidence_sections.get("strengths", []) or [])[: max(strength_count, 0)]:
         next_block = dict(block)
-        next_block["evidence_snippets"] = list(block.get("evidence_snippets", []) or [])[: max(
-            evidence_per_block, 0
-        )]
+        snippets = list(block.get("evidence_snippets", []) or [])
+        full_texts = list(block.get("evidence_full_text", []) or []) or list(snippets)
+        clip = min(max(evidence_per_block, 0), len(snippets), len(full_texts))
+        next_block["evidence_snippets"] = snippets[:clip]
+        next_block["evidence_full_text"] = full_texts[:clip]
         clipped_strengths.append(next_block)
 
     clipped_risks = []
     for block in list(evidence_sections.get("risks", []) or [])[: max(risk_count, 0)]:
         next_block = dict(block)
-        next_block["evidence_snippets"] = list(block.get("evidence_snippets", []) or [])[: max(
-            evidence_per_block, 0
-        )]
+        snippets = list(block.get("evidence_snippets", []) or [])
+        full_texts = list(block.get("evidence_full_text", []) or []) or list(snippets)
+        clip = min(max(evidence_per_block, 0), len(snippets), len(full_texts))
+        next_block["evidence_snippets"] = snippets[:clip]
+        next_block["evidence_full_text"] = full_texts[:clip]
         clipped_risks.append(next_block)
 
     return {
         "strengths": clipped_strengths,
         "risks": clipped_risks,
     }
+
+
+def _ensure_non_empty_evidence_sections(
+    *,
+    evidence_sections: dict[str, list[dict[str, Any]]],
+    consensus_payload: dict[str, Any],
+    report_plan: dict[str, Any],
+    report_display: dict[str, Any],
+) -> dict[str, list[dict[str, Any]]]:
+    strengths = list(evidence_sections.get("strengths", []) or [])
+    risks = list(evidence_sections.get("risks", []) or [])
+
+    if not strengths:
+        fallback = _build_fallback_evidence_block(
+            stance="positive",
+            consensus_payload=consensus_payload,
+            report_plan=report_plan,
+            report_display=report_display,
+            block_id="str_1",
+        )
+        if fallback is not None:
+            strengths = [fallback]
+
+    if not risks:
+        fallback = _build_fallback_evidence_block(
+            stance="negative",
+            consensus_payload=consensus_payload,
+            report_plan=report_plan,
+            report_display=report_display,
+            block_id="risk_1",
+        )
+        if fallback is not None:
+            risks = [fallback]
+
+    return {"strengths": strengths[:3], "risks": risks[:3]}
+
+
+def _build_fallback_evidence_block(
+    *,
+    stance: str,
+    consensus_payload: dict[str, Any],
+    report_plan: dict[str, Any],
+    report_display: dict[str, Any],
+    block_id: str,
+) -> dict[str, Any] | None:
+    theme, aspect = _pick_priority_theme_and_aspect(
+        stance=stance,
+        report_plan=report_plan,
+        report_display=report_display,
+    )
+    match_tokens = _build_theme_match_tokens(theme, [aspect] if aspect else [])
+    snippets = _select_relaxed_evidence_snippets(
+        consensus_payload=consensus_payload,
+        stance=stance,
+        match_tokens=match_tokens,
+        minimum=2,
+        maximum=3,
+    )
+    if len(snippets) < 2:
+        return None
+
+    title = (
+        _strength_outcome_title(aspect=aspect or "gameplay")
+        if stance == "positive"
+        else _risk_outcome_title(aspect=aspect or "performance")
+    )
+    why_it_matters = _build_block_why_it_matters(
+        stance=stance,
+        theme=theme or ("핵심 장점" if stance == "positive" else "핵심 리스크"),
+        aspect_labels=[CATEGORY_DISPLAY.get(aspect or "", "핵심 경험")],
+    )
+    return {
+        "block_id": block_id,
+        "title": title,
+        "theme": theme,
+        "why_it_matters": why_it_matters,
+        "explanation": why_it_matters,
+        "aspect_keys": [aspect] if aspect else [],
+        "stance": stance,
+        "consensus_level": "medium",
+        "mention_count": len(snippets),
+        "evidence_snippets": snippets[:3],
+        "evidence_full_text": snippets[:3],
+    }
+
+
+def _pick_priority_theme_and_aspect(
+    *,
+    stance: str,
+    report_plan: dict[str, Any],
+    report_display: dict[str, Any],
+) -> tuple[str, str]:
+    priorities = report_plan.get("theme_priorities", {}) if isinstance(report_plan, dict) else {}
+    key = "strengths" if stance == "positive" else "risks"
+    top = list(priorities.get(key, []) or [])
+    if top and isinstance(top[0], dict):
+        return (
+            str(top[0].get("theme", "")).strip(),
+            str(top[0].get("aspect", "")).strip(),
+        )
+
+    display_key = "top_strengths" if stance == "positive" else "top_risks"
+    display_items = list(report_display.get(display_key, []) or [])
+    if display_items and isinstance(display_items[0], dict):
+        return (
+            str(display_items[0].get("title", "")).strip(),
+            "",
+        )
+    return "", ""
+
+
+def _select_relaxed_evidence_snippets(
+    *,
+    consensus_payload: dict[str, Any],
+    stance: str,
+    match_tokens: list[str],
+    minimum: int,
+    maximum: int,
+) -> list[str]:
+    aspects = list(consensus_payload.get("consensus_aspects", []) or [])
+    strict: list[tuple[int, int, str]] = []
+    relaxed: list[tuple[int, int, str]] = []
+    seen: set[str] = set()
+    index = 0
+
+    for item in aspects:
+        evidence_group = item.get("evidence_group", {}) or {}
+        for entry in list(evidence_group.get(stance, []) or []):
+            raw = _prepare_evidence_source_text(str(entry.get("snippet", "")), limit=1200)
+            if not raw:
+                continue
+            normalized = _normalize_compressed_snippet(raw)
+            if not normalized or _looks_cutoff(normalized) or _is_noisy_evidence_text(normalized):
+                continue
+            if normalized in seen:
+                continue
+            if not _snippet_matches_stance(normalized, stance):
+                continue
+            seen.add(normalized)
+            score = _snippet_theme_overlap_score(normalized, match_tokens)
+            strict.append((score, -index, normalized))
+            index += 1
+
+        for raw_sample in list(item.get("sample_reviews", []) or []):
+            raw = _prepare_evidence_source_text(str(raw_sample), limit=1200)
+            if not raw:
+                continue
+            normalized = _normalize_compressed_snippet(raw)
+            if not normalized or _looks_cutoff(normalized) or _is_noisy_evidence_text(normalized):
+                continue
+            if normalized in seen:
+                continue
+            if not _snippet_matches_stance(normalized, stance):
+                continue
+            seen.add(normalized)
+            score = _snippet_theme_overlap_score(normalized, match_tokens)
+            strict.append((score, -index, normalized))
+            index += 1
+
+    strict.sort(key=lambda item: (item[0], item[1]), reverse=True)
+    selected = [value for _, _, value in strict][:maximum]
+    if len(selected) >= minimum:
+        return selected[:maximum]
+
+    # Relax: allow any readable snippet when strict theme match is not enough.
+    for item in aspects:
+        evidence_group = item.get("evidence_group", {}) or {}
+        for bucket in ("positive", "negative"):
+            for entry in list(evidence_group.get(bucket, []) or []):
+                raw = _prepare_evidence_source_text(str(entry.get("snippet", "")), limit=1200)
+                if not raw:
+                    continue
+                normalized = _normalize_compressed_snippet(raw)
+                if not normalized or _looks_cutoff(normalized) or _is_noisy_evidence_text(normalized):
+                    continue
+                if normalized in seen:
+                    continue
+                stance_score = 2 if _snippet_matches_stance(normalized, stance) else 0
+                theme_score = _snippet_theme_overlap_score(normalized, match_tokens)
+                relaxed.append((stance_score, theme_score, -index, normalized))
+                index += 1
+                seen.add(normalized)
+
+    relaxed.sort(key=lambda item: (item[0], item[1], item[2]), reverse=True)
+    for stance_score, _, _, snippet in relaxed:
+        if len(selected) >= maximum:
+            break
+        # Priority: stance match first, then approximate theme.
+        if stance_score >= 1 or len(selected) < minimum:
+            selected.append(snippet)
+
+    return selected[:maximum]
 
 
 def _attach_legacy_flat_fields(payload: dict[str, Any]) -> dict[str, Any]:
@@ -731,6 +1067,7 @@ def _build_consensus_payload(
                 "themes": themes,
                 "tone": _infer_aspect_tone(negative_ratio, themes),
                 "evidence_group": evidence_group,
+                "sample_reviews": [str(item) for item in list(signal.get("sample_reviews", []) or []) if str(item)][:3],
             }
         )
 
@@ -800,14 +1137,19 @@ def _collect_grouped_evidence(
         if aspect not in tags:
             continue
 
-        snippet = _prepare_evidence_source_text(str(review.get("review_text", "")), limit=1200)
-        if not snippet or snippet in seen:
+        full_text = " ".join(str(review.get("review_text", "")).split()).strip()
+        snippet = _prepare_evidence_source_text(full_text, limit=1200)
+        if not snippet or not full_text or full_text in seen:
             continue
         if _is_noisy_evidence_text(snippet):
             continue
-        seen.add(snippet)
+        seen.add(full_text)
 
-        item = {"review_id": str(review.get("review_id", "")), "snippet": snippet}
+        item = {
+            "review_id": str(review.get("review_id", "")),
+            "snippet": snippet,
+            "full_text": full_text,
+        }
         stance = _classify_snippet_stance(snippet, voted_up=bool(review.get("voted_up", False)))
         if stance == "positive":
             positive.append(item)
@@ -821,12 +1163,14 @@ def _collect_grouped_evidence(
 
     if not positive and not negative:
         for index, snippet in enumerate(fallback_snippets[:3]):
-            normalized = _prepare_evidence_source_text(str(snippet), limit=1200)
-            if normalized and not _is_noisy_evidence_text(normalized):
+            full_text = " ".join(str(snippet).split()).strip()
+            normalized = _prepare_evidence_source_text(full_text, limit=1200)
+            if normalized and full_text and not _is_noisy_evidence_text(normalized):
                 negative.append(
                     {
                         "review_id": f"fallback-{aspect}-{index + 1}",
                         "snippet": normalized,
+                        "full_text": full_text,
                     }
                 )
 
@@ -943,20 +1287,22 @@ def _build_headline(
     strengths: list[dict[str, Any]],
     risks: list[dict[str, Any]],
 ) -> str:
-    strength_theme = _experience_theme(strengths[0], positive=True) if strengths else "핵심 플레이 감각"
-    risk_theme = _experience_theme(risks[0], positive=False) if risks else "기술 안정성"
+    strength_aspect = str(strengths[0].get("aspect", "")) if strengths else ""
+    risk_aspect = str(risks[0].get("aspect", "")) if risks else ""
+    positive = _positive_headline_clause(strength_aspect)
+    negative = _negative_headline_clause(risk_aspect)
 
     if recommendation in {"free_play_recommended", "play_now"}:
-        return f"{strength_theme} 체감이 좋아 무료로 지금 시작해보기 좋은 상태입니다."
+        return f"초반에는 변수로 답답할 수 있지만, {positive} 지금 무료로 시작해볼 가치는 충분합니다."
     if recommendation == "try_lightly":
-        return f"{strength_theme} 장점이 보여 무료로 가볍게 시작해보고 맞는지 판단하기 좋습니다."
+        return f"처음엔 적응이 필요할 수 있지만, {positive} 무료로 짧게 시작해 맞는지 확인해보는 선택이 안전합니다."
     if recommendation == "buy_now":
-        return f"{strength_theme} 체감이 좋아 지금 바로 시작해도 만족도가 높은 편입니다."
+        return f"초반 적응 비용은 조금 있지만, {positive} 지금 구매해도 후회 가능성은 낮은 편입니다."
     if recommendation == "buy_on_sale":
-        return f"{strength_theme} 장점은 분명하지만 {risk_theme}이 거슬릴 수 있어 할인 시점이 더 안전합니다."
+        return f"{positive} {negative} 할인 구간에서 진입하면 만족 대비 리스크를 더 잘 관리할 수 있습니다."
     if recommendation == "wait":
-        return f"{strength_theme}은 매력적이지만 {risk_theme} 불편이 남아 있어 업데이트를 본 뒤 결정하는 편이 좋습니다."
-    return f"{risk_theme} 불편이 플레이 경험을 크게 흔들 수 있어 현재 시점 구매는 보수적으로 보는 편이 좋습니다."
+        return f"{positive} 다만 {negative} 업데이트 방향을 한 번 더 확인한 뒤 결정하는 편이 안전합니다."
+    return f"{positive} 다만 {negative} 지금은 구매보다 관망이 더 합리적인 선택에 가깝습니다."
 
 
 def _build_timing_summary(
@@ -1024,32 +1370,34 @@ def _choose_negative_theme(themes: list[str]) -> str | None:
 
 
 def _to_strength_item(item: dict[str, Any]) -> dict[str, str]:
-    label = CATEGORY_DISPLAY.get(item["aspect"], item["aspect"])
+    aspect = str(item.get("aspect", ""))
     themes = list(item.get("themes", []) or [])
     selected_theme = _choose_positive_theme(themes)
+    title = _strength_outcome_title(aspect=aspect)
     if selected_theme:
         return {
-            "title": selected_theme,
-            "summary": _strength_experience_summary(aspect=str(item.get("aspect", "")), theme=selected_theme),
+            "title": title,
+            "summary": _strength_experience_summary(aspect=aspect, theme=selected_theme),
         }
     return {
-        "title": label,
-        "summary": _strength_experience_summary(aspect=str(item.get("aspect", "")), theme=label),
+        "title": title,
+        "summary": _strength_experience_summary(aspect=aspect, theme=CATEGORY_DISPLAY.get(aspect, "핵심 경험")),
     }
 
 
 def _to_risk_item(item: dict[str, Any]) -> dict[str, str]:
-    label = CATEGORY_DISPLAY.get(item["aspect"], item["aspect"])
+    aspect = str(item.get("aspect", ""))
     themes = list(item.get("themes", []) or [])
     selected_theme = _choose_negative_theme(themes)
+    title = _risk_outcome_title(aspect=aspect)
     if selected_theme:
         return {
-            "title": selected_theme,
-            "summary": _risk_experience_summary(aspect=str(item.get("aspect", "")), theme=selected_theme),
+            "title": title,
+            "summary": _risk_experience_summary(aspect=aspect, theme=selected_theme),
         }
     return {
-        "title": label,
-        "summary": _risk_experience_summary(aspect=str(item.get("aspect", "")), theme=label),
+        "title": title,
+        "summary": _risk_experience_summary(aspect=aspect, theme=CATEGORY_DISPLAY.get(aspect, "핵심 리스크")),
     }
 
 
@@ -1063,37 +1411,43 @@ def _experience_theme(item: dict[str, Any], *, positive: bool) -> str:
 
 def _strength_experience_summary(*, aspect: str, theme: str) -> str:
     if aspect == "gameplay":
-        return f"{theme} 체감이 좋아 한 판 더 하게 되는 흐름이 잘 만들어집니다."
+        return "전투 리듬이 손에 붙기 시작하면 몰입이 빠르게 올라 한 판 더 하게 되는 흐름이 만들어집니다."
     if aspect == "story":
-        return f"{theme} 덕분에 진행을 멈추기 어려울 만큼 몰입감이 유지됩니다."
+        return "진행할수록 스토리 몰입이 깊어져 다음 구간을 계속 확인하고 싶어지는 타입입니다."
     if aspect == "graphics":
-        return f"{theme}이 플레이 분위기를 끌어올려 감상형 플레이 만족도가 높습니다."
+        return "월드 연출과 분위기 체감이 좋아 감상형 플레이 만족도가 높게 유지됩니다."
     if aspect == "customization":
-        return f"{theme} 재미가 커서 캐릭터를 만지는 시간 자체가 즐거운 편입니다."
+        return "커스터마이징 과정 자체가 재미 요소로 작동해 플레이 동기를 유지하기 쉽습니다."
     if aspect == "content_depth":
-        return f"{theme} 덕분에 장시간 플레이에서도 목표를 잃지 않기 쉽습니다."
-    return f"{theme}이 실제 플레이 만족도로 이어지는 편입니다."
+        return "중장기 플레이에서도 파고들 목표가 남아 있어 플레이 지속성이 높은 편입니다."
+    if aspect in {"difficulty", "difficulty_onboarding"}:
+        return "처음에는 난도가 높게 느껴질 수 있지만, 적응 이후 성취 체감이 크게 돌아오는 편입니다."
+    return "플레이를 이어갈수록 장점 체감이 커져 전반 만족도로 이어지는 흐름입니다."
 
 
 def _risk_experience_summary(*, aspect: str, theme: str) -> str:
     if aspect == "performance":
-        return f"{theme} 때문에 전투나 이동 흐름이 끊겨 몰입이 쉽게 깨질 수 있습니다."
+        return "교전이나 이동 중 성능 변동이 발생하면 몰입이 갑자기 끊길 수 있습니다."
     if aspect == "bugs":
-        return f"{theme}이 진행 리듬을 자주 끊어 플레이 피로를 높일 수 있습니다."
+        return "진행 중 오류가 발생하면 플레이 리듬이 자주 끊겨 피로가 누적될 수 있습니다."
     if aspect in {"difficulty", "difficulty_onboarding"}:
-        return f"{theme} 때문에 초반 적응에서 막히면 이탈 가능성이 커질 수 있습니다."
+        return "초반 규칙 적응에 실패하면 이탈 가능성이 빠르게 커질 수 있습니다."
     if aspect == "monetization":
-        return f"{theme}이 거슬리면 가격 대비 만족감이 빠르게 떨어질 수 있습니다."
-    return f"{theme}이 플레이 경험의 만족도를 낮출 수 있어 주의가 필요합니다."
+        return "비용 대비 만족 기준이 높은 플레이어에게는 체감 만족이 낮아질 가능성이 있습니다."
+    return "일부 구간에서 피로가 누적될 수 있어 시작 전 감수 범위를 확인하는 편이 안전합니다."
 
 
 def _build_evidence_blocks(consensus_payload: dict[str, Any]) -> list[dict[str, Any]]:
     """Build insight+evidence blocks from high-consensus repeated opinions."""
     aspects = list(consensus_payload.get("consensus_aspects", []) or [])
-    high_min = int(
-        (consensus_payload.get("consensus_thresholds", {}) or {}).get("high_min_mentions", 12)
-    )
+    thresholds = consensus_payload.get("consensus_thresholds", {}) or {}
+    high_min = int(thresholds.get("high_min_mentions", 12))
+    medium_min = int(thresholds.get("medium_min_mentions", 6))
     high_items = [item for item in aspects if item.get("consensus_level") == "high"]
+    min_mentions = high_min
+    if not high_items:
+        high_items = [item for item in aspects if item.get("consensus_level") == "medium"]
+        min_mentions = medium_min
     if not high_items:
         return []
 
@@ -1114,6 +1468,7 @@ def _build_evidence_blocks(consensus_payload: dict[str, Any]) -> list[dict[str, 
                 "aspects": [],
                 "aspect_labels": [],
                 "snippets": [],
+                "full_texts": [],
             },
         )
 
@@ -1130,6 +1485,9 @@ def _build_evidence_blocks(consensus_payload: dict[str, Any]) -> list[dict[str, 
         match_tokens = _build_theme_match_tokens(bucket["theme"], bucket["aspects"])
         for snippet in stance_snippets:
             text = _prepare_evidence_source_text(str(snippet.get("snippet", "")), limit=1200)
+            full_text = " ".join(
+                str(snippet.get("full_text") or snippet.get("snippet", "")).split()
+            ).strip()
             if not text or text in bucket["snippets"]:
                 continue
             if not _snippet_matches_stance(text, stance):
@@ -1137,17 +1495,41 @@ def _build_evidence_blocks(consensus_payload: dict[str, Any]) -> list[dict[str, 
             if match_tokens and not _snippet_matches_theme(text, match_tokens):
                 continue
             bucket["snippets"].append(text)
+            bucket["full_texts"].append(full_text or text)
             if len(bucket["snippets"]) >= 4:
                 break
 
+        # Relax slightly when strict theme match is too narrow.
+        if len(bucket["snippets"]) < 2:
+            relaxed_pool: list[tuple[int, str]] = []
+            for snippet in stance_snippets:
+                text = _prepare_evidence_source_text(str(snippet.get("snippet", "")), limit=1200)
+                if not text or text in bucket["snippets"]:
+                    continue
+                if _is_noisy_evidence_text(text):
+                    continue
+                if not _snippet_matches_stance(text, stance):
+                    continue
+                relaxed_pool.append((_snippet_theme_overlap_score(text, match_tokens), text))
+            relaxed_pool.sort(key=lambda item: item[0], reverse=True)
+            for _, text in relaxed_pool:
+                bucket["snippets"].append(text)
+                bucket["full_texts"].append(text)
+                if len(bucket["snippets"]) >= 3:
+                    break
+
     blocks: list[dict[str, Any]] = []
     for bucket in sorted(grouped.values(), key=lambda b: (-int(b["mention_count"]), b["theme"])):
-        if int(bucket["mention_count"]) < high_min:
+        if int(bucket["mention_count"]) < min_mentions:
             continue
         if len(bucket["snippets"]) < 2:
             continue
 
-        title = _build_block_title(bucket["theme"], bucket["stance"])
+        title = _build_block_title(
+            bucket["theme"],
+            bucket["stance"],
+            aspects=list(bucket.get("aspects", []) or []),
+        )
         why_it_matters = _build_block_why_it_matters(
             stance=bucket["stance"],
             theme=bucket["theme"],
@@ -1164,6 +1546,7 @@ def _build_evidence_blocks(consensus_payload: dict[str, Any]) -> list[dict[str, 
                 "consensus_level": "high",
                 "mention_count": int(bucket["mention_count"]),
                 "evidence_snippets": bucket["snippets"][:3],
+                "evidence_full_text": (bucket["full_texts"][:3] or bucket["snippets"][:3]),
             }
         )
         if len(blocks) >= 4:
@@ -1190,10 +1573,11 @@ def _pick_block_theme(item: dict[str, Any], stance: str) -> str | None:
     return _choose_positive_theme(themes)
 
 
-def _build_block_title(theme: str, stance: str) -> str:
+def _build_block_title(theme: str, stance: str, *, aspects: list[str] | None = None) -> str:
+    primary_aspect = str((aspects or [""])[0] or "")
     if stance == "positive":
-        return f"{theme}이 실제 플레이 만족으로 이어진다는 반응"
-    return f"{theme} 때문에 플레이 흐름이 끊긴다는 반응"
+        return _strength_outcome_title(aspect=primary_aspect or "gameplay")
+    return _risk_outcome_title(aspect=primary_aspect or "performance")
 
 
 def _build_block_why_it_matters(
@@ -1239,6 +1623,13 @@ def _snippet_matches_theme(text: str, theme_tokens: list[str]) -> bool:
         return True
     normalized = str(text).lower().replace(" ", "")
     return any(token.replace(" ", "") in normalized for token in theme_tokens)
+
+
+def _snippet_theme_overlap_score(text: str, theme_tokens: list[str]) -> int:
+    if not theme_tokens:
+        return 0
+    normalized = str(text).lower().replace(" ", "")
+    return sum(1 for token in theme_tokens if token.replace(" ", "") in normalized)
 
 
 def _snippet_matches_stance(text: str, stance: str) -> bool:
@@ -1293,16 +1684,31 @@ def _compress_evidence_sections(
             snippets = block.get("evidence_snippets")
             if not isinstance(snippets, list):
                 continue
+            full_texts = block.get("evidence_full_text")
+            if not isinstance(full_texts, list):
+                full_texts = list(snippets)
+            pair_count = min(len(snippets), len(full_texts))
+            if pair_count < 2:
+                continue
+            snippets = [str(item) for item in list(snippets[:pair_count]) if str(item)]
+            full_texts = [str(item) for item in list(full_texts[:pair_count]) if str(item)]
+            pair_count = min(len(snippets), len(full_texts))
+            if pair_count < 2:
+                continue
+            snippets = snippets[:pair_count]
+            full_texts = full_texts[:pair_count]
             stance = str(block.get("stance", "mixed"))
             match_tokens = _build_theme_match_tokens(
                 str(block.get("theme", "")),
                 [str(item) for item in list(block.get("aspect_keys", []) or [])],
             )
 
-            rewritten: list[str] = []
+            strict_hits: list[tuple[str, str]] = []
+            relaxed_hits: list[tuple[str, str]] = []
             seen: set[str] = set()
-            for raw in snippets:
+            for idx, raw in enumerate(snippets):
                 raw_text = str(raw or "").strip()
+                raw_full_text = " ".join(str(full_texts[idx] if idx < len(full_texts) else raw_text).split()).strip()
                 if not raw_text:
                     continue
 
@@ -1327,19 +1733,29 @@ def _compress_evidence_sections(
                     continue
                 if not _snippet_matches_stance(normalized, stance):
                     continue
-                if match_tokens and not _snippet_matches_theme(normalized, match_tokens):
-                    continue
 
                 if normalized not in seen:
                     seen.add(normalized)
-                    rewritten.append(normalized)
-                if len(rewritten) >= 3:
-                    break
+                    full_value = raw_full_text or raw_text
+                    if match_tokens and _snippet_matches_theme(normalized, match_tokens):
+                        strict_hits.append((normalized, full_value))
+                    else:
+                        relaxed_hits.append((normalized, full_value))
+
+            rewritten = list(strict_hits)
+            if len(rewritten) < 2:
+                for candidate in relaxed_hits:
+                    if candidate in rewritten:
+                        continue
+                    rewritten.append(candidate)
+                    if len(rewritten) >= 3:
+                        break
 
             if len(rewritten) < 2:
                 continue
             next_block = dict(block)
-            next_block["evidence_snippets"] = rewritten[:3]
+            next_block["evidence_snippets"] = [item[0] for item in rewritten[:3]]
+            next_block["evidence_full_text"] = [item[1] for item in rewritten[:3]]
             compressed_blocks.append(next_block)
         return compressed_blocks
 
@@ -1364,6 +1780,117 @@ def _compress_evidence_reviews(
     next_payload = dict(report_payload)
     next_payload["evidence_reviews"] = merged_blocks
     return next_payload
+
+
+def _apply_evidence_relevance_judge(
+    *,
+    evidence_sections: dict[str, list[dict[str, Any]]],
+    consensus_payload: dict[str, Any],
+    use_llm: bool,
+) -> dict[str, list[dict[str, Any]]]:
+    """Optional LLM judge hook for evidence relevance (default OFF)."""
+    if not use_llm or not _should_use_llm_evidence_judge():
+        return evidence_sections
+
+    judge = OpenAIEvidenceRelevanceJudge()
+    if not judge.available:
+        return evidence_sections
+
+    max_calls_per_block = max(2, int(os.getenv("EVIDENCE_JUDGE_MAX_PER_BLOCK", "8")))
+    max_calls_total = max(4, int(os.getenv("EVIDENCE_JUDGE_MAX_TOTAL", "32")))
+    min_confidence = min(1.0, max(0.0, float(os.getenv("EVIDENCE_JUDGE_MIN_CONFIDENCE", "0.65"))))
+    timeout_seconds = max(3, int(os.getenv("EVIDENCE_JUDGE_TIMEOUT_SECONDS", "8")))
+    retry_limit = max(0, int(os.getenv("EVIDENCE_JUDGE_RETRY_LIMIT", "1")))
+
+    remaining_calls = max_calls_total
+
+    def _refine_block_list(blocks: list[dict[str, Any]]) -> list[dict[str, Any]]:
+        nonlocal remaining_calls
+        refined: list[dict[str, Any]] = []
+        for block in blocks:
+            if not isinstance(block, dict):
+                continue
+            snippets = [str(item) for item in list(block.get("evidence_snippets", []) or []) if str(item)]
+            full_texts = [str(item) for item in list(block.get("evidence_full_text", []) or []) if str(item)]
+            if not full_texts:
+                full_texts = list(snippets)
+            pair_count = min(len(snippets), len(full_texts))
+            if pair_count < 2:
+                refined.append(dict(block))
+                continue
+            snippets = snippets[:pair_count]
+            full_texts = full_texts[:pair_count]
+
+            stance = str(block.get("stance", "mixed"))
+            theme = str(block.get("theme", "")).strip() or str(block.get("title", "")).strip()
+            block_title = str(block.get("title", "핵심 근거"))
+
+            accepted: list[tuple[float, str, str]] = []
+            rejected: list[tuple[str, str]] = []
+            local_calls = 0
+
+            for idx, snippet in enumerate(snippets):
+                full_value = full_texts[idx] if idx < len(full_texts) else snippet
+                if remaining_calls <= 0 or local_calls >= max_calls_per_block:
+                    rejected.append((snippet, full_value))
+                    continue
+                judged = judge.judge(
+                    expected_stance=stance,
+                    expected_theme=theme,
+                    block_title=block_title,
+                    snippet=snippet,
+                    timeout_seconds=timeout_seconds,
+                    retry_limit=retry_limit,
+                )
+                remaining_calls -= 1
+                local_calls += 1
+                if judged and judged.fit and judged.stance_match and judged.confidence >= min_confidence:
+                    accepted.append((judged.confidence, snippet, full_value))
+                else:
+                    rejected.append((snippet, full_value))
+
+            accepted.sort(key=lambda item: item[0], reverse=True)
+            selected: list[tuple[str, str]] = [(snippet, full_value) for _, snippet, full_value in accepted]
+
+            for snippet, full_value in rejected:
+                if len(selected) >= 3:
+                    break
+                selected.append((snippet, full_value))
+
+            if len(selected) < 2:
+                match_tokens = _build_theme_match_tokens(
+                    theme,
+                    [str(item) for item in list(block.get("aspect_keys", []) or []) if str(item)],
+                )
+                recovered = _select_relaxed_evidence_snippets(
+                    consensus_payload=consensus_payload,
+                    stance=stance,
+                    match_tokens=match_tokens,
+                    minimum=2,
+                    maximum=3,
+                )
+                seen = {snippet for snippet, _ in selected}
+                for snippet in recovered:
+                    if snippet in seen:
+                        continue
+                    selected.append((snippet, snippet))
+                    seen.add(snippet)
+                    if len(selected) >= 3:
+                        break
+
+            if len(selected) < 2:
+                selected = list(zip(snippets[:3], full_texts[:3], strict=False))
+
+            next_block = dict(block)
+            next_block["evidence_snippets"] = [snippet for snippet, _ in selected[:3]]
+            next_block["evidence_full_text"] = [full_value for _, full_value in selected[:3]]
+            refined.append(next_block)
+        return refined
+
+    return {
+        "strengths": _refine_block_list(list(evidence_sections.get("strengths", []) or [])),
+        "risks": _refine_block_list(list(evidence_sections.get("risks", []) or [])),
+    }
 
 
 def _attach_evidence_sections(report_payload: dict[str, Any]) -> dict[str, Any]:
@@ -1492,6 +2019,14 @@ def _is_evidence_block_list(value: Any) -> bool:
             return False
         if any(not isinstance(snippet, str) for snippet in snippets):
             return False
+        full_texts = item.get("evidence_full_text")
+        if full_texts is not None:
+            if not isinstance(full_texts, list):
+                return False
+            if len(full_texts) != len(snippets):
+                return False
+            if any(not isinstance(text, str) for text in full_texts):
+                return False
     return True
 
 

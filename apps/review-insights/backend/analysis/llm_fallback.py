@@ -31,6 +31,7 @@ class LLMFallbackStats:
     low_confidence: int = 0
     cache_hits: int = 0
     skipped_hard_exclusion: int = 0
+    skipped_not_included: int = 0
     skipped_no_semantic_signal: int = 0
     skipped_no_uncertainty_signal: int = 0
 
@@ -43,6 +44,7 @@ class LLMFallbackStats:
             "low_confidence": self.low_confidence,
             "cache_hits": self.cache_hits,
             "skipped_hard_exclusion": self.skipped_hard_exclusion,
+            "skipped_not_included": self.skipped_not_included,
             "skipped_no_semantic_signal": self.skipped_no_semantic_signal,
             "skipped_no_uncertainty_signal": self.skipped_no_uncertainty_signal,
         }
@@ -80,6 +82,10 @@ def apply_selective_llm_fallback(
         if _is_hard_exclusion_zone(review):
             stats.skipped_hard_exclusion += 1
             continue
+        # Candidate pool is aligned to included_review_count by design.
+        if not review.included_in_analysis:
+            stats.skipped_not_included += 1
+            continue
         if not _has_semantic_signal(review):
             stats.skipped_no_semantic_signal += 1
             continue
@@ -88,7 +94,12 @@ def apply_selective_llm_fallback(
             continue
         candidate_indexes.append(index)
 
-    capped_indexes = candidate_indexes[: max(config.max_llm_reviews, 0)]
+    sorted_indexes = sorted(
+        candidate_indexes,
+        key=lambda idx: _candidate_priority(processed_reviews[idx], idx),
+        reverse=True,
+    )
+    capped_indexes = sorted_indexes[: max(config.max_llm_reviews, 0)]
     cache: dict[str, LLMClassificationResult | None] = {}
     updated_reviews = list(processed_reviews)
 
@@ -199,6 +210,23 @@ def _mark_rule_fallback(
         final_decision_source="rule",
         final_decision=_decision_label(review.included_in_analysis),
     )
+
+
+def _candidate_priority(review: ProcessedReview, index: int) -> tuple[int, float, int, int]:
+    helpful_votes = int(review.helpful_votes or 0)
+    uncertainty = _uncertainty_score(review)
+    timestamp = int(review.timestamp_created or 0)
+    return (helpful_votes, uncertainty, timestamp, -index)
+
+
+def _uncertainty_score(review: ProcessedReview) -> float:
+    score = 0.0
+    if review.ambiguity_flags:
+        score += min(0.20, 0.05 * len(review.ambiguity_flags))
+    if not review.category_tags and review.included_in_analysis:
+        score += 0.15
+    score += max(0.0, 0.70 - float(review.rule_confidence))
+    return score
 
 
 def _ensure_final_fields(review: ProcessedReview) -> ProcessedReview:

@@ -172,7 +172,8 @@ class ReportViewTests(unittest.TestCase):
         )
 
         evidence_sections = report.get("evidence_sections", {})
-        self.assertEqual(evidence_sections.get("risks"), [])
+        self.assertTrue(evidence_sections.get("risks"))
+        self.assertGreaterEqual(len(evidence_sections["risks"][0].get("evidence_snippets", [])), 2)
 
     def test_free_game_uses_price_aware_recommendation_values(self):
         metadata = {
@@ -235,6 +236,65 @@ class ReportViewTests(unittest.TestCase):
         self.assertNotIn(recommendation, {"buy_now", "buy_on_sale"})
         headline = report.get("report_display", {}).get("headline", "")
         self.assertNotIn("할인 구매", headline)
+
+    def test_evidence_sections_never_empty_with_relaxed_fallback(self):
+        metadata = {
+            "appid": 999001,
+            "name": "Fallback Test",
+            "genres": ["Action"],
+            "release_stage": "released",
+        }
+        analysis = {
+            "issue_signals": {
+                "gameplay": {
+                    "mention_count": 30,
+                    "negative_ratio": 0.35,
+                    "recent_trend": "flat",
+                    "themes": ["전투 손맛"],
+                    "sample_reviews": [],
+                },
+                "performance": {
+                    "mention_count": 28,
+                    "negative_ratio": 0.72,
+                    "recent_trend": "up",
+                    "themes": ["프레임 드랍"],
+                    "sample_reviews": [],
+                },
+            }
+        }
+        processed = [
+            {
+                "review_id": "x1",
+                "review_text": "전투 손맛이 좋아서 한 판 더 하게 되고 플레이 몰입이 계속 이어집니다.",
+                "included_in_analysis": True,
+                "category_tags": ["gameplay"],
+                "voted_up": True,
+            },
+            {
+                "review_id": "x2",
+                "review_text": "교전 중 프레임이 떨어지고 끊김이 발생해서 조작이 밀리는 답답함이 큽니다.",
+                "included_in_analysis": True,
+                "category_tags": ["performance"],
+                "voted_up": False,
+            },
+        ]
+
+        report = build_consumer_report_from_snapshot(
+            appid=999001,
+            metadata=metadata,
+            analysis=analysis,
+            processed_reviews=processed,
+            pipeline_run_id="relaxed-fallback",
+            source_review_count=2,
+        )
+
+        sections = report.get("evidence_sections", {})
+        self.assertTrue(sections.get("strengths"))
+        self.assertTrue(sections.get("risks"))
+        self.assertGreaterEqual(len(sections["strengths"][0].get("evidence_snippets", [])), 2)
+        self.assertGreaterEqual(len(sections["risks"][0].get("evidence_snippets", [])), 2)
+        headline = report.get("report_display", {}).get("headline", "")
+        self.assertFalse(headline.startswith("조작 / 규칙 학습 난이도"))
 
 
 if __name__ == "__main__":

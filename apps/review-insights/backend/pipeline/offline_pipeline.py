@@ -70,6 +70,7 @@ def run_offline_pipeline_for_appid(
         "low_confidence": 0,
         "cache_hits": 0,
         "skipped_hard_exclusion": 0,
+        "skipped_not_included": 0,
         "skipped_no_semantic_signal": 0,
         "skipped_no_uncertainty_signal": 0,
     }

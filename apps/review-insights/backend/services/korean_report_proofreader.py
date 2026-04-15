@@ -33,8 +33,8 @@ RULE_REPLACEMENTS: tuple[tuple[str, str], ...] = (
     ("문제이 ", "문제가 "),
     ("이슈이 ", "이슈가 "),
     ("리스크이 ", "리스크가 "),
-    ("불만이 거슬", "불만이 거슬"),
     ("가볍게  시작", "가볍게 시작"),
+    ("확인가 필요", "확인이 필요"),
 )
 
 
@@ -46,11 +46,6 @@ def rule_proofread_text(text: str) -> str:
 
     for before, after in RULE_REPLACEMENTS:
         value = value.replace(before, after)
-
-    # Common grammar shape: "<noun>이 거슬리" -> "<noun>가 거슬리"
-    value = re.sub(r"([0-9A-Za-z가-힣/]+)이 거슬", r"\1가 거슬", value)
-    value = re.sub(r"([0-9A-Za-z가-힣/]+)이 필요", r"\1가 필요", value)
-    value = re.sub(r"([0-9A-Za-z가-힣/]+)이 반복", r"\1가 반복", value)
 
     # Normalize punctuation spacing.
     value = re.sub(r"\s+([,.!?])", r"\1", value)
@@ -153,4 +148,3 @@ def _validate_llm_text(payload: Any, *, source: str) -> str | None:
     if ratio < 0.55 or ratio > 1.8:
         return None
     return normalized
-
