@@ -8,7 +8,7 @@ from datetime import datetime, timezone
 from typing import Any
 
 from models.schemas import AnalysisResult, GameMetadata, ProcessedReview, RawReview
-from services.evidence_snippet_llm import OpenAIEvidenceSnippetCompressor
+from services.evidence_judge_llm import OpenAIEvidenceJudge
 from services.korean_report_proofreader import KoreanReportProofreader
 from services.report_writer_llm import OpenAIReportWriter, validate_structured_report_payload
 
@@ -252,8 +252,8 @@ def _should_use_llm_report_writer() -> bool:
     return os.getenv("USE_LLM_REPORT_WRITER", "true").strip().lower() in {"1", "true", "yes", "on"}
 
 
-def _should_use_llm_evidence_compression() -> bool:
-    return os.getenv("USE_LLM_EVIDENCE_COMPRESSION", "true").strip().lower() in {
+def _should_use_llm_evidence_judge() -> bool:
+    return os.getenv("USE_LLM_EVIDENCE_JUDGE", "false").strip().lower() in {
         "1",
         "true",
         "yes",
@@ -589,6 +589,11 @@ def _build_evidence_sections_from_blocks(blocks: list[dict[str, Any]]) -> dict[s
             continue
         stance = str(block.get("stance", ""))
         snippets = [str(item) for item in list(block.get("evidence_snippets", []) or []) if str(item)]
+        candidate_snippets = [
+            str(item)
+            for item in list(block.get("evidence_candidate_snippets", []) or [])
+            if str(item)
+        ]
         if len(snippets) < 2:
             continue
         if stance == "positive":
@@ -603,6 +608,8 @@ def _build_evidence_sections_from_blocks(blocks: list[dict[str, Any]]) -> dict[s
                     "stance": "positive",
                     "consensus_level": str(block.get("consensus_level", "high")),
                     "mention_count": int(block.get("mention_count", 0)),
+                    "evidence_quality_level": str(block.get("evidence_quality_level", "strict")),
+                    "evidence_candidate_snippets": candidate_snippets[:8],
                     "evidence_snippets": snippets[:3],
                 }
             )
@@ -619,6 +626,8 @@ def _build_evidence_sections_from_blocks(blocks: list[dict[str, Any]]) -> dict[s
                     "stance": "negative",
                     "consensus_level": str(block.get("consensus_level", "high")),
                     "mention_count": int(block.get("mention_count", 0)),
+                    "evidence_quality_level": str(block.get("evidence_quality_level", "strict")),
+                    "evidence_candidate_snippets": candidate_snippets[:8],
                     "evidence_snippets": snippets[:3],
                 }
             )
@@ -1204,6 +1213,293 @@ def _build_evidence_blocks(consensus_payload: dict[str, Any]) -> list[dict[str, 
     return blocks
 
 
+def _build_evidence_blocks_v2(consensus_payload: dict[str, Any]) -> list[dict[str, Any]]:
+    """Build insight+evidence blocks with 3-stage gates.
+
+    Stage 1: strict (stance + theme match, high consensus first)
+    Stage 2: relaxed (stance match + aspect-aligned material)
+    Stage 3: guaranteed_fill (global stance pools to avoid empty evidence)
+    """
+    aspects = list(consensus_payload.get("consensus_aspects", []) or [])
+    high_min = int(
+        (consensus_payload.get("consensus_thresholds", {}) or {}).get("high_min_mentions", 12)
+    )
+    high_items = [item for item in aspects if item.get("consensus_level") == "high"]
+    medium_items = [item for item in aspects if item.get("consensus_level") == "medium"]
+    base_items = high_items if high_items else medium_items
+    if not base_items:
+        return []
+
+    pool_items = high_items + medium_items
+    global_stance_snippets = _collect_global_stance_snippets_v2(pool_items)
+    global_material_snippets = _collect_global_material_snippets_v2(consensus_payload)
+
+    grouped: dict[tuple[str, str], dict[str, Any]] = {}
+    for item in base_items:
+        stance = _block_stance(item)
+        if stance not in {"positive", "negative"}:
+            continue
+
+        theme = _pick_block_theme(item, stance) or str(item.get("aspect_label", "?듭떖 ?섍껄"))
+        key = (stance, theme)
+        bucket = grouped.setdefault(
+            key,
+            {
+                "stance": stance,
+                "theme": theme,
+                "mention_count": 0,
+                "aspects": [],
+                "aspect_labels": [],
+                "consensus_level": str(item.get("consensus_level", "high")),
+                "strict_candidates": [],
+                "relaxed_candidates": [],
+            },
+        )
+
+        bucket["mention_count"] += int(item.get("mention_count", 0))
+        aspect = str(item.get("aspect", ""))
+        if aspect and aspect not in bucket["aspects"]:
+            bucket["aspects"].append(aspect)
+        aspect_label = str(item.get("aspect_label", ""))
+        if aspect_label and aspect_label not in bucket["aspect_labels"]:
+            bucket["aspect_labels"].append(aspect_label)
+
+        evidence_group = item.get("evidence_group", {}) or {}
+        stance_snippets = list(evidence_group.get(stance, []) or [])
+        match_tokens = _build_theme_match_tokens(bucket["theme"], bucket["aspects"])
+        for snippet in stance_snippets:
+            text = _prepare_evidence_source_text(str(snippet.get("snippet", "")), limit=1200)
+            if not text:
+                continue
+            if not _snippet_matches_stance(text, stance):
+                continue
+            if match_tokens and _snippet_matches_theme(text, match_tokens):
+                if text not in bucket["strict_candidates"]:
+                    bucket["strict_candidates"].append(text)
+            if text not in bucket["relaxed_candidates"]:
+                bucket["relaxed_candidates"].append(text)
+
+    blocks: list[dict[str, Any]] = []
+    for bucket in sorted(grouped.values(), key=lambda b: (-int(b["mention_count"]), b["theme"])):
+        if bucket.get("consensus_level") == "high" and int(bucket["mention_count"]) < high_min:
+            continue
+
+        stage = "strict"
+        snippets: list[str] = []
+        snippets = _append_unique_snippets_v2(
+            snippets,
+            list(bucket.get("strict_candidates", [])),
+            limit=8,
+        )
+
+        if len(snippets) < 2:
+            stage = "relaxed"
+            snippets = _append_unique_snippets_v2(
+                snippets,
+                list(bucket.get("relaxed_candidates", [])),
+                limit=8,
+            )
+            snippets = _append_unique_snippets_v2(
+                snippets,
+                _collect_aspect_material_snippets_v2(
+                    consensus_payload=consensus_payload,
+                    stance=str(bucket.get("stance", "")),
+                    aspects=list(bucket.get("aspects", [])),
+                ),
+                limit=8,
+            )
+
+        if len(snippets) < 2:
+            stage = "guaranteed_fill"
+            stance_key = str(bucket.get("stance", ""))
+            snippets = _append_unique_snippets_v2(
+                snippets,
+                list(global_stance_snippets.get(stance_key, [])),
+                limit=8,
+            )
+            snippets = _append_unique_snippets_v2(
+                snippets,
+                list(global_material_snippets.get(stance_key, [])),
+                limit=8,
+            )
+
+        if len(snippets) < 2:
+            continue
+
+        title = _build_block_title(str(bucket["theme"]), str(bucket["stance"]))
+        why_it_matters = _build_block_why_it_matters(
+            stance=str(bucket["stance"]),
+            theme=str(bucket["theme"]),
+            aspect_labels=list(bucket["aspect_labels"]),
+        )
+        blocks.append(
+            {
+                "title": title,
+                "theme": str(bucket["theme"]),
+                "why_it_matters": why_it_matters,
+                "explanation": why_it_matters,
+                "aspect_keys": list(bucket["aspects"]),
+                "stance": str(bucket["stance"]),
+                "consensus_level": str(bucket.get("consensus_level", "high")),
+                "mention_count": int(bucket["mention_count"]),
+                "evidence_quality_level": stage,
+                "evidence_candidate_snippets": snippets[:8],
+                "evidence_snippets": snippets[:3],
+            }
+        )
+        if len(blocks) >= 4:
+            break
+
+    blocks = _ensure_min_stance_blocks_v2(
+        blocks=blocks,
+        source_items=pool_items,
+        global_stance_snippets=global_stance_snippets,
+        global_material_snippets=global_material_snippets,
+    )
+    return blocks
+
+
+def _append_unique_snippets_v2(base: list[str], incoming: list[str], *, limit: int) -> list[str]:
+    result = list(base)
+    seen = set(result)
+    for text in incoming:
+        normalized = _prepare_evidence_source_text(str(text), limit=1200)
+        if not normalized or normalized in seen:
+            continue
+        if _is_noisy_evidence_text(normalized):
+            continue
+        seen.add(normalized)
+        result.append(normalized)
+        if len(result) >= limit:
+            break
+    return result
+
+
+def _collect_global_stance_snippets_v2(items: list[dict[str, Any]]) -> dict[str, list[str]]:
+    collected = {"positive": [], "negative": []}
+    for item in items:
+        for stance in ("positive", "negative"):
+            evidence_group = item.get("evidence_group", {}) or {}
+            for snippet in list(evidence_group.get(stance, []) or []):
+                text = _prepare_evidence_source_text(str(snippet.get("snippet", "")), limit=1200)
+                if not text:
+                    continue
+                if not _snippet_matches_stance(text, stance):
+                    continue
+                if text not in collected[stance]:
+                    collected[stance].append(text)
+    return collected
+
+
+def _collect_global_material_snippets_v2(consensus_payload: dict[str, Any]) -> dict[str, list[str]]:
+    collected = {"positive": [], "negative": []}
+    for material in list(consensus_payload.get("report_materials", []) or []):
+        if not isinstance(material, dict):
+            continue
+        stance = str(material.get("stance", "")).strip().lower()
+        if stance not in {"positive", "negative"}:
+            continue
+        text = _prepare_evidence_source_text(str(material.get("refined_text", "")), limit=1200)
+        if not text:
+            continue
+        if text not in collected[stance]:
+            collected[stance].append(text)
+    return collected
+
+
+def _collect_aspect_material_snippets_v2(
+    *,
+    consensus_payload: dict[str, Any],
+    stance: str,
+    aspects: list[str],
+) -> list[str]:
+    aspect_set = {str(aspect).strip().lower() for aspect in aspects if str(aspect).strip()}
+    if not aspect_set:
+        return []
+
+    result: list[str] = []
+    for material in list(consensus_payload.get("report_materials", []) or []):
+        if not isinstance(material, dict):
+            continue
+        material_stance = str(material.get("stance", "")).strip().lower()
+        if material_stance != stance:
+            continue
+        material_tags = {
+            str(tag).strip().lower()
+            for tag in list(material.get("category_tags", []) or [])
+            if str(tag).strip()
+        }
+        if material_tags and aspect_set.isdisjoint(material_tags):
+            continue
+        text = _prepare_evidence_source_text(str(material.get("refined_text", "")), limit=1200)
+        if text:
+            result.append(text)
+    return result
+
+
+def _ensure_min_stance_blocks_v2(
+    *,
+    blocks: list[dict[str, Any]],
+    source_items: list[dict[str, Any]],
+    global_stance_snippets: dict[str, list[str]],
+    global_material_snippets: dict[str, list[str]],
+) -> list[dict[str, Any]]:
+    result = list(blocks)
+    existing = {str(block.get("stance", "")) for block in result}
+    for stance in ("positive", "negative"):
+        if stance in existing:
+            continue
+        candidate = _pick_best_item_for_stance_v2(source_items, stance)
+        if not candidate:
+            continue
+        snippets: list[str] = []
+        snippets = _append_unique_snippets_v2(snippets, list(global_stance_snippets.get(stance, [])), limit=8)
+        snippets = _append_unique_snippets_v2(snippets, list(global_material_snippets.get(stance, [])), limit=8)
+        if len(snippets) < 2:
+            continue
+
+        theme = _pick_block_theme(candidate, stance) or str(candidate.get("aspect_label", "?듭떖 ?섍껄"))
+        aspect_label = str(candidate.get("aspect_label", ""))
+        why = _build_block_why_it_matters(
+            stance=stance,
+            theme=theme,
+            aspect_labels=[aspect_label] if aspect_label else [],
+        )
+        result.append(
+            {
+                "title": _build_block_title(theme, stance),
+                "theme": theme,
+                "why_it_matters": why,
+                "explanation": why,
+                "aspect_keys": [str(candidate.get("aspect", ""))],
+                "stance": stance,
+                "consensus_level": str(candidate.get("consensus_level", "medium")),
+                "mention_count": int(candidate.get("mention_count", 0)),
+                "evidence_quality_level": "guaranteed_fill",
+                "evidence_candidate_snippets": snippets[:8],
+                "evidence_snippets": snippets[:3],
+            }
+        )
+    return result
+
+
+def _pick_best_item_for_stance_v2(items: list[dict[str, Any]], stance: str) -> dict[str, Any] | None:
+    candidates = [item for item in items if _block_stance(item) == stance]
+    if not candidates:
+        return None
+    return sorted(
+        candidates,
+        key=lambda item: (
+            -_consensus_rank(str(item.get("consensus_level", "low"))),
+            -int(item.get("mention_count", 0)),
+        ),
+    )[0]
+
+
+# Use v2 generator as the active evidence strategy.
+_build_evidence_blocks = _build_evidence_blocks_v2
+
+
 def _block_stance(item: dict[str, Any]) -> str:
     tone = str(item.get("tone", "mixed"))
     negative_ratio = float(item.get("negative_ratio", 0.0))
@@ -1305,18 +1601,18 @@ def _compress_evidence_sections(
     *,
     use_llm: bool,
 ) -> dict[str, list[dict[str, Any]]]:
-    """Compress grouped evidence snippets (stage 3)."""
+    """Select grouped evidence snippets with judge-only replacement."""
     strengths = list(evidence_sections.get("strengths", []) or [])
     risks = list(evidence_sections.get("risks", []) or [])
     if not strengths and not risks:
         return {"strengths": [], "risks": []}
 
-    compressor = (
-        OpenAIEvidenceSnippetCompressor()
-        if use_llm and _should_use_llm_evidence_compression()
+    judge = (
+        OpenAIEvidenceJudge()
+        if use_llm and _should_use_llm_evidence_judge()
         else None
     )
-    llm_enabled = bool(compressor and compressor.available)
+    llm_judge_enabled = bool(judge and judge.available)
 
     def _compress_block_list(blocks: list[dict[str, Any]]) -> list[dict[str, Any]]:
         compressed_blocks: list[dict[str, Any]] = []
@@ -1326,6 +1622,14 @@ def _compress_evidence_sections(
             snippets = block.get("evidence_snippets")
             if not isinstance(snippets, list):
                 continue
+            candidate_snippets = block.get("evidence_candidate_snippets")
+            source_snippets = (
+                list(candidate_snippets)
+                if isinstance(candidate_snippets, list) and candidate_snippets
+                else list(snippets)
+            )
+            if not source_snippets:
+                continue
             stance = str(block.get("stance", "mixed"))
             match_tokens = _build_theme_match_tokens(
                 str(block.get("theme", "")),
@@ -1334,27 +1638,13 @@ def _compress_evidence_sections(
 
             rewritten: list[str] = []
             seen: set[str] = set()
-            for raw in snippets:
+            for raw in source_snippets[:8]:
                 raw_text = str(raw or "").strip()
                 if not raw_text:
                     continue
 
-                compressed: str | None = None
-                if llm_enabled and compressor is not None:
-                    compressed = compressor.compress(
-                        raw_text=raw_text,
-                        stance=str(block.get("stance", "mixed")),
-                        context_title=str(block.get("title", "핵심 의견")),
-                        timeout_seconds=15,
-                        retry_limit=1,
-                    )
-                if not compressed:
-                    compressed = _fallback_compress_snippet(raw_text)
-
-                normalized = _normalize_compressed_snippet(compressed)
-                if _looks_cutoff(normalized):
-                    normalized = _normalize_compressed_snippet(_fallback_compress_snippet(raw_text))
-                if not normalized or _looks_cutoff(normalized):
+                normalized = _prepare_evidence_source_text(raw_text, limit=1200)
+                if not normalized:
                     continue
                 if _is_noisy_evidence_text(normalized):
                     continue
@@ -1366,13 +1656,48 @@ def _compress_evidence_sections(
                 if normalized not in seen:
                     seen.add(normalized)
                     rewritten.append(normalized)
-                if len(rewritten) >= 3:
+                if len(rewritten) >= 8:
                     break
 
             if len(rewritten) < 2:
+                fallback_rewritten: list[str] = []
+                fallback_seen: set[str] = set()
+                for raw in source_snippets[:8]:
+                    raw_text = str(raw or "").strip()
+                    if not raw_text:
+                        continue
+                    normalized = _prepare_evidence_source_text(raw_text, limit=1200)
+                    if not normalized:
+                        continue
+                    if normalized in fallback_seen:
+                        continue
+                    if not _snippet_matches_stance(normalized, stance):
+                        continue
+                    fallback_seen.add(normalized)
+                    fallback_rewritten.append(normalized)
+                    if len(fallback_rewritten) >= 8:
+                        break
+                if len(fallback_rewritten) >= 2:
+                    rewritten = fallback_rewritten[:8]
+            if len(rewritten) < 2:
+                continue
+
+            finalized = _select_evidence_snippets_for_block(
+                block=block,
+                candidates=rewritten[:8],
+                judge=(judge if llm_judge_enabled else None),
+            )
+            if len(finalized) < 2:
+                finalized = _rank_evidence_candidates(
+                    candidates=rewritten[:8],
+                    stance=stance,
+                    match_tokens=match_tokens,
+                )[:3]
+            if len(finalized) < 2:
                 continue
             next_block = dict(block)
-            next_block["evidence_snippets"] = rewritten[:3]
+            next_block["evidence_candidate_snippets"] = rewritten[:8]
+            next_block["evidence_snippets"] = finalized[:3]
             compressed_blocks.append(next_block)
         return compressed_blocks
 
@@ -1380,6 +1705,104 @@ def _compress_evidence_sections(
         "strengths": _compress_block_list(strengths)[:3],
         "risks": _compress_block_list(risks)[:3],
     }
+
+
+def _select_evidence_snippets_for_block(
+    *,
+    block: dict[str, Any],
+    candidates: list[str],
+    judge: OpenAIEvidenceJudge | None,
+) -> list[str]:
+    stance = str(block.get("stance", "mixed"))
+    match_tokens = _build_theme_match_tokens(
+        str(block.get("theme", "")),
+        [str(item) for item in list(block.get("aspect_keys", []) or [])],
+    )
+    ranked = _rank_evidence_candidates(candidates=candidates, stance=stance, match_tokens=match_tokens)
+    if len(ranked) < 2:
+        return ranked
+
+    preferred: list[str] = []
+    if judge is not None and len(ranked) >= 2:
+        selected_indices = judge.judge(
+            title=str(block.get("title", "핵심 근거")),
+            theme=str(block.get("theme", "")),
+            why_it_matters=str(block.get("why_it_matters", "")),
+            stance=stance,
+            candidates=ranked[:8],
+            timeout_seconds=20,
+            retry_limit=1,
+        )
+        if selected_indices:
+            for index in selected_indices:
+                zero_based = index - 1
+                if 0 <= zero_based < len(ranked):
+                    preferred.append(ranked[zero_based])
+
+    ordered: list[str] = []
+    seen: set[str] = set()
+    for text in preferred + ranked:
+        if text in seen:
+            continue
+        seen.add(text)
+        ordered.append(text)
+
+    strict: list[str] = []
+    for text in ordered:
+        if not _snippet_matches_stance(text, stance):
+            continue
+        if match_tokens and not _snippet_matches_theme(text, match_tokens):
+            continue
+        strict.append(text)
+        if len(strict) >= 3:
+            break
+    if len(strict) >= 2:
+        return strict[:3]
+
+    relaxed = list(strict)
+    for text in ordered:
+        if text in relaxed:
+            continue
+        if not _snippet_matches_stance(text, stance):
+            continue
+        relaxed.append(text)
+        if len(relaxed) >= 3:
+            break
+    if len(relaxed) >= 2:
+        return relaxed[:3]
+
+    fallback = list(relaxed)
+    for text in ordered:
+        if text in fallback:
+            continue
+        fallback.append(text)
+        if len(fallback) >= 3:
+            break
+    return fallback[:3] if len(fallback) >= 2 else []
+
+
+def _rank_evidence_candidates(
+    *,
+    candidates: list[str],
+    stance: str,
+    match_tokens: list[str],
+) -> list[str]:
+    scored: list[tuple[int, int, str]] = []
+    for index, text in enumerate(candidates):
+        normalized = str(text).strip()
+        if not normalized:
+            continue
+        score = 0
+        if _snippet_matches_stance(normalized, stance):
+            score += 4
+        if match_tokens and _snippet_matches_theme(normalized, match_tokens):
+            score += 2
+        if 20 <= len(normalized) <= 320:
+            score += 1
+        scored.append((score, index, normalized))
+
+    scored.sort(key=lambda item: (-item[0], item[1]))
+    return [item[2] for item in scored]
 
 
 def _compress_evidence_reviews(
@@ -1412,22 +1835,6 @@ def _attach_evidence_sections(report_payload: dict[str, Any]) -> dict[str, Any]:
     return next_payload
 
 
-def _fallback_compress_snippet(raw_text: str) -> str:
-    """Deterministic fallback: keep 1~4 full sentences."""
-    source = _prepare_evidence_source_text(raw_text, limit=700)
-    if not source:
-        return ""
-    sentences = _split_sentences(source)
-    if not sentences:
-        return source
-
-    selected = sentences[:4]
-    result = " ".join(selected).strip()
-    if len(result) > 260:
-        result = _prepare_evidence_source_text(result, limit=260)
-    return result
-
-
 def _prepare_evidence_source_text(text: str, limit: int = 1200) -> str:
     """Keep source text readable and avoid mid-sentence truncation."""
     compact = " ".join((text or "").split())
@@ -1457,27 +1864,6 @@ def _prepare_evidence_source_text(text: str, limit: int = 1200) -> str:
 def _split_sentences(text: str) -> list[str]:
     chunks = re.split(r"(?<=[.!?\u3002\uff01\uff1f])\s+", text)
     return [chunk.strip() for chunk in chunks if chunk.strip()]
-
-
-def _normalize_compressed_snippet(text: str) -> str:
-    normalized = " ".join((text or "").split())
-    if not normalized:
-        return ""
-    normalized = normalized.replace("…", ".")
-    normalized = normalized.replace("...", ".")
-    normalized = re.sub(r"\s*\.\s*\.\s*", ". ", normalized)
-    return " ".join(normalized.split()).strip()
-
-
-def _looks_cutoff(text: str) -> bool:
-    target = (text or "").strip()
-    if not target:
-        return True
-    if target.endswith("…") or target.endswith("..."):
-        return True
-    if target.endswith(",") or target.endswith("，"):
-        return True
-    return False
 
 
 def _is_noisy_evidence_text(text: str) -> bool:

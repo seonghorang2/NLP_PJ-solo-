@@ -11,7 +11,7 @@ BACKEND_DIR = Path(__file__).resolve().parents[1] / "backend"
 if str(BACKEND_DIR) not in sys.path:
     sys.path.insert(0, str(BACKEND_DIR))
 
-from services.report_view import build_consumer_report_from_snapshot
+from services.report_view import _select_evidence_snippets_for_block, build_consumer_report_from_snapshot
 
 
 def sentence_count(text: str) -> int:
@@ -127,7 +127,7 @@ class ReportViewTests(unittest.TestCase):
             all(block.get("stance") == "negative" for block in evidence_sections["risks"])
         )
 
-    def test_evidence_blocks_drop_theme_mismatched_snippets(self):
+    def test_evidence_blocks_use_relaxed_or_guaranteed_fill_when_theme_mismatch(self):
         metadata = {
             "appid": 1245620,
             "name": "ELDEN RING",
@@ -172,7 +172,9 @@ class ReportViewTests(unittest.TestCase):
         )
 
         evidence_sections = report.get("evidence_sections", {})
-        self.assertEqual(evidence_sections.get("risks"), [])
+        risks = evidence_sections.get("risks") or []
+        self.assertTrue(risks)
+        self.assertGreaterEqual(len(risks[0].get("evidence_snippets", [])), 2)
 
     def test_free_game_uses_price_aware_recommendation_values(self):
         metadata = {
@@ -235,6 +237,30 @@ class ReportViewTests(unittest.TestCase):
         self.assertNotIn(recommendation, {"buy_now", "buy_on_sale"})
         headline = report.get("report_display", {}).get("headline", "")
         self.assertNotIn("할인 구매", headline)
+
+    def test_evidence_selection_prefers_stance_and_theme_when_judge_disabled(self):
+        block = {
+            "title": "교전 경험이 반복 플레이 만족으로 이어진다는 반응",
+            "theme": "총기 손맛과 교전 몰입",
+            "why_it_matters": "교전 감각이 맞으면 장기 플레이 만족도가 높아집니다.",
+            "stance": "positive",
+            "aspect_keys": ["gameplay"],
+        }
+        candidates = [
+            "프레임이 끊기고 렉이 심해서 플레이가 불가능했습니다.",
+            "총기 손맛이 좋아서 교전이 짜릿하고 계속 하게 됩니다.",
+            "커스터마이징 선택지가 많아 꾸미는 재미가 있습니다.",
+        ]
+
+        selected = _select_evidence_snippets_for_block(
+            block=block,
+            candidates=candidates,
+            judge=None,
+        )
+
+        self.assertGreaterEqual(len(selected), 2)
+        self.assertIn("총기 손맛", selected[0])
+        self.assertTrue(all("불가능" not in snippet for snippet in selected[:2]))
 
 
 if __name__ == "__main__":

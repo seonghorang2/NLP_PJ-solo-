@@ -16,6 +16,9 @@ const strengths = document.getElementById("strengths");
 const risks = document.getElementById("risks");
 const evidencePositiveList = document.getElementById("evidence-positive-list");
 const evidenceNegativeList = document.getElementById("evidence-negative-list");
+const evidenceSections = document.querySelector(".evidence-sections");
+const evidencePositiveSection = evidencePositiveList?.closest(".evidence-section");
+const evidenceNegativeSection = evidenceNegativeList?.closest(".evidence-section");
 const disclaimer = document.getElementById("disclaimer");
 const statusLine = document.getElementById("status-line");
 
@@ -168,6 +171,24 @@ function renderEvidenceSection(container, blocks, emptyMessage) {
 
 function renderEvidence(report) {
   const sections = normalizeEvidenceSections(report);
+  const positiveCount = sections.loved.length;
+  const negativeCount = sections.complained.length;
+
+  if (evidenceSections) {
+    const isSparse = positiveCount <= 1 || negativeCount <= 1;
+    const hasOnlyOneSide = (positiveCount === 0) !== (negativeCount === 0);
+    evidenceSections.classList.toggle("sparse-layout", isSparse);
+    evidenceSections.classList.toggle("single-side-layout", hasOnlyOneSide);
+  }
+  if (evidencePositiveSection) {
+    evidencePositiveSection.classList.toggle("is-empty", positiveCount === 0);
+    evidencePositiveSection.classList.toggle("is-single", positiveCount === 1);
+  }
+  if (evidenceNegativeSection) {
+    evidenceNegativeSection.classList.toggle("is-empty", negativeCount === 0);
+    evidenceNegativeSection.classList.toggle("is-single", negativeCount === 1);
+  }
+
   renderEvidenceSection(
     evidencePositiveList,
     sections.loved,
