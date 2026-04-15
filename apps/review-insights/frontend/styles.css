@@ -9,6 +9,8 @@
   --brand: #66c0f4;
   --buy-now: #59d08a;
   --buy-sale: #66c0f4;
+  --buy-free: #4fd89d;
+  --buy-try: #8bc7ff;
   --buy-wait: #f2b84b;
   --buy-avoid: #ee6b77;
   --neutral: #8191a8;
@@ -139,6 +141,16 @@ button:disabled {
   color: var(--buy-sale);
 }
 
+.buy-badge.buy-free {
+  background: rgba(79, 216, 157, 0.2);
+  color: var(--buy-free);
+}
+
+.buy-badge.buy-try {
+  background: rgba(139, 199, 255, 0.2);
+  color: var(--buy-try);
+}
+
 .buy-badge.buy-wait {
   background: rgba(242, 184, 75, 0.24);
   color: var(--buy-wait);
@@ -261,32 +273,22 @@ button:disabled {
   border: 1px solid rgba(255, 255, 255, 0.1);
   background: #182334;
   border-radius: 12px;
-  padding: 11px 12px;
+  padding: 12px;
   display: grid;
-  gap: 7px;
-}
-
-.evidence-meta {
-  margin: 0;
-  font-size: 0.8rem;
-  color: #9ec5e0;
+  gap: 8px;
 }
 
 .evidence-card h3 {
   margin: 0;
-  font-size: 0.95rem;
-  line-height: 1.45;
+  font-size: 0.98rem;
+  line-height: 1.4;
 }
 
-.evidence-text {
+.evidence-why {
   margin: 0;
   line-height: 1.55;
-  font-size: 0.92rem;
+  font-size: 0.91rem;
   color: #dbe4f2;
-  display: -webkit-box;
-  -webkit-line-clamp: 3;
-  -webkit-box-orient: vertical;
-  overflow: hidden;
 }
 
 .evidence-snippets {
@@ -299,11 +301,7 @@ button:disabled {
 
 .evidence-snippets li {
   line-height: 1.5;
-  font-size: 0.9rem;
-  display: -webkit-box;
-  -webkit-line-clamp: 2;
-  -webkit-box-orient: vertical;
-  overflow: hidden;
+  font-size: 0.88rem;
 }
 
 .placeholder {

@@ -14,7 +14,6 @@ const goodForList = document.getElementById("good-for-list");
 const notGoodForList = document.getElementById("not-good-for-list");
 const strengths = document.getElementById("strengths");
 const risks = document.getElementById("risks");
-const recentStateLine = document.getElementById("recent-state-line");
 const evidencePositiveList = document.getElementById("evidence-positive-list");
 const evidenceNegativeList = document.getElementById("evidence-negative-list");
 const disclaimer = document.getElementById("disclaimer");
@@ -30,6 +29,9 @@ function recommendationLabel(value) {
     buy_on_sale: "할인 구매 추천",
     wait: "업데이트 관망 추천",
     not_recommended: "현재 비추천",
+    free_play_recommended: "무료 플레이 추천",
+    play_now: "지금 플레이 추천",
+    try_lightly: "가볍게 시작해보기 좋음",
   };
   return labels[value] || "-";
 }
@@ -51,23 +53,15 @@ function buyBadgeClass(value) {
     buy_on_sale: "buy-sale",
     wait: "buy-wait",
     not_recommended: "buy-avoid",
+    free_play_recommended: "buy-free",
+    play_now: "buy-free",
+    try_lightly: "buy-try",
   };
   return map[value] || "neutral";
 }
 
 function toList(values) {
   return Array.isArray(values) ? values : [];
-}
-
-function clampText(value, maxLength) {
-  const text = String(value || "").trim().replace(/\s+/g, " ");
-  if (!text) {
-    return "";
-  }
-  if (text.length <= maxLength) {
-    return text;
-  }
-  return `${text.slice(0, maxLength - 1).trim()}…`;
 }
 
 function renderBullets(container, values) {
@@ -105,90 +99,20 @@ function renderCards(container, values) {
   });
 }
 
-function normalizeEvidenceBlocks(values) {
-  const list = toList(values);
-  if (list.length === 0) {
-    return [];
-  }
-
-  // New structure: insight+evidence blocks
-  if (
-    typeof list[0] === "object" &&
-    list[0] !== null &&
-    Array.isArray(list[0].evidence_snippets)
-  ) {
-    return list;
-  }
-
-  // Backward compatibility: old raw snippet list
-  const grouped = new Map();
-  list.forEach((item) => {
-    if (!item || typeof item !== "object") {
-      return;
-    }
-    const stance = item.stance === "negative" ? "negative" : "positive";
-    const key = `${stance}::${item.aspect_label || item.aspect || "핵심 의견"}`;
-    if (!grouped.has(key)) {
-      grouped.set(key, {
-        title: `[${item.aspect_label || item.aspect || "핵심 의견"}] 대표 의견`,
-        explanation:
-          stance === "negative"
-            ? "반복적으로 등장한 불만 의견입니다."
-            : "반복적으로 등장한 긍정 의견입니다.",
-        stance,
-        consensus_level: "medium",
-        mention_count: 0,
-        evidence_snippets: [],
-      });
-    }
-    const block = grouped.get(key);
-    const snippet = String(item.snippet || "").trim();
-    if (snippet && !block.evidence_snippets.includes(snippet)) {
-      block.evidence_snippets.push(snippet);
-    }
-    block.mention_count += 1;
-  });
-
-  return [...grouped.values()]
-    .filter((block) => block.evidence_snippets.length >= 1)
-    .map((block) => ({
-      ...block,
-      evidence_snippets: block.evidence_snippets.slice(0, 3),
-    }))
-    .slice(0, 4);
-}
-
 function normalizeEvidenceSections(report) {
   const sections = report && typeof report === "object" ? report.evidence_sections : null;
-  if (
-    sections &&
-    typeof sections === "object" &&
-    Array.isArray(sections.loved) &&
-    Array.isArray(sections.complained)
-  ) {
-    return {
-      loved: normalizeEvidenceBlocks(sections.loved)
-        .filter((block) => block.stance === "positive")
-        .map(normalizeEvidenceBlock)
-        .filter(Boolean)
-        .slice(0, 3),
-      complained: normalizeEvidenceBlocks(sections.complained)
-        .filter((block) => block.stance === "negative")
-        .map(normalizeEvidenceBlock)
-        .filter(Boolean)
-        .slice(0, 3),
-    };
+  if (!sections || typeof sections !== "object") {
+    return { loved: [], complained: [] };
   }
 
-  const blocks = normalizeEvidenceBlocks(report ? report.evidence_reviews : []);
+  const strengths = Array.isArray(sections.strengths) ? sections.strengths : [];
+  const risks = Array.isArray(sections.risks) ? sections.risks : [];
   return {
-    loved: blocks
-      .filter((block) => block.stance === "positive")
+    loved: strengths
       .map(normalizeEvidenceBlock)
       .filter(Boolean)
       .slice(0, 3),
-    complained: blocks
-      .filter((block) => block.stance === "negative")
+    complained: risks
       .map(normalizeEvidenceBlock)
       .filter(Boolean)
       .slice(0, 3),
@@ -199,21 +123,22 @@ function normalizeEvidenceBlock(block) {
   if (!block || typeof block !== "object") {
     return null;
   }
-  const title = clampText(block.title, 60);
-  const explanation = clampText(block.explanation, 150);
+  const title = String(block.title || "").trim().replace(/\s+/g, " ");
+  const whyItMatters = String(block.why_it_matters || block.explanation || "")
+    .trim()
+    .replace(/\s+/g, " ");
   const snippets = toList(block.evidence_snippets)
-    .map((snippet) => clampText(snippet, 120))
+    .map((snippet) => String(snippet || "").trim().replace(/\s+/g, " "))
     .filter(Boolean)
-    .slice(0, 2);
+    .slice(0, 3);
 
-  if (!title || !explanation || snippets.length < 2) {
+  if (!title || !whyItMatters || snippets.length < 2) {
     return null;
   }
 
   return {
-    ...block,
     title,
-    explanation,
+    whyItMatters,
     evidence_snippets: snippets,
   };
 }
@@ -233,9 +158,8 @@ function renderEvidenceSection(container, blocks, emptyMessage) {
     const snippetsHtml = snippets.map((snippet) => `<li>"${snippet}"</li>`).join("");
 
     card.innerHTML = `
-      <p class="evidence-meta">${block.consensus_level || "high"} consensus · ${block.mention_count || 0}건</p>
       <h3>${block.title || "-"}</h3>
-      <p class="evidence-text">${block.explanation || "-"}</p>
+      <p class="evidence-why">${block.whyItMatters || "-"}</p>
       <ul class="evidence-snippets">${snippetsHtml}</ul>
     `;
     container.appendChild(card);
@@ -257,17 +181,30 @@ function renderEvidence(report) {
 }
 
 function renderReport(report) {
+  const display = report.report_display;
+  if (!display || typeof display !== "object") {
+    throw new Error("report_display가 없는 리포트입니다.");
+  }
+  if (
+    !report ||
+    typeof report !== "object" ||
+    !report.evidence_sections ||
+    !Array.isArray(report.evidence_sections.strengths) ||
+    !Array.isArray(report.evidence_sections.risks)
+  ) {
+    throw new Error("근거 섹션(강점/리스크)이 없는 리포트입니다.");
+  }
   const game = report.game || {};
-  const recommendation = report.buy_recommendation || "";
-  const recentState = report.recent_state || {};
+  const recommendation = display.buy_recommendation || "";
+  const recentState = display.recent_state || {};
 
   gameName.textContent = game.name || `appid ${report.appid}`;
-  headline.textContent = report.headline || "-";
+  headline.textContent = display.headline || "-";
 
   buyBadge.textContent = recommendationLabel(recommendation);
   buyBadge.className = `buy-badge ${buyBadgeClass(recommendation)}`;
 
-  buyTimingSummary.textContent = report.buy_timing_summary || "-";
+  buyTimingSummary.textContent = display.buy_timing_summary || "-";
   recentStateSummary.textContent = recentState.summary || "-";
   recentStateStatus.textContent = `상태: ${recentStateLabel(recentState.status)}`;
   buyRecommendation.textContent = recommendationLabel(recommendation);
@@ -275,12 +212,11 @@ function renderReport(report) {
     ? `업데이트: ${new Date(report.generated_at).toLocaleString("ko-KR")}`
     : "업데이트 정보 없음";
 
-  renderBullets(goodForList, report.good_for);
-  renderBullets(notGoodForList, report.not_good_for);
-  renderCards(strengths, report.top_strengths);
-  renderCards(risks, report.top_risks);
+  renderBullets(goodForList, display.good_for);
+  renderBullets(notGoodForList, display.not_good_for);
+  renderCards(strengths, display.top_strengths);
+  renderCards(risks, display.top_risks);
 
-  recentStateLine.textContent = recentState.summary || report.buy_timing_summary || "-";
   renderEvidence(report);
   disclaimer.textContent = report.disclaimer || "";
 }

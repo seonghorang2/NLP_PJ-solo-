@@ -101,6 +101,7 @@ class ReportViewTests(unittest.TestCase):
         self.assertTrue(evidence_blocks)
         for block in evidence_blocks:
             self.assertIn("title", block)
+            self.assertIn("why_it_matters", block)
             self.assertIn("explanation", block)
             self.assertIn("stance", block)
             self.assertIn("consensus_level", block)
@@ -117,14 +118,123 @@ class ReportViewTests(unittest.TestCase):
 
         evidence_sections = report.get("evidence_sections")
         self.assertIsInstance(evidence_sections, dict)
-        self.assertIn("loved", evidence_sections)
-        self.assertIn("complained", evidence_sections)
-        self.assertTrue(evidence_sections["loved"])
-        self.assertTrue(evidence_sections["complained"])
-        self.assertTrue(all(block.get("stance") == "positive" for block in evidence_sections["loved"]))
+        self.assertIn("strengths", evidence_sections)
+        self.assertIn("risks", evidence_sections)
+        self.assertTrue(evidence_sections["strengths"])
+        self.assertTrue(evidence_sections["risks"])
+        self.assertTrue(all(block.get("stance") == "positive" for block in evidence_sections["strengths"]))
         self.assertTrue(
-            all(block.get("stance") == "negative" for block in evidence_sections["complained"])
+            all(block.get("stance") == "negative" for block in evidence_sections["risks"])
         )
+
+    def test_evidence_blocks_drop_theme_mismatched_snippets(self):
+        metadata = {
+            "appid": 1245620,
+            "name": "ELDEN RING",
+            "genres": ["Action", "RPG"],
+            "release_stage": "released",
+        }
+        analysis = {
+            "issue_signals": {
+                "monetization": {
+                    "mention_count": 24,
+                    "negative_ratio": 0.85,
+                    "recent_trend": "up",
+                    "themes": ["가격 / 과금 불만"],
+                    "sample_reviews": [],
+                }
+            }
+        }
+        processed = [
+            {
+                "review_id": "m1",
+                "review_text": "보스 패턴이 불친절해서 초반 진입이 너무 빡빡합니다.",
+                "included_in_analysis": True,
+                "category_tags": ["monetization"],
+                "voted_up": False,
+            },
+            {
+                "review_id": "m2",
+                "review_text": "전투 타이밍이 어렵고 카메라가 불편해서 스트레스를 받았습니다.",
+                "included_in_analysis": True,
+                "category_tags": ["monetization"],
+                "voted_up": False,
+            },
+        ]
+
+        report = build_consumer_report_from_snapshot(
+            appid=1245620,
+            metadata=metadata,
+            analysis=analysis,
+            processed_reviews=processed,
+            pipeline_run_id="test-run-2",
+            source_review_count=2,
+        )
+
+        evidence_sections = report.get("evidence_sections", {})
+        self.assertEqual(evidence_sections.get("risks"), [])
+
+    def test_free_game_uses_price_aware_recommendation_values(self):
+        metadata = {
+            "appid": 578080,
+            "name": "PUBG: BATTLEGROUNDS",
+            "genres": ["Action"],
+            "price_model": "free_to_play",
+            "is_free": True,
+            "release_stage": "released",
+        }
+        analysis = {
+            "issue_signals": {
+                "performance": {
+                    "mention_count": 18,
+                    "negative_ratio": 0.56,
+                    "recent_trend": "flat",
+                    "themes": ["프레임 드랍"],
+                    "sample_reviews": ["교전 중 프레임이 불안정합니다."],
+                },
+                "gameplay": {
+                    "mention_count": 22,
+                    "negative_ratio": 0.30,
+                    "recent_trend": "flat",
+                    "themes": ["전투 손맛"],
+                    "sample_reviews": ["총기 손맛이 좋아 반복 플레이하게 됩니다."],
+                },
+            }
+        }
+        processed = [
+            {
+                "review_id": "f1",
+                "review_text": "총기 손맛이 좋아 계속 하게 됩니다.",
+                "included_in_analysis": True,
+                "category_tags": ["gameplay"],
+                "voted_up": True,
+            },
+            {
+                "review_id": "f2",
+                "review_text": "교전 중 프레임이 떨어질 때가 있어서 답답합니다.",
+                "included_in_analysis": True,
+                "category_tags": ["performance"],
+                "voted_up": False,
+            },
+        ]
+
+        report = build_consumer_report_from_snapshot(
+            appid=578080,
+            metadata=metadata,
+            analysis=analysis,
+            processed_reviews=processed,
+            pipeline_run_id="free-run",
+            source_review_count=2,
+        )
+
+        recommendation = report.get("report_display", {}).get("buy_recommendation")
+        self.assertIn(
+            recommendation,
+            {"free_play_recommended", "play_now", "try_lightly", "wait", "not_recommended"},
+        )
+        self.assertNotIn(recommendation, {"buy_now", "buy_on_sale"})
+        headline = report.get("report_display", {}).get("headline", "")
+        self.assertNotIn("할인 구매", headline)
 
 
 if __name__ == "__main__":

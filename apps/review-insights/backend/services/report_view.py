@@ -9,19 +9,8 @@ from typing import Any
 
 from models.schemas import AnalysisResult, GameMetadata, ProcessedReview, RawReview
 from services.evidence_snippet_llm import OpenAIEvidenceSnippetCompressor
-from services.report_writer_llm import OpenAIReportWriter
-
-REQUIRED_REPORT_KEYS = {
-    "headline",
-    "buy_recommendation",
-    "buy_timing_summary",
-    "good_for",
-    "not_good_for",
-    "top_strengths",
-    "top_risks",
-    "recent_state",
-    "evidence_reviews",
-}
+from services.korean_report_proofreader import KoreanReportProofreader
+from services.report_writer_llm import OpenAIReportWriter, validate_structured_report_payload
 
 CATEGORY_DISPLAY = {
     "balance": "밸런스",
@@ -36,33 +25,13 @@ CATEGORY_DISPLAY = {
     "localization": "번역/로컬라이징",
     "graphics": "그래픽/비주얼",
     "sound": "사운드",
+    "monetization": "과금/가격",
     "gameplay": "전투/핵심 플레이",
     "story": "스토리/몰입",
     "customization": "커스터마이징",
     "building_ux": "건축/배치 UX",
     "save_progression": "저장/진행 안정성",
     "mod_support": "모드 지원/호환성",
-}
-
-GOOD_FOR_PHRASES = {
-    "gameplay": "전투와 조작 손맛을 중시하는 플레이어",
-    "story": "서사와 연출 몰입감을 중요하게 보는 플레이어",
-    "graphics": "비주얼 완성도를 구매 기준으로 보는 플레이어",
-    "customization": "캐릭터/빌드 커스터마이징을 즐기는 플레이어",
-    "content_depth": "장시간 성장 루프를 선호하는 플레이어",
-    "difficulty": "숙련형 플레이를 선호하는 플레이어",
-}
-
-NOT_GOOD_FOR_PHRASES = {
-    "performance": "프레임 저하나 끊김에 민감한 플레이어",
-    "bugs": "버그/충돌 허용 범위가 낮은 플레이어",
-    "difficulty": "초반 진입장벽이 낮은 게임을 원하는 플레이어",
-    "difficulty_onboarding": "튜토리얼 완성도를 중요하게 보는 플레이어",
-    "save_progression": "진행 데이터 안정성을 최우선으로 보는 플레이어",
-    "mod_support": "모드 활용이 필수인 플레이어",
-    "matchmaking": "멀티 매칭 안정성을 최우선으로 보는 플레이어",
-    "multiplayer": "팀플레이 품질에 민감한 플레이어",
-    "balance": "메타/밸런스 변동에 스트레스를 크게 받는 플레이어",
 }
 
 NEGATIVE_THEME_HINTS = {
@@ -101,19 +70,81 @@ POSITIVE_THEME_HINTS = {
     "손맛",
 }
 
+EVIDENCE_POSITIVE_HINTS = {
+    "재밌",
+    "재미",
+    "좋",
+    "만족",
+    "몰입",
+    "훌륭",
+    "손맛",
+    "추천",
+}
+
+EVIDENCE_NEGATIVE_HINTS = {
+    "불편",
+    "문제",
+    "버그",
+    "오류",
+    "렉",
+    "프레임",
+    "끊김",
+    "튕김",
+    "지루",
+    "답답",
+    "하락",
+    "스트레스",
+}
+
+ASPECT_EVIDENCE_HINTS = {
+    "gameplay": ("전투", "타격", "손맛", "보스", "무기", "빌드", "스킬", "탐험"),
+    "performance": ("프레임", "렉", "끊김", "최적화", "버벅", "튕김"),
+    "bugs": ("버그", "오류", "에러", "멈춤", "충돌"),
+    "monetization": ("가격", "과금", "현질", "유료", "결제", "확장팩"),
+    "story": ("스토리", "서사", "몰입", "캐릭터", "연출"),
+    "difficulty": ("난이도", "어려", "초보", "튜토리얼", "입문"),
+    "difficulty_onboarding": ("튜토리얼", "설명", "가이드", "입문", "초반"),
+    "graphics": ("그래픽", "비주얼", "연출", "아트", "풍경"),
+    "sound": ("사운드", "음악", "bgm", "효과음", "음향"),
+    "controls": ("조작", "ui", "키설정", "인터페이스", "입력"),
+    "content_depth": ("볼륨", "콘텐츠", "반복", "파밍", "엔드게임"),
+    "customization": ("커스터마이징", "외형", "빌드", "의상", "꾸미"),
+    "save_progression": ("저장", "세이브", "진행", "롤백", "손실"),
+    "matchmaking": ("매칭", "큐", "서버", "대기시간", "핑"),
+    "multiplayer": ("멀티", "협동", "팀플", "파티", "네트워크"),
+    "balance": ("밸런스", "메타", "너프", "버프", "불공정"),
+    "localization": ("번역", "로컬", "자막", "텍스트", "오역"),
+}
+
+GOOD_FOR_SCENARIOS = {
+    "gameplay": "긴 보스전에서 패턴을 익히고 반복 트라이를 즐기는 플레이어",
+    "story": "전투 속도보다 서사와 분위기 몰입을 우선하는 플레이어",
+    "graphics": "시각 연출과 월드 분위기를 천천히 감상하며 플레이하는 플레이어",
+    "customization": "캐릭터 외형과 빌드를 오래 만지며 플레이하는 플레이어",
+    "content_depth": "하루에 오래 붙잡고 성장 루프를 깊게 파는 플레이어",
+    "difficulty": "난관을 반복 시도하며 실력을 올리는 과정 자체를 즐기는 플레이어",
+}
+
+NOT_GOOD_FOR_SCENARIOS = {
+    "performance": "짧은 플레이 시간에도 프레임 안정성이 꼭 필요한 환경에서 즐기려는 플레이어",
+    "bugs": "진행 중 오류나 예기치 않은 끊김을 거의 허용하지 않는 플레이어",
+    "difficulty": "초반부터 편하게 진행되는 난이도를 기대하는 플레이어",
+    "difficulty_onboarding": "튜토리얼 안내가 충분해야 시작할 수 있는 플레이어",
+    "save_progression": "플레이 기록 보존을 최우선으로 보는 플레이어",
+    "matchmaking": "멀티 매칭 품질이 낮으면 즉시 이탈하는 플레이어",
+    "multiplayer": "팀플레이 품질과 소통 스트레스를 크게 받는 플레이어",
+    "balance": "메타 변동에 민감해 작은 밸런스 변화도 피로하게 느끼는 플레이어",
+    "monetization": "가격 대비 체감 만족을 매우 엄격하게 따지는 플레이어",
+}
+
+PAID_RECOMMENDATIONS = {"buy_now", "buy_on_sale", "wait", "not_recommended"}
+FREE_RECOMMENDATIONS = {"free_play_recommended", "play_now", "try_lightly", "wait", "not_recommended"}
+ALL_RECOMMENDATIONS = PAID_RECOMMENDATIONS | FREE_RECOMMENDATIONS
+
 
 def is_consumer_report_payload(payload: Any) -> bool:
-    """Return True when payload already matches consumer report shape."""
-    if not isinstance(payload, dict):
-        return False
-    if not REQUIRED_REPORT_KEYS.issubset(set(payload.keys())):
-        return False
-    if not _is_evidence_block_list(payload.get("evidence_reviews")):
-        return False
-    evidence_sections = payload.get("evidence_sections")
-    if evidence_sections is None:
-        return True
-    return _is_evidence_sections_map(evidence_sections)
+    """Return True when payload matches the multi-stage report contract."""
+    return validate_structured_report_payload(payload)
 
 
 def build_report_ready_data(
@@ -139,19 +170,14 @@ def build_report_ready_data(
         included_count=included_count,
     )
 
-    report_payload = _build_report_deterministic(consensus_payload)
-    if _should_use_llm_report_writer():
-        writer = OpenAIReportWriter()
-        llm_report = writer.generate_report(consensus_payload)
-        if is_consumer_report_payload(llm_report):
-            report_payload = llm_report
+    structured_report = _build_structured_report_bundle(
+        consensus_payload=consensus_payload,
+        enable_llm_sections=True,
+        enable_llm_evidence_compression=True,
+    )
 
-    # Offline stage only: compress all evidence snippets with LLM (fallback to rules).
-    report_payload = _compress_evidence_reviews(report_payload, use_llm=True)
-    report_payload = _attach_evidence_sections(report_payload)
-
-    return {
-        "report_version": "v3-insight-evidence",
+    payload = {
+        "report_version": "v4-planned-sections",
         "appid": appid,
         "pipeline_run_id": pipeline_run_id,
         "generated_at": datetime.now(timezone.utc).isoformat(),
@@ -160,11 +186,14 @@ def build_report_ready_data(
         "game": {
             "name": metadata_payload.get("name"),
             "genres": list(metadata_payload.get("genres", []) or []),
+            "price_model": metadata_payload.get("price_model"),
+            "is_free": metadata_payload.get("is_free"),
             "release_stage": metadata_payload.get("release_stage"),
         },
-        **report_payload,
+        **structured_report,
         "disclaimer": "이 리포트는 반복적으로 관찰된 고합의 리뷰 신호를 구매 판단 관점으로 재해석한 결과입니다.",
     }
+    return _attach_legacy_flat_fields(payload)
 
 
 def build_consumer_report_from_snapshot(
@@ -189,14 +218,14 @@ def build_consumer_report_from_snapshot(
         processed_reviews=processed_payload,
         included_count=included_count,
     )
-    report_payload = _build_report_deterministic(consensus_payload)
+    structured_report = _build_structured_report_bundle(
+        consensus_payload=consensus_payload,
+        enable_llm_sections=False,
+        enable_llm_evidence_compression=False,
+    )
 
-    # Read-only path: keep deterministic compression only (no online LLM call).
-    report_payload = _compress_evidence_reviews(report_payload, use_llm=False)
-    report_payload = _attach_evidence_sections(report_payload)
-
-    return {
-        "report_version": "v3-insight-evidence",
+    payload = {
+        "report_version": "v4-planned-sections",
         "appid": appid,
         "pipeline_run_id": pipeline_run_id,
         "generated_at": datetime.now(timezone.utc).isoformat(),
@@ -205,11 +234,14 @@ def build_consumer_report_from_snapshot(
         "game": {
             "name": metadata_payload.get("name"),
             "genres": list(metadata_payload.get("genres", []) or []),
+            "price_model": metadata_payload.get("price_model"),
+            "is_free": metadata_payload.get("is_free"),
             "release_stage": metadata_payload.get("release_stage"),
         },
-        **report_payload,
+        **structured_report,
         "disclaimer": "이 리포트는 반복적으로 관찰된 고합의 리뷰 신호를 구매 판단 관점으로 재해석한 결과입니다.",
     }
+    return _attach_legacy_flat_fields(payload)
 
 
 def _should_use_llm_report_writer() -> bool:
@@ -223,6 +255,442 @@ def _should_use_llm_evidence_compression() -> bool:
         "yes",
         "on",
     }
+
+
+def _build_structured_report_bundle(
+    *,
+    consensus_payload: dict[str, Any],
+    enable_llm_sections: bool,
+    enable_llm_evidence_compression: bool,
+) -> dict[str, Any]:
+    """Run multi-stage report generation:
+    1) report_plan
+    2) section-wise report_display
+    3) evidence grouping + snippet compression
+    """
+    seed_display = _build_report_deterministic(consensus_payload)
+    seed_plan = _build_report_plan_deterministic(consensus_payload, seed_display)
+    seed_evidence_sections = _build_evidence_sections_from_blocks(
+        list(seed_display.get("evidence_reviews", []) or [])
+    )
+
+    report_plan = seed_plan
+    report_display = {k: v for k, v in seed_display.items() if k != "evidence_reviews"}
+    writer = OpenAIReportWriter()
+
+    if enable_llm_sections and _should_use_llm_report_writer() and writer.available:
+        llm_plan = writer.generate_report_plan(
+            consensus_payload=consensus_payload,
+            seed_plan=seed_plan,
+        )
+        if isinstance(llm_plan, dict):
+            report_plan = llm_plan
+
+        llm_display = writer.generate_report_display(
+            consensus_payload=consensus_payload,
+            report_plan=report_plan,
+            seed_display=report_display,
+        )
+        if isinstance(llm_display, dict):
+            report_display = llm_display
+
+    evidence_sections = _compress_evidence_sections(
+        seed_evidence_sections,
+        use_llm=enable_llm_evidence_compression,
+    )
+    evidence_sections = _truncate_evidence_sections_by_plan(evidence_sections, report_plan)
+
+    payload = {
+        "report_plan": report_plan,
+        "report_display": report_display,
+        "evidence_sections": evidence_sections,
+    }
+    if validate_structured_report_payload(payload):
+        finalized = _apply_price_aware_recommendation_to_payload(
+            payload=payload,
+            consensus_payload=consensus_payload,
+        )
+        finalized = _apply_final_language_polish(
+            payload=finalized,
+            allow_llm=bool(enable_llm_sections),
+            is_free_game=_is_free_game(consensus_payload),
+        )
+        if validate_structured_report_payload(finalized):
+            return finalized
+
+    # Hard fallback to deterministic multi-stage result.
+    fallback = {
+        "report_plan": seed_plan,
+        "report_display": {k: v for k, v in seed_display.items() if k != "evidence_reviews"},
+        "evidence_sections": _truncate_evidence_sections_by_plan(
+            _compress_evidence_sections(seed_evidence_sections, use_llm=False),
+            seed_plan,
+        ),
+    }
+    fallback = _apply_price_aware_recommendation_to_payload(
+        payload=fallback,
+        consensus_payload=consensus_payload,
+    )
+    fallback = _apply_final_language_polish(
+        payload=fallback,
+        allow_llm=False,
+        is_free_game=_is_free_game(consensus_payload),
+    )
+    return fallback
+
+
+def _build_report_plan_deterministic(
+    consensus_payload: dict[str, Any],
+    seed_display: dict[str, Any],
+) -> dict[str, Any]:
+    aspects = list(consensus_payload.get("consensus_aspects", []) or [])
+    strengths = [item for item in aspects if _block_stance(item) == "positive"][:3]
+    risks = [item for item in aspects if _block_stance(item) == "negative"][:3]
+    recommendation = str(seed_display.get("buy_recommendation", "buy_on_sale"))
+
+    strength_reasons = [
+        {
+            "reason_id": f"str_{index + 1}",
+            "aspect": str(item.get("aspect", "")),
+            "theme": _pick_block_theme(item, "positive")
+            or str(item.get("aspect_label", "핵심 강점")),
+        }
+        for index, item in enumerate(strengths)
+    ]
+    risk_reasons = [
+        {
+            "reason_id": f"risk_{index + 1}",
+            "aspect": str(item.get("aspect", "")),
+            "theme": _pick_block_theme(item, "negative")
+            or str(item.get("aspect_label", "핵심 리스크")),
+        }
+        for index, item in enumerate(risks)
+    ]
+    primary_reason_ids = [item["reason_id"] for item in (risk_reasons + strength_reasons)[:2]]
+
+    return {
+        "decision_anchor": {
+            "buy_recommendation": recommendation,
+            "primary_reason_ids": primary_reason_ids,
+            "rationale_short": str(seed_display.get("buy_timing_summary", "")),
+        },
+        "section_blueprint": {
+            "strength_block_count": 3,
+            "risk_block_count": 3,
+            "evidence_per_block": 3,
+        },
+        "theme_priorities": {
+            "strengths": strength_reasons,
+            "risks": risk_reasons,
+        },
+    }
+
+
+def _is_llm_report_proofread_enabled() -> bool:
+    return os.getenv("USE_LLM_REPORT_PROOFREAD", "true").strip().lower() in {"1", "true", "yes", "on"}
+
+
+def _is_free_game(consensus_payload: dict[str, Any]) -> bool:
+    game_context = consensus_payload.get("game_context", {}) if isinstance(consensus_payload, dict) else {}
+    if bool(game_context.get("is_free")):
+        return True
+    return str(game_context.get("price_model", "")) == "free_to_play"
+
+
+def _to_price_aware_recommendation(value: str, *, is_free_game: bool) -> str:
+    recommendation = str(value or "").strip()
+    if not recommendation:
+        recommendation = "buy_on_sale"
+    if recommendation not in ALL_RECOMMENDATIONS:
+        recommendation = "buy_on_sale"
+
+    if not is_free_game:
+        if recommendation in FREE_RECOMMENDATIONS - {"wait", "not_recommended"}:
+            return "buy_now"
+        return recommendation if recommendation in PAID_RECOMMENDATIONS else "buy_on_sale"
+
+    free_mapping = {
+        "buy_now": "free_play_recommended",
+        "buy_on_sale": "try_lightly",
+        "free_play_recommended": "free_play_recommended",
+        "play_now": "play_now",
+        "try_lightly": "try_lightly",
+        "wait": "wait",
+        "not_recommended": "not_recommended",
+    }
+    return free_mapping.get(recommendation, "try_lightly")
+
+
+def _apply_price_aware_recommendation_to_payload(
+    *,
+    payload: dict[str, Any],
+    consensus_payload: dict[str, Any],
+) -> dict[str, Any]:
+    is_free_game = _is_free_game(consensus_payload)
+    report_plan = dict(payload.get("report_plan", {}) or {})
+    report_display = dict(payload.get("report_display", {}) or {})
+
+    decision_anchor = dict(report_plan.get("decision_anchor", {}) or {})
+    plan_rec = _to_price_aware_recommendation(
+        str(decision_anchor.get("buy_recommendation", report_display.get("buy_recommendation", "buy_on_sale"))),
+        is_free_game=is_free_game,
+    )
+    decision_anchor["buy_recommendation"] = plan_rec
+    report_plan["decision_anchor"] = decision_anchor
+
+    display_rec = _to_price_aware_recommendation(
+        str(report_display.get("buy_recommendation", plan_rec)),
+        is_free_game=is_free_game,
+    )
+    report_display["buy_recommendation"] = display_rec
+
+    if is_free_game:
+        report_display["headline"] = _rewrite_free_game_text(str(report_display.get("headline", "")))
+        report_display["buy_timing_summary"] = _rewrite_free_game_text(
+            str(report_display.get("buy_timing_summary", ""))
+        )
+
+    merged = dict(payload)
+    merged["report_plan"] = report_plan
+    merged["report_display"] = report_display
+    return merged
+
+
+def _rewrite_free_game_text(text: str) -> str:
+    normalized = " ".join((text or "").split()).strip()
+    if not normalized:
+        return normalized
+
+    replacements = (
+        ("할인 구매", "무료 플레이"),
+        ("할인 시점", "시작 시점"),
+        ("할인", "무료"),
+        ("지금 구매", "지금 플레이"),
+        ("구매", "플레이"),
+        ("사는 것이", "시작하는 것이"),
+        ("사도", "플레이해도"),
+        ("사는 편이", "시작하는 편이"),
+    )
+    result = normalized
+    for before, after in replacements:
+        result = result.replace(before, after)
+    return result
+
+
+def _apply_final_language_polish(
+    *,
+    payload: dict[str, Any],
+    allow_llm: bool,
+    is_free_game: bool,
+) -> dict[str, Any]:
+    report_plan = dict(payload.get("report_plan", {}) or {})
+    report_display = dict(payload.get("report_display", {}) or {})
+    evidence_sections = payload.get("evidence_sections", {}) or {}
+
+    proofreader = KoreanReportProofreader()
+    llm_enabled = bool(allow_llm and _is_llm_report_proofread_enabled() and proofreader.available)
+
+    def _fix(text: str) -> str:
+        source = _rewrite_free_game_text(text) if is_free_game else str(text or "")
+        return proofreader.proofread_text(source, allow_llm=llm_enabled)
+
+    decision_anchor = dict(report_plan.get("decision_anchor", {}) or {})
+    if isinstance(decision_anchor.get("rationale_short"), str):
+        decision_anchor["rationale_short"] = _fix(str(decision_anchor.get("rationale_short", "")))
+    report_plan["decision_anchor"] = decision_anchor
+
+    if isinstance(report_display.get("headline"), str):
+        report_display["headline"] = _fix(str(report_display.get("headline", "")))
+    if isinstance(report_display.get("buy_timing_summary"), str):
+        report_display["buy_timing_summary"] = _fix(str(report_display.get("buy_timing_summary", "")))
+
+    good_for = []
+    for item in list(report_display.get("good_for", []) or []):
+        good_for.append(_fix(str(item)))
+    report_display["good_for"] = good_for
+
+    not_good_for = []
+    for item in list(report_display.get("not_good_for", []) or []):
+        not_good_for.append(_fix(str(item)))
+    report_display["not_good_for"] = not_good_for
+
+    top_strengths = []
+    for item in list(report_display.get("top_strengths", []) or []):
+        if not isinstance(item, dict):
+            continue
+        next_item = dict(item)
+        if isinstance(next_item.get("title"), str):
+            next_item["title"] = _fix(str(next_item.get("title", "")))
+        if isinstance(next_item.get("summary"), str):
+            next_item["summary"] = _fix(str(next_item.get("summary", "")))
+        top_strengths.append(next_item)
+    report_display["top_strengths"] = top_strengths
+
+    top_risks = []
+    for item in list(report_display.get("top_risks", []) or []):
+        if not isinstance(item, dict):
+            continue
+        next_item = dict(item)
+        if isinstance(next_item.get("title"), str):
+            next_item["title"] = _fix(str(next_item.get("title", "")))
+        if isinstance(next_item.get("summary"), str):
+            next_item["summary"] = _fix(str(next_item.get("summary", "")))
+        top_risks.append(next_item)
+    report_display["top_risks"] = top_risks
+
+    recent_state = dict(report_display.get("recent_state", {}) or {})
+    if isinstance(recent_state.get("summary"), str):
+        recent_state["summary"] = _fix(str(recent_state.get("summary", "")))
+    report_display["recent_state"] = recent_state
+
+    def _fix_blocks(blocks: list[dict[str, Any]]) -> list[dict[str, Any]]:
+        fixed: list[dict[str, Any]] = []
+        for block in blocks:
+            if not isinstance(block, dict):
+                continue
+            next_block = dict(block)
+            if isinstance(next_block.get("title"), str):
+                next_block["title"] = _fix(str(next_block.get("title", "")))
+            if isinstance(next_block.get("why_it_matters"), str):
+                next_block["why_it_matters"] = _fix(str(next_block.get("why_it_matters", "")))
+            if isinstance(next_block.get("explanation"), str):
+                next_block["explanation"] = _fix(str(next_block.get("explanation", "")))
+            snippets: list[str] = []
+            for snippet in list(next_block.get("evidence_snippets", []) or []):
+                snippets.append(_fix(str(snippet)))
+            next_block["evidence_snippets"] = snippets
+            fixed.append(next_block)
+        return fixed
+
+    next_sections = {
+        "strengths": _fix_blocks(list(evidence_sections.get("strengths", []) or [])),
+        "risks": _fix_blocks(list(evidence_sections.get("risks", []) or [])),
+    }
+
+    merged = dict(payload)
+    merged["report_plan"] = report_plan
+    merged["report_display"] = report_display
+    merged["evidence_sections"] = next_sections
+    return merged
+
+
+def _build_evidence_sections_from_blocks(blocks: list[dict[str, Any]]) -> dict[str, list[dict[str, Any]]]:
+    strengths: list[dict[str, Any]] = []
+    risks: list[dict[str, Any]] = []
+    strength_index = 1
+    risk_index = 1
+
+    for block in blocks:
+        if not isinstance(block, dict):
+            continue
+        stance = str(block.get("stance", ""))
+        snippets = [str(item) for item in list(block.get("evidence_snippets", []) or []) if str(item)]
+        if len(snippets) < 2:
+            continue
+        if stance == "positive":
+            strengths.append(
+                {
+                    "block_id": f"str_{strength_index}",
+                    "title": str(block.get("title", "")),
+                    "theme": str(block.get("theme", "")),
+                    "why_it_matters": str(block.get("why_it_matters") or block.get("explanation", "")),
+                    "explanation": str(block.get("explanation", "")),
+                    "aspect_keys": list(block.get("aspect_keys", []) or []),
+                    "stance": "positive",
+                    "consensus_level": str(block.get("consensus_level", "high")),
+                    "mention_count": int(block.get("mention_count", 0)),
+                    "evidence_snippets": snippets[:3],
+                }
+            )
+            strength_index += 1
+        elif stance == "negative":
+            risks.append(
+                {
+                    "block_id": f"risk_{risk_index}",
+                    "title": str(block.get("title", "")),
+                    "theme": str(block.get("theme", "")),
+                    "why_it_matters": str(block.get("why_it_matters") or block.get("explanation", "")),
+                    "explanation": str(block.get("explanation", "")),
+                    "aspect_keys": list(block.get("aspect_keys", []) or []),
+                    "stance": "negative",
+                    "consensus_level": str(block.get("consensus_level", "high")),
+                    "mention_count": int(block.get("mention_count", 0)),
+                    "evidence_snippets": snippets[:3],
+                }
+            )
+            risk_index += 1
+
+    return {
+        "strengths": strengths[:3],
+        "risks": risks[:3],
+    }
+
+
+def _truncate_evidence_sections_by_plan(
+    evidence_sections: dict[str, list[dict[str, Any]]],
+    report_plan: dict[str, Any],
+) -> dict[str, list[dict[str, Any]]]:
+    blueprint = report_plan.get("section_blueprint", {}) if isinstance(report_plan, dict) else {}
+    strength_count = int(blueprint.get("strength_block_count", 3))
+    risk_count = int(blueprint.get("risk_block_count", 3))
+    evidence_per_block = int(blueprint.get("evidence_per_block", 3))
+    if evidence_per_block < 2:
+        evidence_per_block = 2
+    if evidence_per_block > 3:
+        evidence_per_block = 3
+
+    clipped_strengths = []
+    for block in list(evidence_sections.get("strengths", []) or [])[: max(strength_count, 0)]:
+        next_block = dict(block)
+        next_block["evidence_snippets"] = list(block.get("evidence_snippets", []) or [])[: max(
+            evidence_per_block, 0
+        )]
+        clipped_strengths.append(next_block)
+
+    clipped_risks = []
+    for block in list(evidence_sections.get("risks", []) or [])[: max(risk_count, 0)]:
+        next_block = dict(block)
+        next_block["evidence_snippets"] = list(block.get("evidence_snippets", []) or [])[: max(
+            evidence_per_block, 0
+        )]
+        clipped_risks.append(next_block)
+
+    return {
+        "strengths": clipped_strengths,
+        "risks": clipped_risks,
+    }
+
+
+def _attach_legacy_flat_fields(payload: dict[str, Any]) -> dict[str, Any]:
+    """Keep backward-compatible top-level fields for existing UI routes."""
+    report_display = payload.get("report_display", {}) if isinstance(payload, dict) else {}
+    evidence_sections = payload.get("evidence_sections", {}) if isinstance(payload, dict) else {}
+
+    evidence_reviews: list[dict[str, Any]] = []
+    for block in list(evidence_sections.get("strengths", []) or []):
+        merged = dict(block)
+        merged["stance"] = "positive"
+        evidence_reviews.append(merged)
+    for block in list(evidence_sections.get("risks", []) or []):
+        merged = dict(block)
+        merged["stance"] = "negative"
+        evidence_reviews.append(merged)
+
+    merged_payload = dict(payload)
+    merged_payload.update(
+        {
+            "headline": report_display.get("headline"),
+            "buy_recommendation": report_display.get("buy_recommendation"),
+            "buy_timing_summary": report_display.get("buy_timing_summary"),
+            "good_for": report_display.get("good_for"),
+            "not_good_for": report_display.get("not_good_for"),
+            "top_strengths": report_display.get("top_strengths"),
+            "top_risks": report_display.get("top_risks"),
+            "recent_state": report_display.get("recent_state"),
+            "evidence_reviews": evidence_reviews,
+        }
+    )
+    return merged_payload
 
 
 def _build_consensus_payload(
@@ -274,6 +742,8 @@ def _build_consensus_payload(
             "appid": appid,
             "name": metadata.get("name"),
             "genres": list(metadata.get("genres", []) or []),
+            "price_model": metadata.get("price_model"),
+            "is_free": metadata.get("is_free"),
             "analysis_window": "latest_snapshot",
             "included_review_count": included_count,
         },
@@ -333,13 +803,18 @@ def _collect_grouped_evidence(
         snippet = _prepare_evidence_source_text(str(review.get("review_text", "")), limit=1200)
         if not snippet or snippet in seen:
             continue
+        if _is_noisy_evidence_text(snippet):
+            continue
         seen.add(snippet)
 
         item = {"review_id": str(review.get("review_id", "")), "snippet": snippet}
-        if bool(review.get("voted_up", False)):
+        stance = _classify_snippet_stance(snippet, voted_up=bool(review.get("voted_up", False)))
+        if stance == "positive":
             positive.append(item)
-        else:
+        elif stance == "negative":
             negative.append(item)
+        else:
+            continue
 
         if len(positive) >= 4 and len(negative) >= 4:
             break
@@ -347,7 +822,7 @@ def _collect_grouped_evidence(
     if not positive and not negative:
         for index, snippet in enumerate(fallback_snippets[:3]):
             normalized = _prepare_evidence_source_text(str(snippet), limit=1200)
-            if normalized:
+            if normalized and not _is_noisy_evidence_text(normalized):
                 negative.append(
                     {
                         "review_id": f"fallback-{aspect}-{index + 1}",
@@ -366,21 +841,17 @@ def _build_report_deterministic(consensus_payload: dict[str, Any]) -> dict[str, 
     selected_strengths = _select_strengths(high, medium)
     selected_risks = _select_risks(high, medium)
     recent_state = _derive_recent_state(selected_risks, high, medium)
-    recommendation = _derive_recommendation(selected_risks, recent_state["status"])
+    paid_recommendation = _derive_recommendation(selected_risks, recent_state["status"])
+    recommendation = _to_price_aware_recommendation(
+        paid_recommendation,
+        is_free_game=_is_free_game(consensus_payload),
+    )
     headline = _build_headline(recommendation, selected_strengths, selected_risks)
     buy_timing_summary = _build_timing_summary(recommendation, recent_state, selected_risks)
     evidence_blocks = _build_evidence_blocks(consensus_payload)
 
-    good_for = _build_fit(
-        selected_strengths,
-        GOOD_FOR_PHRASES,
-        fallback="핵심 시스템을 깊게 파고드는 플레이어에게 적합합니다.",
-    )
-    not_good_for = _build_fit(
-        selected_risks,
-        NOT_GOOD_FOR_PHRASES,
-        fallback="기술 안정성과 완성도를 최우선으로 보는 플레이어는 주의가 필요합니다.",
-    )
+    good_for = _build_good_for(selected_strengths)
+    not_good_for = _build_not_good_for(selected_risks)
 
     return {
         "headline": headline,
@@ -440,18 +911,18 @@ def _derive_recent_state(
     medium: list[dict[str, Any]],
 ) -> dict[str, str]:
     if not high and not medium:
-        return {"status": "insufficient_data", "summary": "반복 신호가 충분하지 않아 최근 상태 판단을 보류합니다."}
+        return {"status": "insufficient_data", "summary": "최근 후기만으로는 체감 변화를 단정하기 어려운 상태입니다."}
 
     up = sum(1 for item in selected_risks if item.get("recent_trend") == "up")
     down = sum(1 for item in selected_risks if item.get("recent_trend") == "down")
 
     if selected_risks and up >= down + 1:
-        return {"status": "declining", "summary": "최근 주요 리스크 언급이 증가해 체감 품질이 악화되는 흐름입니다."}
+        return {"status": "declining", "summary": "최근에는 불편을 호소하는 후기가 늘어 체감 만족도가 내려가는 흐름입니다."}
     if selected_risks and down >= up + 1:
-        return {"status": "improving", "summary": "핵심 리스크 언급이 줄며 최근 체감이 개선되는 흐름입니다."}
+        return {"status": "improving", "summary": "불편 요소 체감이 완화됐다는 후기가 늘어 플레이 경험이 나아지는 흐름입니다."}
     if selected_risks:
-        return {"status": "mixed", "summary": "긍정과 리스크 신호가 동시에 관찰되어 최근 평가는 혼재 상태입니다."}
-    return {"status": "stable", "summary": "고합의 신호 기준으로 최근 평가는 대체로 안정적입니다."}
+        return {"status": "mixed", "summary": "만족 포인트와 불편 포인트가 함께 보여 체감 평가가 갈리는 상태입니다."}
+    return {"status": "stable", "summary": "최근 후기 체감은 큰 흔들림 없이 비슷한 수준으로 유지되는 편입니다."}
 
 
 def _derive_recommendation(selected_risks: list[dict[str, Any]], recent_status: str) -> str:
@@ -472,16 +943,20 @@ def _build_headline(
     strengths: list[dict[str, Any]],
     risks: list[dict[str, Any]],
 ) -> str:
-    strength = CATEGORY_DISPLAY.get(strengths[0]["aspect"], strengths[0]["aspect"]) if strengths else "핵심 재미"
-    risk = CATEGORY_DISPLAY.get(risks[0]["aspect"], risks[0]["aspect"]) if risks else "기술 안정성"
+    strength_theme = _experience_theme(strengths[0], positive=True) if strengths else "핵심 플레이 감각"
+    risk_theme = _experience_theme(risks[0], positive=False) if risks else "기술 안정성"
 
+    if recommendation in {"free_play_recommended", "play_now"}:
+        return f"{strength_theme} 체감이 좋아 무료로 지금 시작해보기 좋은 상태입니다."
+    if recommendation == "try_lightly":
+        return f"{strength_theme} 장점이 보여 무료로 가볍게 시작해보고 맞는지 판단하기 좋습니다."
     if recommendation == "buy_now":
-        return f"{strength}에 대한 반복 호평이 뚜렷하고, 현재 구매 리스크는 제한적인 편입니다."
+        return f"{strength_theme} 체감이 좋아 지금 바로 시작해도 만족도가 높은 편입니다."
     if recommendation == "buy_on_sale":
-        return f"{strength} 장점은 분명하지만 {risk} 이슈가 남아 있어 할인 시점 접근이 합리적입니다."
+        return f"{strength_theme} 장점은 분명하지만 {risk_theme}이 거슬릴 수 있어 할인 시점이 더 안전합니다."
     if recommendation == "wait":
-        return f"{strength} 호평은 있으나 {risk} 리스크가 누적되어, 다음 업데이트 추이를 본 뒤 구매가 안전합니다."
-    return f"{risk} 관련 고합의 불만이 강해, 현재 시점 구매는 보수적으로 판단하는 편이 좋습니다."
+        return f"{strength_theme}은 매력적이지만 {risk_theme} 불편이 남아 있어 업데이트를 본 뒤 결정하는 편이 좋습니다."
+    return f"{risk_theme} 불편이 플레이 경험을 크게 흔들 수 있어 현재 시점 구매는 보수적으로 보는 편이 좋습니다."
 
 
 def _build_timing_summary(
@@ -489,34 +964,45 @@ def _build_timing_summary(
     recent_state: dict[str, str],
     risks: list[dict[str, Any]],
 ) -> str:
-    risk_label = CATEGORY_DISPLAY.get(risks[0]["aspect"], risks[0]["aspect"]) if risks else "핵심 리스크"
+    risk_theme = _experience_theme(risks[0], positive=False) if risks else "핵심 리스크"
     status = recent_state.get("status", "mixed")
 
+    if recommendation in {"free_play_recommended", "play_now"}:
+        return "무료 게임 기준으로 보면 지금 바로 플레이를 시작해도 체감 부담이 낮은 편입니다."
+    if recommendation == "try_lightly":
+        return "무료이므로 큰 진입 비용 없이 먼저 짧게 플레이해 취향 적합성을 확인하기 좋습니다."
     if recommendation == "buy_now":
-        return "최근 구간에서 주요 불만 신호가 급증하지 않아 지금 구매해도 체감 리스크가 낮습니다."
+        return "최근 후기 흐름에서 체감 불편이 크게 늘지 않아 지금 시작해도 부담이 낮은 편입니다."
     if recommendation == "buy_on_sale":
-        return f"{risk_label} 이슈가 구조적으로 남아 있어, 가격 메리트를 확보한 시점이 더 유리합니다."
+        return f"{risk_theme} 불편을 감수해야 할 수 있어 가격 메리트가 있는 시점이 더 낫습니다."
     if recommendation == "wait":
         if status == "declining":
-            return f"{risk_label} 불만이 최근 증가세라, 안정화 패치 이후 재확인이 안전합니다."
-        return f"{risk_label} 리스크가 아직 유의미해, 단기 관망 후 구매 판단이 좋습니다."
-    return f"{risk_label} 리스크가 높은 상태라, 지금은 구매보다 추세 확인이 우선입니다."
+            return f"{risk_theme} 관련 불편을 호소하는 후기가 늘어 업데이트 방향을 확인한 뒤 결정하는 편이 안전합니다."
+        return f"{risk_theme} 불편이 여전히 자주 보이는 편이라 한두 번 더 패치 흐름을 보고 사는 것이 좋습니다."
+    return f"{risk_theme} 문제가 플레이 몰입을 크게 깰 수 있어, 당장은 관망이 더 안전합니다."
 
 
-def _build_fit(
-    selected_items: list[dict[str, Any]],
-    phrase_map: dict[str, str],
-    *,
-    fallback: str,
-) -> list[str]:
+def _build_good_for(selected_strengths: list[dict[str, Any]]) -> list[str]:
     result: list[str] = []
-    for item in selected_items:
+    for item in selected_strengths:
         aspect = str(item.get("aspect", ""))
-        phrase = phrase_map.get(aspect)
+        phrase = GOOD_FOR_SCENARIOS.get(aspect)
         if phrase and phrase not in result:
             result.append(phrase)
     if not result:
-        result.append(fallback)
+        result.append("한 번 시작하면 오래 몰입해 플레이할 수 있는 상황의 플레이어")
+    return result
+
+
+def _build_not_good_for(selected_risks: list[dict[str, Any]]) -> list[str]:
+    result: list[str] = []
+    for item in selected_risks:
+        aspect = str(item.get("aspect", ""))
+        phrase = NOT_GOOD_FOR_SCENARIOS.get(aspect)
+        if phrase and phrase not in result:
+            result.append(phrase)
+    if not result:
+        result.append("완성도와 기술 안정성이 조금만 흔들려도 스트레스를 크게 받는 플레이어")
     return result
 
 
@@ -539,34 +1025,66 @@ def _choose_negative_theme(themes: list[str]) -> str | None:
 
 def _to_strength_item(item: dict[str, Any]) -> dict[str, str]:
     label = CATEGORY_DISPLAY.get(item["aspect"], item["aspect"])
-    mention_count = int(item.get("mention_count", 0))
     themes = list(item.get("themes", []) or [])
     selected_theme = _choose_positive_theme(themes)
     if selected_theme:
         return {
-            "title": label,
-            "summary": f"{selected_theme} 신호가 {mention_count}건 이상 반복되며 구매 매력으로 작동합니다.",
+            "title": selected_theme,
+            "summary": _strength_experience_summary(aspect=str(item.get("aspect", "")), theme=selected_theme),
         }
     return {
         "title": label,
-        "summary": f"{label}에 대한 긍정 신호가 반복적으로 관찰됩니다.",
+        "summary": _strength_experience_summary(aspect=str(item.get("aspect", "")), theme=label),
     }
 
 
 def _to_risk_item(item: dict[str, Any]) -> dict[str, str]:
     label = CATEGORY_DISPLAY.get(item["aspect"], item["aspect"])
-    mention_count = int(item.get("mention_count", 0))
     themes = list(item.get("themes", []) or [])
     selected_theme = _choose_negative_theme(themes)
     if selected_theme:
         return {
-            "title": label,
-            "summary": f"{selected_theme} 이슈가 {mention_count}건 이상 반복돼 구매 리스크로 작용합니다.",
+            "title": selected_theme,
+            "summary": _risk_experience_summary(aspect=str(item.get("aspect", "")), theme=selected_theme),
         }
     return {
         "title": label,
-        "summary": f"{label} 관련 불만이 누적되어 주의가 필요합니다.",
+        "summary": _risk_experience_summary(aspect=str(item.get("aspect", "")), theme=label),
     }
+
+
+def _experience_theme(item: dict[str, Any], *, positive: bool) -> str:
+    themes = list(item.get("themes", []) or [])
+    selected = _choose_positive_theme(themes) if positive else _choose_negative_theme(themes)
+    if selected:
+        return selected
+    return CATEGORY_DISPLAY.get(str(item.get("aspect", "")), "핵심 경험")
+
+
+def _strength_experience_summary(*, aspect: str, theme: str) -> str:
+    if aspect == "gameplay":
+        return f"{theme} 체감이 좋아 한 판 더 하게 되는 흐름이 잘 만들어집니다."
+    if aspect == "story":
+        return f"{theme} 덕분에 진행을 멈추기 어려울 만큼 몰입감이 유지됩니다."
+    if aspect == "graphics":
+        return f"{theme}이 플레이 분위기를 끌어올려 감상형 플레이 만족도가 높습니다."
+    if aspect == "customization":
+        return f"{theme} 재미가 커서 캐릭터를 만지는 시간 자체가 즐거운 편입니다."
+    if aspect == "content_depth":
+        return f"{theme} 덕분에 장시간 플레이에서도 목표를 잃지 않기 쉽습니다."
+    return f"{theme}이 실제 플레이 만족도로 이어지는 편입니다."
+
+
+def _risk_experience_summary(*, aspect: str, theme: str) -> str:
+    if aspect == "performance":
+        return f"{theme} 때문에 전투나 이동 흐름이 끊겨 몰입이 쉽게 깨질 수 있습니다."
+    if aspect == "bugs":
+        return f"{theme}이 진행 리듬을 자주 끊어 플레이 피로를 높일 수 있습니다."
+    if aspect in {"difficulty", "difficulty_onboarding"}:
+        return f"{theme} 때문에 초반 적응에서 막히면 이탈 가능성이 커질 수 있습니다."
+    if aspect == "monetization":
+        return f"{theme}이 거슬리면 가격 대비 만족감이 빠르게 떨어질 수 있습니다."
+    return f"{theme}이 플레이 경험의 만족도를 낮출 수 있어 주의가 필요합니다."
 
 
 def _build_evidence_blocks(consensus_payload: dict[str, Any]) -> list[dict[str, Any]]:
@@ -593,22 +1111,34 @@ def _build_evidence_blocks(consensus_payload: dict[str, Any]) -> list[dict[str, 
                 "stance": stance,
                 "theme": theme,
                 "mention_count": 0,
+                "aspects": [],
                 "aspect_labels": [],
                 "snippets": [],
             },
         )
 
         bucket["mention_count"] += int(item.get("mention_count", 0))
+        aspect = str(item.get("aspect", ""))
+        if aspect and aspect not in bucket["aspects"]:
+            bucket["aspects"].append(aspect)
         aspect_label = str(item.get("aspect_label", ""))
         if aspect_label and aspect_label not in bucket["aspect_labels"]:
             bucket["aspect_labels"].append(aspect_label)
 
         evidence_group = item.get("evidence_group", {}) or {}
         stance_snippets = list(evidence_group.get(stance, []) or [])
-        for snippet in stance_snippets[:3]:
+        match_tokens = _build_theme_match_tokens(bucket["theme"], bucket["aspects"])
+        for snippet in stance_snippets:
             text = _prepare_evidence_source_text(str(snippet.get("snippet", "")), limit=1200)
-            if text and text not in bucket["snippets"]:
-                bucket["snippets"].append(text)
+            if not text or text in bucket["snippets"]:
+                continue
+            if not _snippet_matches_stance(text, stance):
+                continue
+            if match_tokens and not _snippet_matches_theme(text, match_tokens):
+                continue
+            bucket["snippets"].append(text)
+            if len(bucket["snippets"]) >= 4:
+                break
 
     blocks: list[dict[str, Any]] = []
     for bucket in sorted(grouped.values(), key=lambda b: (-int(b["mention_count"]), b["theme"])):
@@ -617,17 +1147,19 @@ def _build_evidence_blocks(consensus_payload: dict[str, Any]) -> list[dict[str, 
         if len(bucket["snippets"]) < 2:
             continue
 
-        title = _build_block_title(bucket["theme"], bucket["aspect_labels"])
-        explanation = _build_block_explanation(
+        title = _build_block_title(bucket["theme"], bucket["stance"])
+        why_it_matters = _build_block_why_it_matters(
             stance=bucket["stance"],
             theme=bucket["theme"],
-            mention_count=int(bucket["mention_count"]),
             aspect_labels=bucket["aspect_labels"],
         )
         blocks.append(
             {
                 "title": title,
-                "explanation": explanation,
+                "theme": bucket["theme"],
+                "why_it_matters": why_it_matters,
+                "explanation": why_it_matters,
+                "aspect_keys": list(bucket["aspects"]),
                 "stance": bucket["stance"],
                 "consensus_level": "high",
                 "mention_count": int(bucket["mention_count"]),
@@ -658,39 +1190,93 @@ def _pick_block_theme(item: dict[str, Any], stance: str) -> str | None:
     return _choose_positive_theme(themes)
 
 
-def _build_block_title(theme: str, aspect_labels: list[str]) -> str:
-    base = aspect_labels[0] if aspect_labels else "핵심 의견"
-    return f"[{base}] {theme}"
+def _build_block_title(theme: str, stance: str) -> str:
+    if stance == "positive":
+        return f"{theme}이 실제 플레이 만족으로 이어진다는 반응"
+    return f"{theme} 때문에 플레이 흐름이 끊긴다는 반응"
 
 
-def _build_block_explanation(
+def _build_block_why_it_matters(
     *,
     stance: str,
     theme: str,
-    mention_count: int,
     aspect_labels: list[str],
 ) -> str:
-    aspect_text = ", ".join(aspect_labels[:2]) if aspect_labels else "핵심 경험"
+    aspect_text = ", ".join(aspect_labels[:2]) if aspect_labels else "핵심 플레이"
     if stance == "negative":
-        return (
-            f"{aspect_text} 영역에서 '{theme}' 불만이 반복적으로 관찰됩니다. "
-            f"동일한 문제 제기가 {mention_count}건 이상 누적되어 구매 리스크로 해석됩니다."
-        )
+        return f"{aspect_text}에서 {theme} 불편이 반복되면 초반 만족도가 크게 떨어질 수 있어 구매 전 감수 여부 확인이 필요합니다."
     return (
-        f"{aspect_text} 영역에서 '{theme}' 호평이 반복됩니다. "
-        f"유사한 긍정 신호가 {mention_count}건 이상 확인되어 만족 포인트로 볼 수 있습니다."
+        f"{aspect_text}에서 {theme} 체감이 좋으면 초반부터 몰입이 붙어 장시간 플레이 만족으로 이어질 가능성이 큽니다."
     )
 
 
-def _compress_evidence_reviews(
-    report_payload: dict[str, Any],
+def _theme_tokens(theme: str) -> list[str]:
+    cleaned = re.sub(r"[^0-9A-Za-z가-힣 ]", " ", str(theme)).lower()
+    tokens = [token.strip() for token in cleaned.split() if len(token.strip()) >= 2]
+    return list(dict.fromkeys(tokens))
+
+
+def _aspect_hint_tokens(aspects: list[str]) -> list[str]:
+    tokens: list[str] = []
+    for aspect in aspects:
+        key = str(aspect or "").strip().lower()
+        if not key:
+            continue
+        for token in ASPECT_EVIDENCE_HINTS.get(key, ()):
+            token_text = str(token).strip().lower()
+            if len(token_text) >= 2:
+                tokens.append(token_text)
+    return list(dict.fromkeys(tokens))
+
+
+def _build_theme_match_tokens(theme: str, aspects: list[str]) -> list[str]:
+    merged = _theme_tokens(theme) + _aspect_hint_tokens(aspects)
+    return list(dict.fromkeys(merged))
+
+
+def _snippet_matches_theme(text: str, theme_tokens: list[str]) -> bool:
+    if not theme_tokens:
+        return True
+    normalized = str(text).lower().replace(" ", "")
+    return any(token.replace(" ", "") in normalized for token in theme_tokens)
+
+
+def _snippet_matches_stance(text: str, stance: str) -> bool:
+    normalized = str(text).lower()
+    pos_hits = sum(1 for token in EVIDENCE_POSITIVE_HINTS if token in normalized)
+    neg_hits = sum(1 for token in EVIDENCE_NEGATIVE_HINTS if token in normalized)
+    if stance == "positive":
+        if pos_hits == 0 and neg_hits == 0:
+            return True
+        return pos_hits > neg_hits
+    if stance == "negative":
+        if pos_hits == 0 and neg_hits == 0:
+            return True
+        return neg_hits > pos_hits
+    return True
+
+
+def _classify_snippet_stance(text: str, *, voted_up: bool) -> str:
+    normalized = str(text).lower()
+    pos_hits = sum(1 for token in EVIDENCE_POSITIVE_HINTS if token in normalized)
+    neg_hits = sum(1 for token in EVIDENCE_NEGATIVE_HINTS if token in normalized)
+    if pos_hits >= neg_hits + 1:
+        return "positive"
+    if neg_hits >= pos_hits + 1:
+        return "negative"
+    return "positive" if voted_up else "negative"
+
+
+def _compress_evidence_sections(
+    evidence_sections: dict[str, list[dict[str, Any]]],
     *,
     use_llm: bool,
-) -> dict[str, Any]:
-    """Compress evidence snippets into readable 1~4 sentence snippets."""
-    evidence_blocks = report_payload.get("evidence_reviews")
-    if not isinstance(evidence_blocks, list):
-        return report_payload
+) -> dict[str, list[dict[str, Any]]]:
+    """Compress grouped evidence snippets (stage 3)."""
+    strengths = list(evidence_sections.get("strengths", []) or [])
+    risks = list(evidence_sections.get("risks", []) or [])
+    if not strengths and not risks:
+        return {"strengths": [], "risks": []}
 
     compressor = (
         OpenAIEvidenceSnippetCompressor()
@@ -699,75 +1285,97 @@ def _compress_evidence_reviews(
     )
     llm_enabled = bool(compressor and compressor.available)
 
-    compressed_blocks: list[dict[str, Any]] = []
-    for block in evidence_blocks:
-        if not isinstance(block, dict):
-            continue
-        snippets = block.get("evidence_snippets")
-        if not isinstance(snippets, list):
-            continue
-
-        rewritten: list[str] = []
-        seen: set[str] = set()
-        for raw in snippets:
-            raw_text = str(raw or "").strip()
-            if not raw_text:
+    def _compress_block_list(blocks: list[dict[str, Any]]) -> list[dict[str, Any]]:
+        compressed_blocks: list[dict[str, Any]] = []
+        for block in blocks:
+            if not isinstance(block, dict):
                 continue
-
-            compressed: str | None = None
-            if llm_enabled and compressor is not None:
-                compressed = compressor.compress(
-                    raw_text=raw_text,
-                    stance=str(block.get("stance", "mixed")),
-                    context_title=str(block.get("title", "핵심 의견")),
-                    timeout_seconds=15,
-                    retry_limit=1,
-                )
-            if not compressed:
-                compressed = _fallback_compress_snippet(raw_text)
-
-            normalized = _normalize_compressed_snippet(compressed)
-            if _looks_cutoff(normalized):
-                normalized = _normalize_compressed_snippet(_fallback_compress_snippet(raw_text))
-            if not normalized or _looks_cutoff(normalized):
+            snippets = block.get("evidence_snippets")
+            if not isinstance(snippets, list):
                 continue
+            stance = str(block.get("stance", "mixed"))
+            match_tokens = _build_theme_match_tokens(
+                str(block.get("theme", "")),
+                [str(item) for item in list(block.get("aspect_keys", []) or [])],
+            )
 
-            if normalized not in seen:
-                seen.add(normalized)
-                rewritten.append(normalized)
-            if len(rewritten) >= 3:
-                break
+            rewritten: list[str] = []
+            seen: set[str] = set()
+            for raw in snippets:
+                raw_text = str(raw or "").strip()
+                if not raw_text:
+                    continue
 
-        # Keep only blocks with enough readable evidence.
-        if len(rewritten) < 2:
-            continue
+                compressed: str | None = None
+                if llm_enabled and compressor is not None:
+                    compressed = compressor.compress(
+                        raw_text=raw_text,
+                        stance=str(block.get("stance", "mixed")),
+                        context_title=str(block.get("title", "핵심 의견")),
+                        timeout_seconds=15,
+                        retry_limit=1,
+                    )
+                if not compressed:
+                    compressed = _fallback_compress_snippet(raw_text)
 
-        next_block = dict(block)
-        next_block["evidence_snippets"] = rewritten[:3]
-        compressed_blocks.append(next_block)
+                normalized = _normalize_compressed_snippet(compressed)
+                if _looks_cutoff(normalized):
+                    normalized = _normalize_compressed_snippet(_fallback_compress_snippet(raw_text))
+                if not normalized or _looks_cutoff(normalized):
+                    continue
+                if _is_noisy_evidence_text(normalized):
+                    continue
+                if not _snippet_matches_stance(normalized, stance):
+                    continue
+                if match_tokens and not _snippet_matches_theme(normalized, match_tokens):
+                    continue
 
+                if normalized not in seen:
+                    seen.add(normalized)
+                    rewritten.append(normalized)
+                if len(rewritten) >= 3:
+                    break
+
+            if len(rewritten) < 2:
+                continue
+            next_block = dict(block)
+            next_block["evidence_snippets"] = rewritten[:3]
+            compressed_blocks.append(next_block)
+        return compressed_blocks
+
+    return {
+        "strengths": _compress_block_list(strengths)[:3],
+        "risks": _compress_block_list(risks)[:3],
+    }
+
+
+def _compress_evidence_reviews(
+    report_payload: dict[str, Any],
+    *,
+    use_llm: bool,
+) -> dict[str, Any]:
+    """Backward-compat wrapper for old flat payload shape."""
+    evidence_blocks = report_payload.get("evidence_reviews")
+    if not isinstance(evidence_blocks, list):
+        return report_payload
+    sections = _build_evidence_sections_from_blocks(evidence_blocks)
+    compressed = _compress_evidence_sections(sections, use_llm=use_llm)
+    merged_blocks = list(compressed.get("strengths", [])) + list(compressed.get("risks", []))
     next_payload = dict(report_payload)
-    next_payload["evidence_reviews"] = compressed_blocks
+    next_payload["evidence_reviews"] = merged_blocks
     return next_payload
 
 
 def _attach_evidence_sections(report_payload: dict[str, Any]) -> dict[str, Any]:
-    """Attach strictly separated positive/negative evidence sections."""
+    """Backward-compat helper; maps old flat evidence into new section map."""
     blocks = report_payload.get("evidence_reviews")
     if not isinstance(blocks, list):
         next_payload = dict(report_payload)
-        next_payload["evidence_sections"] = {"loved": [], "complained": []}
+        next_payload["evidence_sections"] = {"strengths": [], "risks": []}
         return next_payload
 
-    loved = [block for block in blocks if isinstance(block, dict) and block.get("stance") == "positive"]
-    complained = [
-        block for block in blocks if isinstance(block, dict) and block.get("stance") == "negative"
-    ]
     next_payload = dict(report_payload)
-    next_payload["evidence_sections"] = {
-        "loved": loved,
-        "complained": complained,
-    }
+    next_payload["evidence_sections"] = _build_evidence_sections_from_blocks(blocks)
     return next_payload
 
 
@@ -782,8 +1390,8 @@ def _fallback_compress_snippet(raw_text: str) -> str:
 
     selected = sentences[:4]
     result = " ".join(selected).strip()
-    if len(result) > 360:
-        result = _prepare_evidence_source_text(result, limit=360)
+    if len(result) > 260:
+        result = _prepare_evidence_source_text(result, limit=260)
     return result
 
 
@@ -839,6 +1447,26 @@ def _looks_cutoff(text: str) -> bool:
     return False
 
 
+def _is_noisy_evidence_text(text: str) -> bool:
+    target = " ".join((text or "").split()).strip()
+    if not target:
+        return True
+    if len(target) < 18:
+        return True
+    compact = target.replace(" ", "")
+    if not compact:
+        return True
+    if re.search(r"(.)\1{6,}", compact):
+        return True
+    jamo_count = len(re.findall(r"[ㄱ-ㅎㅏ-ㅣ]", compact))
+    if jamo_count >= 8:
+        return True
+    readable = len(re.findall(r"[0-9A-Za-z가-힣]", compact))
+    if readable / max(len(compact), 1) < 0.55:
+        return True
+    return False
+
+
 def _is_evidence_block_list(value: Any) -> bool:
     if not isinstance(value, list):
         return False
@@ -846,6 +1474,8 @@ def _is_evidence_block_list(value: Any) -> bool:
         if not isinstance(item, dict):
             return False
         if not isinstance(item.get("title"), str):
+            return False
+        if not isinstance(item.get("why_it_matters"), str):
             return False
         if not isinstance(item.get("explanation"), str):
             return False
@@ -868,14 +1498,14 @@ def _is_evidence_block_list(value: Any) -> bool:
 def _is_evidence_sections_map(value: Any) -> bool:
     if not isinstance(value, dict):
         return False
-    loved = value.get("loved")
-    complained = value.get("complained")
-    if not _is_evidence_block_list(loved):
+    strengths = value.get("strengths")
+    risks = value.get("risks")
+    if not _is_evidence_block_list(strengths):
         return False
-    if not _is_evidence_block_list(complained):
+    if not _is_evidence_block_list(risks):
         return False
-    if any(item.get("stance") != "positive" for item in loved):
+    if any(item.get("stance") != "positive" for item in strengths):
         return False
-    if any(item.get("stance") != "negative" for item in complained):
+    if any(item.get("stance") != "negative" for item in risks):
         return False
     return True

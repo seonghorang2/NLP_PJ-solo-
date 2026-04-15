@@ -13,5 +13,10 @@
     "appid": 1245620,
     "name": "ELDEN RING",
     "enabled_for_demo": true
+  },
+  {
+    "appid": 578080,
+    "name": "PUBG: BATTLEGROUNDS",
+    "enabled_for_demo": true
   }
 ]
