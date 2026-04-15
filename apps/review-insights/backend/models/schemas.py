@@ -19,7 +19,6 @@ class RawReview:
     playtime_forever: float | None = None
     playtime_at_review_hours: float | None = None
     num_reviews: int | None = None
-    helpful_votes: int | None = None
     author_steamid: str | None = None
 
     def to_dict(self) -> dict[str, Any]:
@@ -72,7 +71,6 @@ class ProcessedReview:
     final_decision: str = "unknown"
     category_tags: list[str] = field(default_factory=list)
     canonical_theme: str | None = None
-    helpful_votes: int | None = None
 
     def to_dict(self) -> dict[str, Any]:
         return asdict(self)

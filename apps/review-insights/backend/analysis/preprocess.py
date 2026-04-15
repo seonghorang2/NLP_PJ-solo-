@@ -64,7 +64,6 @@ def preprocess_review(raw_review: RawReview) -> ProcessedReview:
         playtime_forever=raw_review.playtime_forever,
         playtime_at_review_hours=raw_review.playtime_at_review_hours,
         num_reviews=raw_review.num_reviews,
-        helpful_votes=raw_review.helpful_votes,
         author_steamid=raw_review.author_steamid,
         hangul_ratio=hangul_ratio,
         is_low_quality=low_quality,

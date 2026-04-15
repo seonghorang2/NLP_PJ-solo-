@@ -127,24 +127,19 @@ function normalizeEvidenceBlock(block) {
   const whyItMatters = String(block.why_it_matters || block.explanation || "")
     .trim()
     .replace(/\s+/g, " ");
-  const fullTexts = toList(block.evidence_full_text)
-    .map((snippet) => String(snippet || "").trim().replace(/\s+/g, " "))
-    .filter(Boolean)
-    .slice(0, 3);
   const snippets = toList(block.evidence_snippets)
     .map((snippet) => String(snippet || "").trim().replace(/\s+/g, " "))
     .filter(Boolean)
     .slice(0, 3);
-  const renderTexts = fullTexts.length > 0 ? fullTexts : snippets;
 
-  if (!title || !whyItMatters || renderTexts.length < 2) {
+  if (!title || !whyItMatters || snippets.length < 2) {
     return null;
   }
 
   return {
     title,
     whyItMatters,
-    evidence_snippets: renderTexts,
+    evidence_snippets: snippets,
   };
 }
 

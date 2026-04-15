@@ -528,12 +528,4 @@ def _validate_evidence_block(block: Any, *, expected_stance: str) -> bool:
         return False
     if any(not isinstance(snippet, str) for snippet in snippets):
         return False
-    full_texts = block.get("evidence_full_text")
-    if full_texts is not None:
-        if not isinstance(full_texts, list):
-            return False
-        if len(full_texts) != len(snippets):
-            return False
-        if any(not isinstance(item, str) for item in full_texts):
-            return False
     return True

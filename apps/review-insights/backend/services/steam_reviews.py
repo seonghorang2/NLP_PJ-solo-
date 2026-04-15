@@ -33,7 +33,6 @@ def normalize_steam_review(appid: int, payload: dict[str, Any]) -> RawReview:
         playtime_forever=_minutes_to_hours(author.get("playtime_forever")),
         playtime_at_review_hours=_minutes_to_hours(author.get("playtime_at_review")),
         num_reviews=_safe_int(author.get("num_reviews")),
-        helpful_votes=_safe_int(payload.get("votes_up")),
         author_steamid=str(author.get("steamid")) if author.get("steamid") else None,
     )
 

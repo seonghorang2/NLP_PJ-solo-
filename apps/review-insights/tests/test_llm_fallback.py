@@ -43,7 +43,6 @@ def make_processed(
     ambiguity_flags: list[str] | None = None,
     category_tags: list[str] | None = None,
     rule_confidence: float = 0.55,
-    helpful_votes: int | None = None,
 ) -> ProcessedReview:
     return ProcessedReview(
         review_id=review_id,
@@ -56,7 +55,6 @@ def make_processed(
         playtime_forever=10.0,
         playtime_at_review_hours=10.0,
         num_reviews=2,
-        helpful_votes=helpful_votes,
         author_steamid="steamid",
         hangul_ratio=hangul_ratio,
         is_low_quality=is_low_quality,
@@ -224,57 +222,6 @@ class LLMFallbackTests(unittest.TestCase):
         self.assertTrue(updated[0].llm_invoked)
         self.assertFalse(updated[1].llm_invoked)
         self.assertEqual(updated[1].final_decision_source, "rule")
-
-    def test_prioritizes_high_helpful_votes_within_included_reviews(self):
-        reviews = [
-            make_processed(
-                review_id="low-helpful",
-                normalized_text="콘텐츠는 좋은데 최적화가 아쉬워요",
-                ambiguity_flags=["ambiguous_category"],
-                category_tags=[],
-                rule_confidence=0.50,
-                helpful_votes=5,
-                included_in_analysis=True,
-            ),
-            make_processed(
-                review_id="high-helpful",
-                normalized_text="매칭은 빠르지만 프레임 드랍이 체감돼요",
-                ambiguity_flags=["ambiguous_category"],
-                category_tags=[],
-                rule_confidence=0.50,
-                helpful_votes=200,
-                included_in_analysis=True,
-            ),
-            make_processed(
-                review_id="excluded-even-if-helpful",
-                normalized_text="비한글 제외 리뷰",
-                included_in_analysis=False,
-                hangul_ratio=0.10,
-                rule_confidence=0.95,
-                helpful_votes=1000,
-            ),
-        ]
-        classifier = StubClassifier(
-            [
-                LLMClassificationResult(
-                    included_in_analysis=True,
-                    category_tags=["performance"],
-                    canonical_theme="최적화 문제",
-                    confidence=0.90,
-                )
-            ]
-        )
-        updated, stats = apply_selective_llm_fallback(
-            reviews,
-            classifier=classifier,
-            config=LLMFallbackConfig(enabled=True, max_llm_reviews=1),
-        )
-
-        self.assertEqual(stats.invoked, 1)
-        self.assertEqual(classifier.call_count, 1)
-        self.assertFalse(updated[0].llm_invoked)
-        self.assertTrue(updated[1].llm_invoked)
-        self.assertFalse(updated[2].llm_invoked)
 
 
 if __name__ == "__main__":
