@@ -1,0 +1,170 @@
+{
+  "report_version": "v4-planned-sections",
+  "appid": 413150,
+  "pipeline_run_id": "413150-20260415T022929Z",
+  "generated_at": "2026-04-15T02:33:23.447628+00:00",
+  "source_review_count": 19998,
+  "included_review_count": 11931,
+  "game": {
+    "name": "Stardew Valley",
+    "genres": [
+      "인디",
+      "RPG",
+      "시뮬레이션"
+    ],
+    "price_model": "paid",
+    "is_free": false,
+    "release_stage": "released"
+  },
+  "report_plan": {
+    "decision_anchor": {
+      "buy_recommendation": "buy_now",
+      "primary_reason_ids": [
+        "risk_1",
+        "risk_2"
+      ],
+      "rationale_short": "최근 후기 흐름에서 체감 불편이 크게 늘지 않아 지금 시작해도 부담이 낮은 편입니다."
+    },
+    "section_blueprint": {
+      "strength_block_count": 3,
+      "risk_block_count": 3,
+      "evidence_per_block": 3
+    },
+    "theme_priorities": {
+      "strengths": [
+        {
+          "reason_id": "str_1",
+          "aspect": "story",
+          "theme": "스토리 / 서사 몰입"
+        }
+      ],
+      "risks": [
+        {
+          "reason_id": "risk_1",
+          "aspect": "content_depth",
+          "theme": "콘텐츠 부족"
+        },
+        {
+          "reason_id": "risk_2",
+          "aspect": "mod_support",
+          "theme": "모드 지원 / 호환 문제"
+        },
+        {
+          "reason_id": "risk_3",
+          "aspect": "multiplayer",
+          "theme": "매칭 / 서버 문제"
+        }
+      ]
+    }
+  },
+  "report_display": {
+    "headline": "스토리/서사 몰입 체감이 좋아 지금 바로 시작해도 만족도가 높은 편입니다.",
+    "buy_recommendation": "buy_now",
+    "buy_timing_summary": "최근 후기 흐름에서 체감 불편이 크게 늘지 않아 지금 시작해도 부담이 낮은 편입니다.",
+    "good_for": [
+      "전투 속도보다 서사와 분위기 몰입을 우선하는 플레이어"
+    ],
+    "not_good_for": [
+      "팀 플레이 품질과 소통 스트레스를 크게 받는 플레이어"
+    ],
+    "top_strengths": [
+      {
+        "title": "스토리/서사 몰입",
+        "summary": "스토리/서사 몰입 덕분에 진행을 멈추기 어려울 만큼 몰입감이 유지됩니다."
+      }
+    ],
+    "top_risks": [
+      {
+        "title": "콘텐츠 부족",
+        "summary": "콘텐츠 부족이 플레이 경험의 만족도를 낮출 수 있어 주의가 필요합니다."
+      },
+      {
+        "title": "모드 지원/호환 문제",
+        "summary": "모드 지원/호환 문제가 플레이 경험의 만족도를 낮출 수 있어 주의가 필요합니다."
+      },
+      {
+        "title": "매칭/서버 문제",
+        "summary": "매칭/서버 문제가 플레이 경험의 만족도를 낮출 수 있어 주의가 필요합니다."
+      }
+    ],
+    "recent_state": {
+      "status": "improving",
+      "summary": "불편 요소 체감이 완화됐다는 후기가 늘어 플레이 경험이 나아지는 흐름입니다."
+    }
+  },
+  "evidence_sections": {
+    "strengths": [],
+    "risks": [
+      {
+        "block_id": "risk_1",
+        "title": "모드 지원/호환 문제 때문에 플레이 흐름이 끊긴다는 반응",
+        "theme": "모드 지원 / 호환 문제",
+        "why_it_matters": "모드 지원/호환성에서 모드 지원/호환 문제 불편이 반복되면 초반 만족도가 크게 떨어질 수 있어 구매 전 감수 여부 확인이 필요합니다.",
+        "explanation": "모드 지원/호환성에서 모드 지원/호환 문제 불편이 반복되면 초반 만족도가 크게 떨어질 수 있어 구매 전 감수 여부 확인이 필요합니다.",
+        "aspect_keys": [
+          "mod_support"
+        ],
+        "stance": "negative",
+        "consensus_level": "high",
+        "mention_count": 783,
+        "evidence_snippets": [
+          "NPC들이 상자를 지나칠 때 아이템이 사라지는 문제가 발생했습니다. 기본 도구조차 사라져서 불편함을 느꼈습니다. 이 문제를 해결하지 않으면 플레이 흐름이 끊겨서 짜증이 납니다.",
+          "모드 없이 플레이하니 답답함을 느꼈다. 호환 문제로 인해 플레이 흐름이 끊겨서 아쉬웠다."
+        ]
+      }
+    ]
+  },
+  "disclaimer": "이 리포트는 반복적으로 관찰된 고합의 리뷰 신호를 구매 판단 관점으로 재해석한 결과입니다.",
+  "headline": "스토리/서사 몰입 체감이 좋아 지금 바로 시작해도 만족도가 높은 편입니다.",
+  "buy_recommendation": "buy_now",
+  "buy_timing_summary": "최근 후기 흐름에서 체감 불편이 크게 늘지 않아 지금 시작해도 부담이 낮은 편입니다.",
+  "good_for": [
+    "전투 속도보다 서사와 분위기 몰입을 우선하는 플레이어"
+  ],
+  "not_good_for": [
+    "팀 플레이 품질과 소통 스트레스를 크게 받는 플레이어"
+  ],
+  "top_strengths": [
+    {
+      "title": "스토리/서사 몰입",
+      "summary": "스토리/서사 몰입 덕분에 진행을 멈추기 어려울 만큼 몰입감이 유지됩니다."
+    }
+  ],
+  "top_risks": [
+    {
+      "title": "콘텐츠 부족",
+      "summary": "콘텐츠 부족이 플레이 경험의 만족도를 낮출 수 있어 주의가 필요합니다."
+    },
+    {
+      "title": "모드 지원/호환 문제",
+      "summary": "모드 지원/호환 문제가 플레이 경험의 만족도를 낮출 수 있어 주의가 필요합니다."
+    },
+    {
+      "title": "매칭/서버 문제",
+      "summary": "매칭/서버 문제가 플레이 경험의 만족도를 낮출 수 있어 주의가 필요합니다."
+    }
+  ],
+  "recent_state": {
+    "status": "improving",
+    "summary": "불편 요소 체감이 완화됐다는 후기가 늘어 플레이 경험이 나아지는 흐름입니다."
+  },
+  "evidence_reviews": [
+    {
+      "block_id": "risk_1",
+      "title": "모드 지원/호환 문제 때문에 플레이 흐름이 끊긴다는 반응",
+      "theme": "모드 지원 / 호환 문제",
+      "why_it_matters": "모드 지원/호환성에서 모드 지원/호환 문제 불편이 반복되면 초반 만족도가 크게 떨어질 수 있어 구매 전 감수 여부 확인이 필요합니다.",
+      "explanation": "모드 지원/호환성에서 모드 지원/호환 문제 불편이 반복되면 초반 만족도가 크게 떨어질 수 있어 구매 전 감수 여부 확인이 필요합니다.",
+      "aspect_keys": [
+        "mod_support"
+      ],
+      "stance": "negative",
+      "consensus_level": "high",
+      "mention_count": 783,
+      "evidence_snippets": [
+        "NPC들이 상자를 지나칠 때 아이템이 사라지는 문제가 발생했습니다. 기본 도구조차 사라져서 불편함을 느꼈습니다. 이 문제를 해결하지 않으면 플레이 흐름이 끊겨서 짜증이 납니다.",
+        "모드 없이 플레이하니 답답함을 느꼈다. 호환 문제로 인해 플레이 흐름이 끊겨서 아쉬웠다."
+      ]
+    }
+  ]
+}

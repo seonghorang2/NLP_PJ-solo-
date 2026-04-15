@@ -18,5 +18,15 @@
     "appid": 578080,
     "name": "PUBG: BATTLEGROUNDS",
     "enabled_for_demo": true
+  },
+  {
+    "appid": 413150,
+    "name": "Stardew Valley",
+    "enabled_for_demo": true
+  },
+  {
+    "appid": 3551340,
+    "name": "Football Manager 26",
+    "enabled_for_demo": true
   }
 ]

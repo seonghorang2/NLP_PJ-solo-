@@ -1,0 +1,226 @@
+{
+  "report_version": "v4-planned-sections",
+  "appid": 3551340,
+  "pipeline_run_id": "3551340-20260415T023604Z",
+  "generated_at": "2026-04-15T02:38:26.883078+00:00",
+  "source_review_count": 1875,
+  "included_review_count": 1482,
+  "game": {
+    "name": "Football Manager 26",
+    "genres": [
+      "시뮬레이션",
+      "스포츠",
+      "전략"
+    ],
+    "price_model": "paid",
+    "is_free": false,
+    "release_stage": "released"
+  },
+  "report_plan": {
+    "decision_anchor": {
+      "buy_recommendation": "not_recommended",
+      "primary_reason_ids": [
+        "risk_1",
+        "risk_2"
+      ],
+      "rationale_short": "일반 버그 문제가 플레이 몰입을 크게 깨울 수 있어, 당장은 관망이 더 안전합니다."
+    },
+    "section_blueprint": {
+      "strength_block_count": 3,
+      "risk_block_count": 3,
+      "evidence_per_block": 3
+    },
+    "theme_priorities": {
+      "strengths": [],
+      "risks": [
+        {
+          "reason_id": "risk_1",
+          "aspect": "controls",
+          "theme": "UI / 입력 불편"
+        },
+        {
+          "reason_id": "risk_2",
+          "aspect": "bugs",
+          "theme": "일반 버그"
+        },
+        {
+          "reason_id": "risk_3",
+          "aspect": "graphics",
+          "theme": "그래픽 / 비주얼 호평"
+        }
+      ]
+    }
+  },
+  "report_display": {
+    "headline": "일반적인 버그 불편이 플레이 경험을 크게 흔들 수 있어 현재 시점에서 구매는 보수적으로 보는 편이 좋습니다.",
+    "buy_recommendation": "not_recommended",
+    "buy_timing_summary": "일반 버그 문제가 플레이 몰입을 크게 깨울 수 있어, 당장은 관망이 더 안전합니다.",
+    "good_for": [
+      "한 번 시작하면 오래 몰입해 플레이할 수 있는 상황의 플레이어"
+    ],
+    "not_good_for": [
+      "진행 중 오류나 예기치 않은 끊김을 거의 허용하지 않는 플레이어",
+      "짧은 플레이 시간에도 프레임 안정성이 꼭 필요한 환경에서 즐기려는 플레이어들"
+    ],
+    "top_strengths": [],
+    "top_risks": [
+      {
+        "title": "일반 버그",
+        "summary": "일반 버그가 진행 리듬을 자주 끊어 플레이 피로를 높일 수 있습니다."
+      },
+      {
+        "title": "최적화 문제",
+        "summary": "최적화 문제 때문에 전투나 이동 흐름이 끊겨 몰입이 쉽게 깨질 수 있습니다."
+      },
+      {
+        "title": "UI / 입력이 불편",
+        "summary": "UI/입력 불편이 플레이 경험의 만족도를 낮출 수 있어 주의가 필요합니다."
+      }
+    ],
+    "recent_state": {
+      "status": "mixed",
+      "summary": "만족 포인트와 불편 포인트가 함께 보여 체감 평가가 갈리는 상태입니다."
+    }
+  },
+  "evidence_sections": {
+    "strengths": [],
+    "risks": [
+      {
+        "block_id": "risk_1",
+        "title": "UI 입력 불편 때문에 플레이 흐름이 끊긴다는 반응",
+        "theme": "UI / 입력 불편",
+        "why_it_matters": "조작/UI에서 UI 입력 불편이 반복되면 초반 만족도가 크게 떨어질 수 있어 구매 전 감수 여부 확인이 필요합니다.",
+        "explanation": "조작/UI에서 UI 입력 불편이 반복되면 초반 만족도가 크게 떨어질 수 있어 구매 전 감수 여부 확인이 필요합니다.",
+        "aspect_keys": [
+          "controls"
+        ],
+        "stance": "negative",
+        "consensus_level": "high",
+        "mention_count": 620,
+        "evidence_snippets": [
+          "UI가 너무 불편해서 게임을 진행할 수가 없다. 적응이 되면 괜찮겠지만, 그 과정이 너무 힘들다. 예약 구매로 사서 환불도 못하는 상황이 아쉽다.",
+          "21에서 넘어왔는데, 21보다 불편한 점이 많아서 플레이 흐름이 끊겼습니다.",
+          "UI가 너무 불편해서 16시간을 해도 적응이 안 된다. 기존 팬을 무시하고 신규 팬을 겨냥하는 것 같아 실망스럽다."
+        ]
+      },
+      {
+        "block_id": "risk_2",
+        "title": "일반 버그 때문에 플레이 흐름이 끊긴다는 반응이 있다.",
+        "theme": "일반 버그",
+        "why_it_matters": "버그와 안정성에서 일반 버그 불편이 반복되면 초반 만족도가 크게 떨어질 수 있어 구매 전 감수 여부 확인이 필요합니다.",
+        "explanation": "버그와 안정성에서 일반 버그 불편이 반복되면 초반 만족도가 크게 떨어질 수 있어 구매 전 감수 여부 확인이 필요합니다.",
+        "aspect_keys": [
+          "bugs"
+        ],
+        "stance": "negative",
+        "consensus_level": "high",
+        "mention_count": 336,
+        "evidence_snippets": [
+          "선수 부상으로 교체를 하려 했지만, 버그로 인해 교체가 불가능했습니다. 이런 잔버그 때문에 플레이 흐름이 끊겨 매우 불편했습니다. 제발 이런 문제를 해결해 주세요.",
+          "전술을 몇 번 수정하려고 했지만 전체 게임이 멈추는 버그가 너무 짜증났습니다. 전술 수정도 불가능하고 즉시 건너뛰기도 안 되니 이 버그는 정말 고쳐지지 않네요. 2년 동안 이 미완성 게임을 하면서 편의성이 전혀 개선되지 않은 것 같아 실망스럽습니다."
+        ]
+      },
+      {
+        "block_id": "risk_3",
+        "title": "그래픽/비주얼 호평 때문에 플레이 흐름이 끊긴다는 반응",
+        "theme": "그래픽 / 비주얼 호평",
+        "why_it_matters": "그래픽/비주얼에서 그래픽/비주얼 호평 불편이 반복되면 초반 만족도가 크게 떨어질 수 있어 구매 전 감수 여부 확인이 필요합니다.",
+        "explanation": "그래픽/비주얼에서 그래픽/비주얼 호평 불편이 반복되면 초반 만족도가 크게 떨어질 수 있어 구매 전 감수 여부 확인이 필요합니다.",
+        "aspect_keys": [
+          "graphics"
+        ],
+        "stance": "negative",
+        "consensus_level": "high",
+        "mention_count": 120,
+        "evidence_snippets": [
+          "그래픽이 뛰어나지만, 그로 인해 플레이 흐름이 끊기는 문제가 있다. 제작사가 유저를 기만하는 느낌이 강하게 든다. 에펨 시리즈 중 유일하게 100시간 이상 플레이하지 않은 시즌이다.",
+          "게임의 UI가 불편하고 인공지능이 더 멍청해졌습니다. 2025년에 출시된 게임의 그래픽이 이 정도라니 실망스럽습니다. fm24보다 퇴보한 느낌입니다."
+        ]
+      }
+    ]
+  },
+  "disclaimer": "이 리포트는 반복적으로 관찰된 고합의 리뷰 신호를 구매 판단 관점으로 재해석한 결과입니다.",
+  "headline": "일반적인 버그 불편이 플레이 경험을 크게 흔들 수 있어 현재 시점에서 구매는 보수적으로 보는 편이 좋습니다.",
+  "buy_recommendation": "not_recommended",
+  "buy_timing_summary": "일반 버그 문제가 플레이 몰입을 크게 깨울 수 있어, 당장은 관망이 더 안전합니다.",
+  "good_for": [
+    "한 번 시작하면 오래 몰입해 플레이할 수 있는 상황의 플레이어"
+  ],
+  "not_good_for": [
+    "진행 중 오류나 예기치 않은 끊김을 거의 허용하지 않는 플레이어",
+    "짧은 플레이 시간에도 프레임 안정성이 꼭 필요한 환경에서 즐기려는 플레이어들"
+  ],
+  "top_strengths": [],
+  "top_risks": [
+    {
+      "title": "일반 버그",
+      "summary": "일반 버그가 진행 리듬을 자주 끊어 플레이 피로를 높일 수 있습니다."
+    },
+    {
+      "title": "최적화 문제",
+      "summary": "최적화 문제 때문에 전투나 이동 흐름이 끊겨 몰입이 쉽게 깨질 수 있습니다."
+    },
+    {
+      "title": "UI / 입력이 불편",
+      "summary": "UI/입력 불편이 플레이 경험의 만족도를 낮출 수 있어 주의가 필요합니다."
+    }
+  ],
+  "recent_state": {
+    "status": "mixed",
+    "summary": "만족 포인트와 불편 포인트가 함께 보여 체감 평가가 갈리는 상태입니다."
+  },
+  "evidence_reviews": [
+    {
+      "block_id": "risk_1",
+      "title": "UI 입력 불편 때문에 플레이 흐름이 끊긴다는 반응",
+      "theme": "UI / 입력 불편",
+      "why_it_matters": "조작/UI에서 UI 입력 불편이 반복되면 초반 만족도가 크게 떨어질 수 있어 구매 전 감수 여부 확인이 필요합니다.",
+      "explanation": "조작/UI에서 UI 입력 불편이 반복되면 초반 만족도가 크게 떨어질 수 있어 구매 전 감수 여부 확인이 필요합니다.",
+      "aspect_keys": [
+        "controls"
+      ],
+      "stance": "negative",
+      "consensus_level": "high",
+      "mention_count": 620,
+      "evidence_snippets": [
+        "UI가 너무 불편해서 게임을 진행할 수가 없다. 적응이 되면 괜찮겠지만, 그 과정이 너무 힘들다. 예약 구매로 사서 환불도 못하는 상황이 아쉽다.",
+        "21에서 넘어왔는데, 21보다 불편한 점이 많아서 플레이 흐름이 끊겼습니다.",
+        "UI가 너무 불편해서 16시간을 해도 적응이 안 된다. 기존 팬을 무시하고 신규 팬을 겨냥하는 것 같아 실망스럽다."
+      ]
+    },
+    {
+      "block_id": "risk_2",
+      "title": "일반 버그 때문에 플레이 흐름이 끊긴다는 반응이 있다.",
+      "theme": "일반 버그",
+      "why_it_matters": "버그와 안정성에서 일반 버그 불편이 반복되면 초반 만족도가 크게 떨어질 수 있어 구매 전 감수 여부 확인이 필요합니다.",
+      "explanation": "버그와 안정성에서 일반 버그 불편이 반복되면 초반 만족도가 크게 떨어질 수 있어 구매 전 감수 여부 확인이 필요합니다.",
+      "aspect_keys": [
+        "bugs"
+      ],
+      "stance": "negative",
+      "consensus_level": "high",
+      "mention_count": 336,
+      "evidence_snippets": [
+        "선수 부상으로 교체를 하려 했지만, 버그로 인해 교체가 불가능했습니다. 이런 잔버그 때문에 플레이 흐름이 끊겨 매우 불편했습니다. 제발 이런 문제를 해결해 주세요.",
+        "전술을 몇 번 수정하려고 했지만 전체 게임이 멈추는 버그가 너무 짜증났습니다. 전술 수정도 불가능하고 즉시 건너뛰기도 안 되니 이 버그는 정말 고쳐지지 않네요. 2년 동안 이 미완성 게임을 하면서 편의성이 전혀 개선되지 않은 것 같아 실망스럽습니다."
+      ]
+    },
+    {
+      "block_id": "risk_3",
+      "title": "그래픽/비주얼 호평 때문에 플레이 흐름이 끊긴다는 반응",
+      "theme": "그래픽 / 비주얼 호평",
+      "why_it_matters": "그래픽/비주얼에서 그래픽/비주얼 호평 불편이 반복되면 초반 만족도가 크게 떨어질 수 있어 구매 전 감수 여부 확인이 필요합니다.",
+      "explanation": "그래픽/비주얼에서 그래픽/비주얼 호평 불편이 반복되면 초반 만족도가 크게 떨어질 수 있어 구매 전 감수 여부 확인이 필요합니다.",
+      "aspect_keys": [
+        "graphics"
+      ],
+      "stance": "negative",
+      "consensus_level": "high",
+      "mention_count": 120,
+      "evidence_snippets": [
+        "그래픽이 뛰어나지만, 그로 인해 플레이 흐름이 끊기는 문제가 있다. 제작사가 유저를 기만하는 느낌이 강하게 든다. 에펨 시리즈 중 유일하게 100시간 이상 플레이하지 않은 시즌이다.",
+        "게임의 UI가 불편하고 인공지능이 더 멍청해졌습니다. 2025년에 출시된 게임의 그래픽이 이 정도라니 실망스럽습니다. fm24보다 퇴보한 느낌입니다."
+      ]
+    }
+  ]
+}
