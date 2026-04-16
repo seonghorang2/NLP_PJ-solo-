@@ -124,18 +124,18 @@
     "hangul_ratio": 0.9814814814814815,
     "is_low_quality": false,
     "is_profanity_only": false,
-    "ambiguity_flags": [
-      "unclassified_included"
-    ],
+    "ambiguity_flags": [],
     "included_in_analysis": true,
     "rule_decision": "include",
-    "rule_confidence": 0.665,
+    "rule_confidence": 0.865,
     "llm_invoked": false,
     "llm_decision": null,
     "llm_confidence": null,
     "final_decision_source": "rule",
     "final_decision": "include",
-    "category_tags": [],
+    "category_tags": [
+      "monetization"
+    ],
     "canonical_theme": null
   },
   {
@@ -163,6 +163,7 @@
     "final_decision_source": "rule",
     "final_decision": "include",
     "category_tags": [
+      "monetization",
       "controls"
     ],
     "canonical_theme": null
@@ -352,19 +353,19 @@
     "hangul_ratio": 0.8181818181818182,
     "is_low_quality": false,
     "is_profanity_only": false,
-    "ambiguity_flags": [],
+    "ambiguity_flags": [
+      "unclassified_included"
+    ],
     "included_in_analysis": true,
     "rule_decision": "include",
-    "rule_confidence": 0.7912,
+    "rule_confidence": 0.5912,
     "llm_invoked": false,
     "llm_decision": null,
     "llm_confidence": null,
     "final_decision_source": "rule",
     "final_decision": "include",
-    "category_tags": [
-      "controls"
-    ],
-    "canonical_theme": "UI / 입력 불편"
+    "category_tags": [],
+    "canonical_theme": null
   },
   {
     "review_id": "222888498",
@@ -381,18 +382,18 @@
     "hangul_ratio": 0.96875,
     "is_low_quality": false,
     "is_profanity_only": false,
-    "ambiguity_flags": [
-      "unclassified_included"
-    ],
+    "ambiguity_flags": [],
     "included_in_analysis": true,
     "rule_decision": "include",
-    "rule_confidence": 0.6283,
+    "rule_confidence": 0.8283,
     "llm_invoked": false,
     "llm_decision": null,
     "llm_confidence": null,
     "final_decision_source": "rule",
     "final_decision": "include",
-    "category_tags": [],
+    "category_tags": [
+      "monetization"
+    ],
     "canonical_theme": null
   },
   {
@@ -584,18 +585,18 @@
     "hangul_ratio": 0.875,
     "is_low_quality": false,
     "is_profanity_only": false,
-    "ambiguity_flags": [
-      "unclassified_included"
-    ],
+    "ambiguity_flags": [],
     "included_in_analysis": true,
     "rule_decision": "include",
-    "rule_confidence": 0.5954,
+    "rule_confidence": 0.7954,
     "llm_invoked": false,
     "llm_decision": null,
     "llm_confidence": null,
     "final_decision_source": "rule",
     "final_decision": "include",
-    "category_tags": [],
+    "category_tags": [
+      "monetization"
+    ],
     "canonical_theme": null
   },
   {
@@ -683,8 +684,7 @@
     "category_tags": [
       "bugs",
       "gameplay",
-      "controls",
-      "content_depth"
+      "controls"
     ],
     "canonical_theme": "일반 버그"
   },
@@ -763,19 +763,19 @@
     "hangul_ratio": 1.0,
     "is_low_quality": false,
     "is_profanity_only": false,
-    "ambiguity_flags": [],
+    "ambiguity_flags": [
+      "unclassified_included"
+    ],
     "included_in_analysis": true,
     "rule_decision": "include",
-    "rule_confidence": 0.785,
+    "rule_confidence": 0.585,
     "llm_invoked": false,
     "llm_decision": null,
     "llm_confidence": null,
     "final_decision_source": "rule",
     "final_decision": "include",
-    "category_tags": [
-      "controls"
-    ],
-    "canonical_theme": "UI / 입력 불편"
+    "category_tags": [],
+    "canonical_theme": null
   },
   {
     "review_id": "222428073",
@@ -997,18 +997,19 @@
     "hangul_ratio": 1.0,
     "is_low_quality": false,
     "is_profanity_only": false,
-    "ambiguity_flags": [
-      "unclassified_included"
-    ],
+    "ambiguity_flags": [],
     "included_in_analysis": true,
     "rule_decision": "include",
-    "rule_confidence": 0.6367,
+    "rule_confidence": 0.8367,
     "llm_invoked": false,
     "llm_decision": null,
     "llm_confidence": null,
     "final_decision_source": "rule",
     "final_decision": "include",
-    "category_tags": [],
+    "category_tags": [
+      "performance",
+      "content_depth"
+    ],
     "canonical_theme": null
   },
   {
@@ -1037,6 +1038,7 @@
     "final_decision": "include",
     "category_tags": [
       "bugs",
+      "monetization",
       "multiplayer"
     ],
     "canonical_theme": "일반 버그"
@@ -1056,18 +1058,18 @@
     "hangul_ratio": 1.0,
     "is_low_quality": false,
     "is_profanity_only": false,
-    "ambiguity_flags": [
-      "unclassified_included"
-    ],
+    "ambiguity_flags": [],
     "included_in_analysis": true,
     "rule_decision": "include",
-    "rule_confidence": 0.615,
+    "rule_confidence": 0.815,
     "llm_invoked": false,
     "llm_decision": null,
     "llm_confidence": null,
     "final_decision_source": "rule",
     "final_decision": "include",
-    "category_tags": [],
+    "category_tags": [
+      "monetization"
+    ],
     "canonical_theme": null
   },
   {
@@ -1230,18 +1232,18 @@
     "hangul_ratio": 1.0,
     "is_low_quality": false,
     "is_profanity_only": false,
-    "ambiguity_flags": [
-      "unclassified_included"
-    ],
+    "ambiguity_flags": [],
     "included_in_analysis": true,
     "rule_decision": "include",
-    "rule_confidence": 0.5933,
+    "rule_confidence": 0.7933,
     "llm_invoked": false,
     "llm_decision": null,
     "llm_confidence": null,
     "final_decision_source": "rule",
     "final_decision": "include",
-    "category_tags": [],
+    "category_tags": [
+      "content_depth"
+    ],
     "canonical_theme": null
   },
   {
@@ -1706,7 +1708,6 @@
     "final_decision_source": "rule",
     "final_decision": "include",
     "category_tags": [
-      "bugs",
       "controls"
     ],
     "canonical_theme": "UI / 입력 불편"
@@ -1880,7 +1881,8 @@
     "final_decision_source": "rule",
     "final_decision": "include",
     "category_tags": [
-      "bugs"
+      "bugs",
+      "monetization"
     ],
     "canonical_theme": "일반 버그"
   },
@@ -2012,18 +2014,18 @@
     "hangul_ratio": 1.0,
     "is_low_quality": false,
     "is_profanity_only": false,
-    "ambiguity_flags": [
-      "unclassified_included"
-    ],
+    "ambiguity_flags": [],
     "included_in_analysis": true,
     "rule_decision": "include",
-    "rule_confidence": 0.5917,
+    "rule_confidence": 0.7917,
     "llm_invoked": false,
     "llm_decision": null,
     "llm_confidence": null,
     "final_decision_source": "rule",
     "final_decision": "include",
-    "category_tags": [],
+    "category_tags": [
+      "monetization"
+    ],
     "canonical_theme": null
   },
   {
@@ -2128,18 +2130,18 @@
     "hangul_ratio": 0.975,
     "is_low_quality": false,
     "is_profanity_only": false,
-    "ambiguity_flags": [
-      "unclassified_included"
-    ],
+    "ambiguity_flags": [],
     "included_in_analysis": true,
     "rule_decision": "include",
-    "rule_confidence": 0.7083,
+    "rule_confidence": 0.9083,
     "llm_invoked": false,
     "llm_decision": null,
     "llm_confidence": null,
     "final_decision_source": "rule",
     "final_decision": "include",
-    "category_tags": [],
+    "category_tags": [
+      "content_depth"
+    ],
     "canonical_theme": null
   },
   {
@@ -2175,7 +2177,8 @@
       "gameplay",
       "monetization",
       "multiplayer",
-      "controls"
+      "controls",
+      "content_depth"
     ],
     "canonical_theme": "일반 버그"
   },
@@ -2556,11 +2559,9 @@
     "final_decision_source": "rule",
     "final_decision": "include",
     "category_tags": [
-      "multiplayer",
-      "controls",
-      "content_depth"
+      "controls"
     ],
-    "canonical_theme": "매칭 / 서버 문제"
+    "canonical_theme": null
   },
   {
     "review_id": "220195344",
@@ -2805,18 +2806,19 @@
     "hangul_ratio": 0.9597989949748744,
     "is_low_quality": false,
     "is_profanity_only": false,
-    "ambiguity_flags": [
-      "unclassified_included"
-    ],
+    "ambiguity_flags": [],
     "included_in_analysis": true,
     "rule_decision": "include",
-    "rule_confidence": 0.775,
+    "rule_confidence": 0.975,
     "llm_invoked": false,
     "llm_decision": null,
     "llm_confidence": null,
     "final_decision_source": "rule",
     "final_decision": "include",
-    "category_tags": [],
+    "category_tags": [
+      "controls",
+      "save_progression"
+    ],
     "canonical_theme": null
   },
   {
@@ -2871,7 +2873,8 @@
     "final_decision_source": "rule",
     "final_decision": "include",
     "category_tags": [
-      "bugs"
+      "bugs",
+      "performance"
     ],
     "canonical_theme": "일반 버그"
   },
@@ -3386,7 +3389,9 @@
     "final_decision_source": "rule",
     "final_decision": "include",
     "category_tags": [
+      "gameplay",
       "monetization",
+      "multiplayer",
       "difficulty",
       "controls"
     ],
@@ -3446,6 +3451,7 @@
     "final_decision_source": "rule",
     "final_decision": "include",
     "category_tags": [
+      "bugs",
       "controls"
     ],
     "canonical_theme": null
@@ -3475,6 +3481,7 @@
     "final_decision_source": "rule",
     "final_decision": "include",
     "category_tags": [
+      "monetization",
       "controls"
     ],
     "canonical_theme": null
@@ -3652,11 +3659,10 @@
     "final_decision_source": "rule",
     "final_decision": "include",
     "category_tags": [
-      "performance",
       "graphics",
       "controls"
     ],
-    "canonical_theme": "실행 불가 / 튕김"
+    "canonical_theme": "그래픽 / 비주얼 호평"
   },
   {
     "review_id": "219103158",
@@ -3761,20 +3767,19 @@
     "is_low_quality": false,
     "is_profanity_only": false,
     "ambiguity_flags": [
-      "ambiguous_sentiment"
+      "ambiguous_sentiment",
+      "unclassified_included"
     ],
     "included_in_analysis": true,
     "rule_decision": "include",
-    "rule_confidence": 0.8033,
+    "rule_confidence": 0.6033,
     "llm_invoked": false,
     "llm_decision": null,
     "llm_confidence": null,
     "final_decision_source": "rule",
     "final_decision": "include",
-    "category_tags": [
-      "controls"
-    ],
-    "canonical_theme": "UI / 입력 불편"
+    "category_tags": [],
+    "canonical_theme": null
   },
   {
     "review_id": "219029020",
@@ -3886,6 +3891,7 @@
     "final_decision_source": "rule",
     "final_decision": "include",
     "category_tags": [
+      "multiplayer",
       "controls"
     ],
     "canonical_theme": null
@@ -4026,7 +4032,7 @@
     "final_decision": "include",
     "category_tags": [
       "bugs",
-      "controls"
+      "content_depth"
     ],
     "canonical_theme": "일반 버그"
   },
@@ -4244,18 +4250,18 @@
     "hangul_ratio": 0.9139784946236559,
     "is_low_quality": false,
     "is_profanity_only": false,
-    "ambiguity_flags": [
-      "unclassified_included"
-    ],
+    "ambiguity_flags": [],
     "included_in_analysis": true,
     "rule_decision": "include",
-    "rule_confidence": 0.73,
+    "rule_confidence": 0.93,
     "llm_invoked": false,
     "llm_decision": null,
     "llm_confidence": null,
     "final_decision_source": "rule",
     "final_decision": "include",
-    "category_tags": [],
+    "category_tags": [
+      "content_depth"
+    ],
     "canonical_theme": null
   },
   {
@@ -4283,6 +4289,7 @@
     "final_decision_source": "rule",
     "final_decision": "include",
     "category_tags": [
+      "monetization",
       "controls"
     ],
     "canonical_theme": null
@@ -4479,6 +4486,7 @@
     "final_decision": "include",
     "category_tags": [
       "graphics",
+      "difficulty",
       "controls",
       "mod_support"
     ],
@@ -4935,7 +4943,6 @@
     "final_decision_source": "rule",
     "final_decision": "include",
     "category_tags": [
-      "bugs",
       "controls",
       "save_progression"
     ],
@@ -5046,18 +5053,18 @@
     "hangul_ratio": 0.8947368421052632,
     "is_low_quality": false,
     "is_profanity_only": false,
-    "ambiguity_flags": [
-      "unclassified_included"
-    ],
+    "ambiguity_flags": [],
     "included_in_analysis": true,
     "rule_decision": "include",
-    "rule_confidence": 0.6054,
+    "rule_confidence": 0.8054,
     "llm_invoked": false,
     "llm_decision": null,
     "llm_confidence": null,
     "final_decision_source": "rule",
     "final_decision": "include",
-    "category_tags": [],
+    "category_tags": [
+      "monetization"
+    ],
     "canonical_theme": null
   },
   {
@@ -5311,18 +5318,18 @@
     "hangul_ratio": 0.9565217391304348,
     "is_low_quality": false,
     "is_profanity_only": false,
-    "ambiguity_flags": [
-      "unclassified_included"
-    ],
+    "ambiguity_flags": [],
     "included_in_analysis": true,
     "rule_decision": "include",
-    "rule_confidence": 0.6133,
+    "rule_confidence": 0.8133,
     "llm_invoked": false,
     "llm_decision": null,
     "llm_confidence": null,
     "final_decision_source": "rule",
     "final_decision": "include",
-    "category_tags": [],
+    "category_tags": [
+      "content_depth"
+    ],
     "canonical_theme": null
   },
   {
@@ -5351,8 +5358,7 @@
     "final_decision": "include",
     "category_tags": [
       "story",
-      "localization",
-      "controls"
+      "localization"
     ],
     "canonical_theme": "스토리 / 서사 몰입"
   },
@@ -5484,19 +5490,19 @@
     "hangul_ratio": 1.0,
     "is_low_quality": false,
     "is_profanity_only": false,
-    "ambiguity_flags": [],
+    "ambiguity_flags": [
+      "unclassified_included"
+    ],
     "included_in_analysis": true,
     "rule_decision": "include",
-    "rule_confidence": 0.975,
+    "rule_confidence": 0.775,
     "llm_invoked": false,
     "llm_decision": null,
     "llm_confidence": null,
     "final_decision_source": "rule",
     "final_decision": "include",
-    "category_tags": [
-      "content_depth"
-    ],
-    "canonical_theme": "상호작용 / 생동감 부족"
+    "category_tags": [],
+    "canonical_theme": null
   },
   {
     "review_id": "218061395",
@@ -5961,6 +5967,7 @@
     "final_decision": "include",
     "category_tags": [
       "balance",
+      "monetization",
       "controls"
     ],
     "canonical_theme": "밸런스 불만"
@@ -6357,6 +6364,7 @@
     "final_decision_source": "rule",
     "final_decision": "include",
     "category_tags": [
+      "monetization",
       "controls"
     ],
     "canonical_theme": null
@@ -6435,18 +6443,19 @@
     "is_low_quality": false,
     "is_profanity_only": false,
     "ambiguity_flags": [
-      "ambiguous_profanity",
-      "unclassified_included"
+      "ambiguous_profanity"
     ],
     "included_in_analysis": true,
     "rule_decision": "include",
-    "rule_confidence": 0.725,
+    "rule_confidence": 0.925,
     "llm_invoked": false,
     "llm_decision": null,
     "llm_confidence": null,
     "final_decision_source": "rule",
     "final_decision": "include",
-    "category_tags": [],
+    "category_tags": [
+      "monetization"
+    ],
     "canonical_theme": null
   },
   {
@@ -6503,8 +6512,7 @@
     "final_decision_source": "rule",
     "final_decision": "include",
     "category_tags": [
-      "bugs",
-      "controls"
+      "bugs"
     ],
     "canonical_theme": "일반 버그"
   },
@@ -6700,19 +6708,19 @@
     "hangul_ratio": 0.9393939393939394,
     "is_low_quality": false,
     "is_profanity_only": false,
-    "ambiguity_flags": [],
+    "ambiguity_flags": [
+      "unclassified_included"
+    ],
     "included_in_analysis": true,
     "rule_decision": "include",
-    "rule_confidence": 0.83,
+    "rule_confidence": 0.63,
     "llm_invoked": false,
     "llm_decision": null,
     "llm_confidence": null,
     "final_decision_source": "rule",
     "final_decision": "include",
-    "category_tags": [
-      "controls"
-    ],
-    "canonical_theme": "UI / 입력 불편"
+    "category_tags": [],
+    "canonical_theme": null
   },
   {
     "review_id": "216769422",
@@ -7057,8 +7065,7 @@
     "final_decision_source": "rule",
     "final_decision": "include",
     "category_tags": [
-      "bugs",
-      "controls"
+      "bugs"
     ],
     "canonical_theme": "일반 버그"
   },
@@ -7352,7 +7359,7 @@
     "category_tags": [
       "bugs",
       "graphics",
-      "controls"
+      "monetization"
     ],
     "canonical_theme": "일반 버그"
   },
@@ -7704,7 +7711,7 @@
     "review_id": "216061560",
     "appid": 3551340,
     "review_text": "[h1] 게임 개좆같이 쳐만들고 연말연시 다 쳐 쉬고 1월 중순에 업뎃 한다 해놓고 버로우 타고 있는 SI <<< 얘네 뭐 없는 거 같으면 개추 ㅋㅋ [/h1]\n \n \n \n[b] 넘버링 시리즈 하나 건너뛰고 나온 풋볼매니저의 잃어버린 1년은 도대체 어디 갔는가? [/b]",
-    "normalized_text": "[h1] 게임 개좆같이 쳐만들고 연말연시 다 쳐 쉬고 1월 중순에 업데이트 한다 해놓고 버로우 타고 있는 SI <<< 얘네 뭐 없는 거 같으면 개추 ㅋㅋ [/h1] [b] 넘버링 시리즈 하나 건너뛰고 나온 풋볼매니저의 잃어버린 1년은 도대체 어디 갔는가? [/b]",
+    "normalized_text": "게임 개좆같이 쳐만들고 연말연시 다 쳐 쉬고 1월 중순에 업데이트 한다 해놓고 버로우 타고 있는 SI <<< 얘네 뭐 없는 거 같으면 개추 ㅋㅋ 넘버링 시리즈 하나 건너뛰고 나온 풋볼매니저의 잃어버린 1년은 도대체 어디 갔는가?",
     "voted_up": false,
     "timestamp_created": 1768540216,
     "timestamp_updated": 1768540216,
@@ -7712,21 +7719,21 @@
     "playtime_at_review_hours": 57.12,
     "num_reviews": 91,
     "author_steamid": "76561198282317015",
-    "hangul_ratio": 0.8736842105263158,
+    "hangul_ratio": 0.9325842696629213,
     "is_low_quality": false,
     "is_profanity_only": false,
-    "ambiguity_flags": [
-      "unclassified_included"
-    ],
+    "ambiguity_flags": [],
     "included_in_analysis": true,
     "rule_decision": "include",
-    "rule_confidence": 0.7268,
+    "rule_confidence": 0.9233,
     "llm_invoked": false,
     "llm_decision": null,
     "llm_confidence": null,
     "final_decision_source": "rule",
     "final_decision": "include",
-    "category_tags": [],
+    "category_tags": [
+      "content_depth"
+    ],
     "canonical_theme": null
   },
   {
@@ -7917,19 +7924,19 @@
     "hangul_ratio": 0.8888888888888888,
     "is_low_quality": false,
     "is_profanity_only": false,
-    "ambiguity_flags": [],
+    "ambiguity_flags": [
+      "unclassified_included"
+    ],
     "included_in_analysis": true,
     "rule_decision": "include",
-    "rule_confidence": 0.8022,
+    "rule_confidence": 0.6022,
     "llm_invoked": false,
     "llm_decision": null,
     "llm_confidence": null,
     "final_decision_source": "rule",
     "final_decision": "include",
-    "category_tags": [
-      "performance"
-    ],
-    "canonical_theme": "실행 불가 / 튕김"
+    "category_tags": [],
+    "canonical_theme": null
   },
   {
     "review_id": "215950188",
@@ -8340,6 +8347,7 @@
     "final_decision": "include",
     "category_tags": [
       "story",
+      "monetization",
       "controls"
     ],
     "canonical_theme": "스토리 / 서사 몰입"
@@ -8741,6 +8749,7 @@
     "final_decision": "include",
     "category_tags": [
       "bugs",
+      "monetization",
       "controls",
       "customization"
     ],
@@ -8821,18 +8830,18 @@
     "hangul_ratio": 1.0,
     "is_low_quality": false,
     "is_profanity_only": false,
-    "ambiguity_flags": [
-      "unclassified_included"
-    ],
+    "ambiguity_flags": [],
     "included_in_analysis": true,
     "rule_decision": "include",
-    "rule_confidence": 0.5817,
+    "rule_confidence": 0.7817,
     "llm_invoked": false,
     "llm_decision": null,
     "llm_confidence": null,
     "final_decision_source": "rule",
     "final_decision": "include",
-    "category_tags": [],
+    "category_tags": [
+      "monetization"
+    ],
     "canonical_theme": null
   },
   {
@@ -9061,6 +9070,7 @@
     "final_decision_source": "rule",
     "final_decision": "include",
     "category_tags": [
+      "bugs",
       "save_progression"
     ],
     "canonical_theme": "저장 / 세이브 손실"
@@ -9149,9 +9159,11 @@
     "final_decision": "include",
     "category_tags": [
       "bugs",
+      "performance",
       "story",
       "graphics",
-      "controls"
+      "controls",
+      "content_depth"
     ],
     "canonical_theme": "일반 버그"
   },
@@ -9369,18 +9381,18 @@
     "hangul_ratio": 1.0,
     "is_low_quality": false,
     "is_profanity_only": false,
-    "ambiguity_flags": [
-      "unclassified_included"
-    ],
+    "ambiguity_flags": [],
     "included_in_analysis": true,
     "rule_decision": "include",
-    "rule_confidence": 0.6283,
+    "rule_confidence": 0.8283,
     "llm_invoked": false,
     "llm_decision": null,
     "llm_confidence": null,
     "final_decision_source": "rule",
     "final_decision": "include",
-    "category_tags": [],
+    "category_tags": [
+      "monetization"
+    ],
     "canonical_theme": null
   },
   {
@@ -9876,6 +9888,7 @@
     "final_decision_source": "rule",
     "final_decision": "include",
     "category_tags": [
+      "multiplayer",
       "controls"
     ],
     "canonical_theme": null
@@ -9992,7 +10005,6 @@
     "final_decision_source": "rule",
     "final_decision": "include",
     "category_tags": [
-      "bugs",
       "controls"
     ],
     "canonical_theme": null
@@ -10318,7 +10330,6 @@
       "graphics",
       "controls",
       "building_ux",
-      "save_progression",
       "mod_support",
       "customization"
     ],
@@ -10485,18 +10496,18 @@
     "hangul_ratio": 0.9636363636363636,
     "is_low_quality": false,
     "is_profanity_only": false,
-    "ambiguity_flags": [
-      "unclassified_included"
-    ],
+    "ambiguity_flags": [],
     "included_in_analysis": true,
     "rule_decision": "include",
-    "rule_confidence": 0.6667,
+    "rule_confidence": 0.8667,
     "llm_invoked": false,
     "llm_decision": null,
     "llm_confidence": null,
     "final_decision_source": "rule",
     "final_decision": "include",
-    "category_tags": [],
+    "category_tags": [
+      "content_depth"
+    ],
     "canonical_theme": null
   },
   {
@@ -10944,19 +10955,19 @@
     "hangul_ratio": 0.9724770642201835,
     "is_low_quality": false,
     "is_profanity_only": false,
-    "ambiguity_flags": [],
+    "ambiguity_flags": [
+      "unclassified_included"
+    ],
     "included_in_analysis": true,
     "rule_decision": "include",
-    "rule_confidence": 0.9567,
+    "rule_confidence": 0.7567,
     "llm_invoked": false,
     "llm_decision": null,
     "llm_confidence": null,
     "final_decision_source": "rule",
     "final_decision": "include",
-    "category_tags": [
-      "controls"
-    ],
-    "canonical_theme": "UI / 입력 불편"
+    "category_tags": [],
+    "canonical_theme": null
   },
   {
     "review_id": "213181350",
@@ -11002,19 +11013,19 @@
     "hangul_ratio": 0.8333333333333334,
     "is_low_quality": false,
     "is_profanity_only": false,
-    "ambiguity_flags": [],
+    "ambiguity_flags": [
+      "unclassified_included"
+    ],
     "included_in_analysis": true,
     "rule_decision": "include",
-    "rule_confidence": 0.7683,
+    "rule_confidence": 0.5683,
     "llm_invoked": false,
     "llm_decision": null,
     "llm_confidence": null,
     "final_decision_source": "rule",
     "final_decision": "include",
-    "category_tags": [
-      "save_progression"
-    ],
-    "canonical_theme": "저장 / 세이브 손실"
+    "category_tags": [],
+    "canonical_theme": null
   },
   {
     "review_id": "213162014",
@@ -11170,18 +11181,19 @@
     "hangul_ratio": 0.9171597633136095,
     "is_low_quality": false,
     "is_profanity_only": false,
-    "ambiguity_flags": [
-      "unclassified_included"
-    ],
+    "ambiguity_flags": [],
     "included_in_analysis": true,
     "rule_decision": "include",
-    "rule_confidence": 0.775,
+    "rule_confidence": 0.975,
     "llm_invoked": false,
     "llm_decision": null,
     "llm_confidence": null,
     "final_decision_source": "rule",
     "final_decision": "include",
-    "category_tags": [],
+    "category_tags": [
+      "gameplay",
+      "content_depth"
+    ],
     "canonical_theme": null
   },
   {
@@ -11703,7 +11715,8 @@
     "final_decision_source": "rule",
     "final_decision": "include",
     "category_tags": [
-      "story"
+      "story",
+      "content_depth"
     ],
     "canonical_theme": "스토리 / 서사 몰입"
   },
@@ -11761,7 +11774,8 @@
     "final_decision_source": "rule",
     "final_decision": "include",
     "category_tags": [
-      "bugs"
+      "bugs",
+      "monetization"
     ],
     "canonical_theme": "일반 버그"
   },
@@ -11933,6 +11947,7 @@
     "final_decision_source": "rule",
     "final_decision": "include",
     "category_tags": [
+      "monetization",
       "multiplayer",
       "controls",
       "building_ux"
@@ -12303,18 +12318,18 @@
     "hangul_ratio": 1.0,
     "is_low_quality": false,
     "is_profanity_only": false,
-    "ambiguity_flags": [
-      "unclassified_included"
-    ],
+    "ambiguity_flags": [],
     "included_in_analysis": true,
     "rule_decision": "include",
-    "rule_confidence": 0.6317,
+    "rule_confidence": 0.8317,
     "llm_invoked": false,
     "llm_decision": null,
     "llm_confidence": null,
     "final_decision_source": "rule",
     "final_decision": "include",
-    "category_tags": [],
+    "category_tags": [
+      "controls"
+    ],
     "canonical_theme": null
   },
   {
@@ -12342,8 +12357,7 @@
     "final_decision_source": "rule",
     "final_decision": "include",
     "category_tags": [
-      "bugs",
-      "performance"
+      "bugs"
     ],
     "canonical_theme": "일반 버그"
   },
@@ -12374,7 +12388,6 @@
     "category_tags": [
       "bugs",
       "performance",
-      "difficulty",
       "controls"
     ],
     "canonical_theme": "충돌 / 크래시"
@@ -13055,19 +13068,19 @@
     "hangul_ratio": 1.0,
     "is_low_quality": false,
     "is_profanity_only": false,
-    "ambiguity_flags": [],
+    "ambiguity_flags": [
+      "unclassified_included"
+    ],
     "included_in_analysis": true,
     "rule_decision": "include",
-    "rule_confidence": 0.8,
+    "rule_confidence": 0.6,
     "llm_invoked": false,
     "llm_decision": null,
     "llm_confidence": null,
     "final_decision_source": "rule",
     "final_decision": "include",
-    "category_tags": [
-      "controls"
-    ],
-    "canonical_theme": "UI / 입력 불편"
+    "category_tags": [],
+    "canonical_theme": null
   },
   {
     "review_id": "211596781",
@@ -13328,8 +13341,7 @@
     "final_decision_source": "rule",
     "final_decision": "include",
     "category_tags": [
-      "bugs",
-      "performance"
+      "bugs"
     ],
     "canonical_theme": "일반 버그"
   },
@@ -13564,8 +13576,7 @@
     "final_decision_source": "rule",
     "final_decision": "include",
     "category_tags": [
-      "bugs",
-      "controls"
+      "bugs"
     ],
     "canonical_theme": "일반 버그"
   },
@@ -13660,7 +13671,7 @@
     "review_id": "211093860",
     "appid": 3551340,
     "review_text": "[h1][b]원래 매 시리즈 비싼 돈주고 불쾌한 경험하는 게임이다.[/b][/h1]\n[h3]이번엔 더욱 더 개좉같이 만들었다! 절대 구매하지 말아라! 뜯어 말려도 구매해서 해보는 날 보고 깨우쳤다\n\"나는 에펨견이다.\"[/h3]\n[h2]그저 Joat!!! but 대체할 수 없다!!!!!!!!!!!\n출시해줘서 고맙다!!!!!!! 그래도 겜은 개좉같다!!!!!!!!!!![/h2]\n\n[h1]감사합니다 좉같습니다 감사합니다 좉같습니다 감사합니다 좉같습니다 감사합니다 좉같습니다 감사합니다 좉같습니다 감사합니다 좉같습니다 감사합니다 좉같습니다 감사합니다 좉같습니다 감사합니다 좉같습니다 감사합니다 좉같습니다 감사합니다 좉같습니다 감사합니다 좉같습니다 감사합니다 좉같습니다 감사합니다 좉같습니다 감사합니다 좉같습니다 감사합니다 좉같습니다 감사합니다 좉같습니다 감사합니다 좉같습니다 감사합니다 좉같습니다 감사합니다 좉같습니다 감사합니다 좉같습니다 감사합니다 좉같습니다 감사합니다 좉같습니다 감사합니다 좉같습니다 감사합니다 좉같습니다 감사합니다 좉같습니다 감사합니다 좉같습니다 감사합니다 좉같습니다 감사합니다 좉같습니다 감사합니다 좉같습니다 감사합니다 좉같습니다 감사합니다 좉같습니다 감사합니다 좉같습니다 감사합니다 좉같습니다 감사합니다 좉같습니다 감사합니다 좉같습니다 감사합니다 좉같습니다 감사합니다 좉같습니다 감사합니다 좉같습니다 감사합니다 좉같습니다 감사합니다 좉같습니다 감사합니다 좉같습니다 감사합니다 좉같습니다 감사합니다 좉같습니다 감사합니다 좉같습니다 감사합니다 좉같습니다 감사합니다 좉같습니다 감사합니다 좉같습니다 감사합니다 좉같습니다 감사합니다 좉같습니다 감사합니다 좉같습니다 [/h1]",
-    "normalized_text": "[h1][b]원래 매 시리즈 비싼 돈주고 불쾌한 경험하는 게임이다.[/b][/h1] [h3]이번엔 더욱 더 개좉같이 만들었다! 절대 구매하지 말아라! 뜯어 말려도 구매해서 해보는 날 보고 깨우쳤다 \"나는 에펨견이다.\"[/h3] [h2]그저 Joat!!! but 대체할 수 없다!! 출시해줘서 고맙다!! 그래도 겜은 개좉같다!![/h2] [h1]감사합니다 좉같습니다 감사합니다 좉같습니다 감사합니다 좉같습니다 감사합니다 좉같습니다 감사합니다 좉같습니다 감사합니다 좉같습니다 감사합니다 좉같습니다 감사합니다 좉같습니다 감사합니다 좉같습니다 감사합니다 좉같습니다 감사합니다 좉같습니다 감사합니다 좉같습니다 감사합니다 좉같습니다 감사합니다 좉같습니다 감사합니다 좉같습니다 감사합니다 좉같습니다 감사합니다 좉같습니다 감사합니다 좉같습니다 감사합니다 좉같습니다 감사합니다 좉같습니다 감사합니다 좉같습니다 감사합니다 좉같습니다 감사합니다 좉같습니다 감사합니다 좉같습니다 감사합니다 좉같습니다 감사합니다 좉같습니다 감사합니다 좉같습니다 감사합니다 좉같습니다 감사합니다 좉같습니다 감사합니다 좉같습니다 감사합니다 좉같습니다 감사합니다 좉같습니다 감사합니다 좉같습니다 감사합니다 좉같습니다 감사합니다 좉같습니다 감사합니다 좉같습니다 감사합니다 좉같습니다 감사합니다 좉같습니다 감사합니다 좉같습니다 감사합니다 좉같습니다 감사합니다 좉같습니다 감사합니다 좉같습니다 감사합니다 좉같습니다 감사합니다 좉같습니다 감사합니다 좉같습니다 감사합니다 좉같습니다 감사합니다 좉같습니다 감사합니다 좉같습니다 감사합니다 좉같습니다 감사합니다 좉같습니다 감사합니다 좉같습니다 [/h1]",
+    "normalized_text": "원래 매 시리즈 비싼 돈주고 불쾌한 경험하는 게임이다. 이번엔 더욱 더 개좉같이 만들었다! 절대 구매하지 말아라! 뜯어 말려도 구매해서 해보는 날 보고 깨우쳤다 \"나는 에펨견이다.\" 그저 Joat!!! but 대체할 수 없다!! 출시해줘서 고맙다!! 그래도 겜은 개좉같다!! 감사합니다 좉같습니다 감사합니다 좉같습니다 감사합니다 좉같습니다 감사합니다 좉같습니다 감사합니다 좉같습니다 감사합니다 좉같습니다 감사합니다 좉같습니다 감사합니다 좉같습니다 감사합니다 좉같습니다 감사합니다 좉같습니다 감사합니다 좉같습니다 감사합니다 좉같습니다 감사합니다 좉같습니다 감사합니다 좉같습니다 감사합니다 좉같습니다 감사합니다 좉같습니다 감사합니다 좉같습니다 감사합니다 좉같습니다 감사합니다 좉같습니다 감사합니다 좉같습니다 감사합니다 좉같습니다 감사합니다 좉같습니다 감사합니다 좉같습니다 감사합니다 좉같습니다 감사합니다 좉같습니다 감사합니다 좉같습니다 감사합니다 좉같습니다 감사합니다 좉같습니다 감사합니다 좉같습니다 감사합니다 좉같습니다 감사합니다 좉같습니다 감사합니다 좉같습니다 감사합니다 좉같습니다 감사합니다 좉같습니다 감사합니다 좉같습니다 감사합니다 좉같습니다 감사합니다 좉같습니다 감사합니다 좉같습니다 감사합니다 좉같습니다 감사합니다 좉같습니다 감사합니다 좉같습니다 감사합니다 좉같습니다 감사합니다 좉같습니다 감사합니다 좉같습니다 감사합니다 좉같습니다 감사합니다 좉같습니다 감사합니다 좉같습니다 감사합니다 좉같습니다 감사합니다 좉같습니다 감사합니다 좉같습니다 감사합니다 좉같습니다",
     "voted_up": true,
     "timestamp_created": 1764228230,
     "timestamp_updated": 1764236926,
@@ -13668,7 +13679,7 @@
     "playtime_at_review_hours": 193.58,
     "num_reviews": 5,
     "author_steamid": "76561198305035285",
-    "hangul_ratio": 0.9603803486529319,
+    "hangul_ratio": 0.9885807504078303,
     "is_low_quality": false,
     "is_profanity_only": false,
     "ambiguity_flags": [
@@ -13797,7 +13808,6 @@
     "category_tags": [
       "story",
       "graphics",
-      "difficulty",
       "controls"
     ],
     "canonical_theme": "스토리 / 서사 몰입"
@@ -14058,6 +14068,7 @@
     "final_decision": "include",
     "category_tags": [
       "bugs",
+      "controls",
       "content_depth"
     ],
     "canonical_theme": "일반 버그"
@@ -14280,18 +14291,18 @@
     "hangul_ratio": 0.9047619047619048,
     "is_low_quality": false,
     "is_profanity_only": false,
-    "ambiguity_flags": [
-      "unclassified_included"
-    ],
+    "ambiguity_flags": [],
     "included_in_analysis": true,
     "rule_decision": "include",
-    "rule_confidence": 0.61,
+    "rule_confidence": 0.81,
     "llm_invoked": false,
     "llm_decision": null,
     "llm_confidence": null,
     "final_decision_source": "rule",
     "final_decision": "include",
-    "category_tags": [],
+    "category_tags": [
+      "monetization"
+    ],
     "canonical_theme": null
   },
   {
@@ -14406,10 +14417,9 @@
     "final_decision_source": "rule",
     "final_decision": "include",
     "category_tags": [
-      "performance",
       "controls"
     ],
-    "canonical_theme": "실행 불가 / 튕김"
+    "canonical_theme": null
   },
   {
     "review_id": "209916569",
@@ -14453,18 +14463,18 @@
     "hangul_ratio": 1.0,
     "is_low_quality": false,
     "is_profanity_only": false,
-    "ambiguity_flags": [
-      "unclassified_included"
-    ],
+    "ambiguity_flags": [],
     "included_in_analysis": true,
     "rule_decision": "include",
-    "rule_confidence": 0.5867,
+    "rule_confidence": 0.7867,
     "llm_invoked": false,
     "llm_decision": null,
     "llm_confidence": null,
     "final_decision_source": "rule",
     "final_decision": "include",
-    "category_tags": [],
+    "category_tags": [
+      "monetization"
+    ],
     "canonical_theme": null
   },
   {
@@ -14492,8 +14502,7 @@
     "final_decision_source": "rule",
     "final_decision": "include",
     "category_tags": [
-      "bugs",
-      "performance"
+      "bugs"
     ],
     "canonical_theme": "접속 / 진행 불가"
   },
@@ -14756,6 +14765,7 @@
     "final_decision_source": "rule",
     "final_decision": "include",
     "category_tags": [
+      "performance",
       "controls"
     ],
     "canonical_theme": "UI / 입력 불편"
@@ -15019,8 +15029,10 @@
       "story",
       "graphics",
       "monetization",
+      "multiplayer",
       "difficulty",
       "controls",
+      "building_ux",
       "save_progression",
       "mod_support",
       "customization"
@@ -15111,6 +15123,7 @@
     "final_decision": "include",
     "category_tags": [
       "bugs",
+      "monetization",
       "controls",
       "save_progression"
     ],
@@ -15172,6 +15185,7 @@
     "category_tags": [
       "bugs",
       "performance",
+      "monetization",
       "controls"
     ],
     "canonical_theme": "일반 버그"
@@ -15315,6 +15329,8 @@
     "final_decision_source": "rule",
     "final_decision": "include",
     "category_tags": [
+      "monetization",
+      "difficulty",
       "mod_support"
     ],
     "canonical_theme": "모드 지원 / 호환 문제"
@@ -15363,18 +15379,18 @@
     "hangul_ratio": 1.0,
     "is_low_quality": false,
     "is_profanity_only": false,
-    "ambiguity_flags": [
-      "unclassified_included"
-    ],
+    "ambiguity_flags": [],
     "included_in_analysis": true,
     "rule_decision": "include",
-    "rule_confidence": 0.6217,
+    "rule_confidence": 0.8217,
     "llm_invoked": false,
     "llm_decision": null,
     "llm_confidence": null,
     "final_decision_source": "rule",
     "final_decision": "include",
-    "category_tags": [],
+    "category_tags": [
+      "monetization"
+    ],
     "canonical_theme": null
   },
   {
@@ -15404,8 +15420,9 @@
     "final_decision_source": "rule",
     "final_decision": "include",
     "category_tags": [
+      "bugs",
       "performance",
-      "difficulty",
+      "monetization",
       "controls",
       "customization"
     ],
@@ -15876,7 +15893,7 @@
     "review_id": "209597206",
     "appid": 3551340,
     "review_text": "[h2] 앞으로의 패치에 명운이 달린 게임 [/h2]\n\n다들 욕 박는 이유는 명확하고 나도 역시 공감한다. 더럽게 불편하다. 향후 패치에서 [b] 유저 인터페이스 복원사업 [/b] 반드시 진행해야만 한다. 불편함이 크다보니 재밌으면서도 답답하고 짜증나서 금방 끄게 된다.\n\n그래도 실제로 경기 플레이는 재밌게 향상시켜놨으니 긍정적 7%가 가여워서 긍정 준다. 앞으로 패치 잘하자.",
-    "normalized_text": "[h2] 앞으로의 패치에 명운이 달린 게임 [/h2] 다들 욕 박는 이유는 명확하고 나도 역시 공감한다. 더럽게 불편하다. 향후 패치에서 [b] 유저 인터페이스 복원사업 [/b] 반드시 진행해야만 한다. 불편함이 크다보니 재밌으면서도 답답하고 짜증나서 금방 끄게 된다. 그래도 실제로 경기 플레이는 재밌게 향상시켜놨으니 긍정적 7%가 가여워서 긍정 준다. 앞으로 패치 잘하자.",
+    "normalized_text": "앞으로의 패치에 명운이 달린 게임 다들 욕 박는 이유는 명확하고 나도 역시 공감한다. 더럽게 불편하다. 향후 패치에서 유저 인터페이스 복원사업 반드시 진행해야만 한다. 불편함이 크다보니 재밌으면서도 답답하고 짜증나서 금방 끄게 된다. 그래도 실제로 경기 플레이는 재밌게 향상시켜놨으니 긍정적 7%가 가여워서 긍정 준다. 앞으로 패치 잘하자.",
     "voted_up": true,
     "timestamp_created": 1763520622,
     "timestamp_updated": 1763520697,
@@ -15884,7 +15901,7 @@
     "playtime_at_review_hours": 7.1,
     "num_reviews": 14,
     "author_steamid": "76561198116265902",
-    "hangul_ratio": 0.9517241379310345,
+    "hangul_ratio": 0.9928057553956835,
     "is_low_quality": false,
     "is_profanity_only": false,
     "ambiguity_flags": [
@@ -15985,7 +16002,7 @@
     "final_decision": "include",
     "category_tags": [
       "balance",
-      "difficulty",
+      "multiplayer",
       "controls",
       "building_ux",
       "customization"
@@ -16334,8 +16351,7 @@
     "final_decision_source": "rule",
     "final_decision": "include",
     "category_tags": [
-      "bugs",
-      "controls"
+      "bugs"
     ],
     "canonical_theme": "일반 버그"
   },
@@ -16512,6 +16528,7 @@
     "final_decision": "include",
     "category_tags": [
       "bugs",
+      "monetization",
       "controls"
     ],
     "canonical_theme": "일반 버그"
@@ -16600,6 +16617,7 @@
     "final_decision": "include",
     "category_tags": [
       "graphics",
+      "monetization",
       "difficulty"
     ],
     "canonical_theme": "그래픽 / 비주얼 호평"
@@ -16619,18 +16637,18 @@
     "hangul_ratio": 1.0,
     "is_low_quality": false,
     "is_profanity_only": false,
-    "ambiguity_flags": [
-      "unclassified_included"
-    ],
+    "ambiguity_flags": [],
     "included_in_analysis": true,
     "rule_decision": "include",
-    "rule_confidence": 0.615,
+    "rule_confidence": 0.815,
     "llm_invoked": false,
     "llm_decision": null,
     "llm_confidence": null,
     "final_decision_source": "rule",
     "final_decision": "include",
-    "category_tags": [],
+    "category_tags": [
+      "controls"
+    ],
     "canonical_theme": null
   },
   {
@@ -16658,10 +16676,9 @@
     "final_decision_source": "rule",
     "final_decision": "include",
     "category_tags": [
-      "controls",
-      "content_depth"
+      "controls"
     ],
-    "canonical_theme": "콘텐츠 부족"
+    "canonical_theme": null
   },
   {
     "review_id": "209459543",
@@ -17587,18 +17604,18 @@
     "hangul_ratio": 1.0,
     "is_low_quality": false,
     "is_profanity_only": false,
-    "ambiguity_flags": [
-      "unclassified_included"
-    ],
+    "ambiguity_flags": [],
     "included_in_analysis": true,
     "rule_decision": "include",
-    "rule_confidence": 0.645,
+    "rule_confidence": 0.845,
     "llm_invoked": false,
     "llm_decision": null,
     "llm_confidence": null,
     "final_decision_source": "rule",
     "final_decision": "include",
-    "category_tags": [],
+    "category_tags": [
+      "performance"
+    ],
     "canonical_theme": null
   },
   {
@@ -17846,19 +17863,19 @@
     "hangul_ratio": 1.0,
     "is_low_quality": false,
     "is_profanity_only": false,
-    "ambiguity_flags": [],
+    "ambiguity_flags": [
+      "unclassified_included"
+    ],
     "included_in_analysis": true,
     "rule_decision": "include",
-    "rule_confidence": 0.8083,
+    "rule_confidence": 0.6083,
     "llm_invoked": false,
     "llm_decision": null,
     "llm_confidence": null,
     "final_decision_source": "rule",
     "final_decision": "include",
-    "category_tags": [
-      "content_depth"
-    ],
-    "canonical_theme": "콘텐츠 부족"
+    "category_tags": [],
+    "canonical_theme": null
   },
   {
     "review_id": "209252797",
@@ -17904,18 +17921,18 @@
     "hangul_ratio": 1.0,
     "is_low_quality": false,
     "is_profanity_only": false,
-    "ambiguity_flags": [
-      "unclassified_included"
-    ],
+    "ambiguity_flags": [],
     "included_in_analysis": true,
     "rule_decision": "include",
-    "rule_confidence": 0.5817,
+    "rule_confidence": 0.7817,
     "llm_invoked": false,
     "llm_decision": null,
     "llm_confidence": null,
     "final_decision_source": "rule",
     "final_decision": "include",
-    "category_tags": [],
+    "category_tags": [
+      "monetization"
+    ],
     "canonical_theme": null
   },
   {
@@ -17991,18 +18008,18 @@
     "hangul_ratio": 1.0,
     "is_low_quality": false,
     "is_profanity_only": false,
-    "ambiguity_flags": [
-      "unclassified_included"
-    ],
+    "ambiguity_flags": [],
     "included_in_analysis": true,
     "rule_decision": "include",
-    "rule_confidence": 0.595,
+    "rule_confidence": 0.795,
     "llm_invoked": false,
     "llm_decision": null,
     "llm_confidence": null,
     "final_decision_source": "rule",
     "final_decision": "include",
-    "category_tags": [],
+    "category_tags": [
+      "monetization"
+    ],
     "canonical_theme": null
   },
   {
@@ -18149,6 +18166,7 @@
     "final_decision": "include",
     "category_tags": [
       "story",
+      "monetization",
       "controls"
     ],
     "canonical_theme": "스토리 / 서사 몰입"
@@ -18348,6 +18366,7 @@
     "final_decision_source": "rule",
     "final_decision": "include",
     "category_tags": [
+      "bugs",
       "performance"
     ],
     "canonical_theme": "실행 불가 / 튕김"
@@ -18377,6 +18396,7 @@
     "final_decision_source": "rule",
     "final_decision": "include",
     "category_tags": [
+      "difficulty",
       "controls"
     ],
     "canonical_theme": null
@@ -18406,10 +18426,10 @@
     "final_decision_source": "rule",
     "final_decision": "include",
     "category_tags": [
-      "performance",
+      "bugs",
       "save_progression"
     ],
-    "canonical_theme": "실행 불가 / 튕김"
+    "canonical_theme": "저장 / 세이브 손실"
   },
   {
     "review_id": "209178168",
@@ -18628,18 +18648,18 @@
     "hangul_ratio": 0.9473684210526315,
     "is_low_quality": false,
     "is_profanity_only": false,
-    "ambiguity_flags": [
-      "unclassified_included"
-    ],
+    "ambiguity_flags": [],
     "included_in_analysis": true,
     "rule_decision": "include",
-    "rule_confidence": 0.6067,
+    "rule_confidence": 0.8067,
     "llm_invoked": false,
     "llm_decision": null,
     "llm_confidence": null,
     "final_decision_source": "rule",
     "final_decision": "include",
-    "category_tags": [],
+    "category_tags": [
+      "controls"
+    ],
     "canonical_theme": null
   },
   {
@@ -18846,7 +18866,6 @@
     "final_decision": "include",
     "category_tags": [
       "bugs",
-      "difficulty",
       "controls"
     ],
     "canonical_theme": "일반 버그"
@@ -18924,19 +18943,19 @@
     "hangul_ratio": 1.0,
     "is_low_quality": false,
     "is_profanity_only": false,
-    "ambiguity_flags": [],
+    "ambiguity_flags": [
+      "unclassified_included"
+    ],
     "included_in_analysis": true,
     "rule_decision": "include",
-    "rule_confidence": 0.81,
+    "rule_confidence": 0.61,
     "llm_invoked": false,
     "llm_decision": null,
     "llm_confidence": null,
     "final_decision_source": "rule",
     "final_decision": "include",
-    "category_tags": [
-      "save_progression"
-    ],
-    "canonical_theme": "저장 / 세이브 손실"
+    "category_tags": [],
+    "canonical_theme": null
   },
   {
     "review_id": "209117265",
@@ -19254,7 +19273,8 @@
     "final_decision_source": "rule",
     "final_decision": "include",
     "category_tags": [
-      "performance"
+      "performance",
+      "monetization"
     ],
     "canonical_theme": "최적화 문제"
   },
@@ -19416,18 +19436,18 @@
     "hangul_ratio": 1.0,
     "is_low_quality": false,
     "is_profanity_only": false,
-    "ambiguity_flags": [
-      "unclassified_included"
-    ],
+    "ambiguity_flags": [],
     "included_in_analysis": true,
     "rule_decision": "include",
-    "rule_confidence": 0.59,
+    "rule_confidence": 0.79,
     "llm_invoked": false,
     "llm_decision": null,
     "llm_confidence": null,
     "final_decision_source": "rule",
     "final_decision": "include",
-    "category_tags": [],
+    "category_tags": [
+      "monetization"
+    ],
     "canonical_theme": null
   },
   {
@@ -19482,6 +19502,7 @@
     "final_decision_source": "rule",
     "final_decision": "include",
     "category_tags": [
+      "monetization",
       "controls"
     ],
     "canonical_theme": "조작감 문제"
@@ -20454,18 +20475,18 @@
     "hangul_ratio": 0.9166666666666666,
     "is_low_quality": false,
     "is_profanity_only": false,
-    "ambiguity_flags": [
-      "unclassified_included"
-    ],
+    "ambiguity_flags": [],
     "included_in_analysis": true,
     "rule_decision": "include",
-    "rule_confidence": 0.615,
+    "rule_confidence": 0.815,
     "llm_invoked": false,
     "llm_decision": null,
     "llm_confidence": null,
     "final_decision_source": "rule",
     "final_decision": "include",
-    "category_tags": [],
+    "category_tags": [
+      "monetization"
+    ],
     "canonical_theme": null
   },
   {
@@ -20522,11 +20543,10 @@
     "final_decision_source": "rule",
     "final_decision": "include",
     "category_tags": [
-      "performance",
       "graphics",
       "controls"
     ],
-    "canonical_theme": "실행 불가 / 튕김"
+    "canonical_theme": "그래픽 / 비주얼 호평"
   },
   {
     "review_id": "209003216",
@@ -20558,7 +20578,6 @@
       "bugs",
       "performance",
       "controls",
-      "save_progression",
       "customization"
     ],
     "canonical_theme": "일반 버그"
@@ -20590,6 +20609,7 @@
     "final_decision_source": "rule",
     "final_decision": "include",
     "category_tags": [
+      "performance",
       "controls"
     ],
     "canonical_theme": null
@@ -20735,6 +20755,7 @@
     "final_decision_source": "rule",
     "final_decision": "include",
     "category_tags": [
+      "gameplay",
       "controls"
     ],
     "canonical_theme": null
@@ -20822,6 +20843,7 @@
     "final_decision_source": "rule",
     "final_decision": "include",
     "category_tags": [
+      "monetization",
       "controls"
     ],
     "canonical_theme": "UI / 입력 불편"
@@ -20966,6 +20988,7 @@
     "final_decision": "include",
     "category_tags": [
       "story",
+      "multiplayer",
       "controls"
     ],
     "canonical_theme": "스토리 / 서사 몰입"
@@ -21068,18 +21091,18 @@
     "hangul_ratio": 1.0,
     "is_low_quality": false,
     "is_profanity_only": false,
-    "ambiguity_flags": [
-      "unclassified_included"
-    ],
+    "ambiguity_flags": [],
     "included_in_analysis": true,
     "rule_decision": "include",
-    "rule_confidence": 0.5933,
+    "rule_confidence": 0.7933,
     "llm_invoked": false,
     "llm_decision": null,
     "llm_confidence": null,
     "final_decision_source": "rule",
     "final_decision": "include",
-    "category_tags": [],
+    "category_tags": [
+      "performance"
+    ],
     "canonical_theme": null
   },
   {
@@ -21196,6 +21219,7 @@
     "final_decision_source": "rule",
     "final_decision": "include",
     "category_tags": [
+      "gameplay",
       "controls"
     ],
     "canonical_theme": "UI / 입력 불편"
@@ -21283,7 +21307,8 @@
     "final_decision_source": "rule",
     "final_decision": "include",
     "category_tags": [
-      "controls"
+      "controls",
+      "save_progression"
     ],
     "canonical_theme": null
   },
@@ -21403,7 +21428,6 @@
     "final_decision_source": "rule",
     "final_decision": "include",
     "category_tags": [
-      "bugs",
       "controls"
     ],
     "canonical_theme": null
@@ -21610,8 +21634,8 @@
     "final_decision": "include",
     "category_tags": [
       "bugs",
-      "difficulty",
-      "controls"
+      "controls",
+      "save_progression"
     ],
     "canonical_theme": "일반 버그"
   },
@@ -21702,6 +21726,7 @@
     "final_decision_source": "rule",
     "final_decision": "include",
     "category_tags": [
+      "multiplayer",
       "difficulty",
       "controls"
     ],
@@ -21751,18 +21776,18 @@
     "hangul_ratio": 1.0,
     "is_low_quality": false,
     "is_profanity_only": false,
-    "ambiguity_flags": [
-      "unclassified_included"
-    ],
+    "ambiguity_flags": [],
     "included_in_analysis": true,
     "rule_decision": "include",
-    "rule_confidence": 0.6117,
+    "rule_confidence": 0.8117,
     "llm_invoked": false,
     "llm_decision": null,
     "llm_confidence": null,
     "final_decision_source": "rule",
     "final_decision": "include",
-    "category_tags": [],
+    "category_tags": [
+      "monetization"
+    ],
     "canonical_theme": null
   },
   {
@@ -22014,18 +22039,18 @@
     "hangul_ratio": 1.0,
     "is_low_quality": false,
     "is_profanity_only": false,
-    "ambiguity_flags": [
-      "unclassified_included"
-    ],
+    "ambiguity_flags": [],
     "included_in_analysis": true,
     "rule_decision": "include",
-    "rule_confidence": 0.5967,
+    "rule_confidence": 0.7967,
     "llm_invoked": false,
     "llm_decision": null,
     "llm_confidence": null,
     "final_decision_source": "rule",
     "final_decision": "include",
-    "category_tags": [],
+    "category_tags": [
+      "content_depth"
+    ],
     "canonical_theme": null
   },
   {
@@ -22160,18 +22185,18 @@
     "hangul_ratio": 0.7777777777777778,
     "is_low_quality": false,
     "is_profanity_only": false,
-    "ambiguity_flags": [
-      "unclassified_included"
-    ],
+    "ambiguity_flags": [],
     "included_in_analysis": true,
     "rule_decision": "include",
-    "rule_confidence": 0.5744,
+    "rule_confidence": 0.7744,
     "llm_invoked": false,
     "llm_decision": null,
     "llm_confidence": null,
     "final_decision_source": "rule",
     "final_decision": "include",
-    "category_tags": [],
+    "category_tags": [
+      "difficulty"
+    ],
     "canonical_theme": null
   },
   {
@@ -22229,7 +22254,8 @@
     "final_decision_source": "rule",
     "final_decision": "include",
     "category_tags": [
-      "bugs"
+      "bugs",
+      "performance"
     ],
     "canonical_theme": "일반 버그"
   },
@@ -22455,18 +22481,18 @@
     "hangul_ratio": 0.7872340425531915,
     "is_low_quality": false,
     "is_profanity_only": false,
-    "ambiguity_flags": [
-      "unclassified_included"
-    ],
+    "ambiguity_flags": [],
     "included_in_analysis": true,
     "rule_decision": "include",
-    "rule_confidence": 0.6251,
+    "rule_confidence": 0.8251,
     "llm_invoked": false,
     "llm_decision": null,
     "llm_confidence": null,
     "final_decision_source": "rule",
     "final_decision": "include",
-    "category_tags": [],
+    "category_tags": [
+      "monetization"
+    ],
     "canonical_theme": null
   },
   {
@@ -23240,18 +23266,18 @@
     "hangul_ratio": 0.9452054794520548,
     "is_low_quality": false,
     "is_profanity_only": false,
-    "ambiguity_flags": [
-      "unclassified_included"
-    ],
+    "ambiguity_flags": [],
     "included_in_analysis": true,
     "rule_decision": "include",
-    "rule_confidence": 0.6967,
+    "rule_confidence": 0.8967,
     "llm_invoked": false,
     "llm_decision": null,
     "llm_confidence": null,
     "final_decision_source": "rule",
     "final_decision": "include",
-    "category_tags": [],
+    "category_tags": [
+      "monetization"
+    ],
     "canonical_theme": null
   },
   {
@@ -23308,7 +23334,8 @@
     "final_decision_source": "rule",
     "final_decision": "include",
     "category_tags": [
-      "story"
+      "story",
+      "monetization"
     ],
     "canonical_theme": "스토리 / 서사 몰입"
   },
@@ -23546,7 +23573,6 @@
       "bugs",
       "graphics",
       "monetization",
-      "difficulty",
       "controls"
     ],
     "canonical_theme": "일반 버그"
@@ -23726,7 +23752,7 @@
     "category_tags": [
       "bugs",
       "story",
-      "difficulty",
+      "monetization",
       "controls"
     ],
     "canonical_theme": "일반 버그"
@@ -23906,7 +23932,8 @@
     "final_decision": "include",
     "category_tags": [
       "bugs",
-      "graphics"
+      "graphics",
+      "controls"
     ],
     "canonical_theme": "일반 버그"
   },
@@ -24077,6 +24104,7 @@
     "final_decision_source": "rule",
     "final_decision": "include",
     "category_tags": [
+      "monetization",
       "controls"
     ],
     "canonical_theme": null
@@ -24163,6 +24191,7 @@
     "final_decision_source": "rule",
     "final_decision": "include",
     "category_tags": [
+      "performance",
       "story",
       "controls",
       "customization"
@@ -24282,10 +24311,9 @@
     "final_decision_source": "rule",
     "final_decision": "include",
     "category_tags": [
-      "difficulty",
       "controls"
     ],
-    "canonical_theme": "조작 / 규칙 학습 난이도"
+    "canonical_theme": null
   },
   {
     "review_id": "208772127",
@@ -24302,18 +24330,18 @@
     "hangul_ratio": 1.0,
     "is_low_quality": false,
     "is_profanity_only": false,
-    "ambiguity_flags": [
-      "unclassified_included"
-    ],
+    "ambiguity_flags": [],
     "included_in_analysis": true,
     "rule_decision": "include",
-    "rule_confidence": 0.585,
+    "rule_confidence": 0.785,
     "llm_invoked": false,
     "llm_decision": null,
     "llm_confidence": null,
     "final_decision_source": "rule",
     "final_decision": "include",
-    "category_tags": [],
+    "category_tags": [
+      "monetization"
+    ],
     "canonical_theme": null
   },
   {
@@ -24370,7 +24398,8 @@
     "final_decision_source": "rule",
     "final_decision": "include",
     "category_tags": [
-      "gameplay"
+      "gameplay",
+      "monetization"
     ],
     "canonical_theme": "전투 손맛 / 액션 호평"
   },
@@ -24459,7 +24488,8 @@
     "final_decision_source": "rule",
     "final_decision": "include",
     "category_tags": [
-      "bugs"
+      "bugs",
+      "content_depth"
     ],
     "canonical_theme": "일반 버그"
   },
@@ -24667,6 +24697,7 @@
       "bugs",
       "story",
       "graphics",
+      "controls",
       "customization"
     ],
     "canonical_theme": "충돌 / 크래시"
@@ -24755,10 +24786,10 @@
     "final_decision": "include",
     "category_tags": [
       "bugs",
-      "performance",
       "balance",
       "monetization",
       "controls",
+      "content_depth",
       "customization"
     ],
     "canonical_theme": "일반 버그"
@@ -24817,8 +24848,7 @@
     "final_decision_source": "rule",
     "final_decision": "include",
     "category_tags": [
-      "bugs",
-      "controls"
+      "bugs"
     ],
     "canonical_theme": "일반 버그"
   },
@@ -24925,18 +24955,18 @@
     "hangul_ratio": 0.9666666666666667,
     "is_low_quality": false,
     "is_profanity_only": false,
-    "ambiguity_flags": [
-      "unclassified_included"
-    ],
+    "ambiguity_flags": [],
     "included_in_analysis": true,
     "rule_decision": "include",
-    "rule_confidence": 0.675,
+    "rule_confidence": 0.875,
     "llm_invoked": false,
     "llm_decision": null,
     "llm_confidence": null,
     "final_decision_source": "rule",
     "final_decision": "include",
-    "category_tags": [],
+    "category_tags": [
+      "controls"
+    ],
     "canonical_theme": null
   },
   {
@@ -25049,7 +25079,8 @@
     "final_decision_source": "rule",
     "final_decision": "include",
     "category_tags": [
-      "performance"
+      "performance",
+      "content_depth"
     ],
     "canonical_theme": "최적화 문제"
   },
@@ -25136,10 +25167,9 @@
     "final_decision_source": "rule",
     "final_decision": "include",
     "category_tags": [
-      "performance",
       "controls"
     ],
-    "canonical_theme": "실행 불가 / 튕김"
+    "canonical_theme": null
   },
   {
     "review_id": "208706109",
@@ -25284,7 +25314,8 @@
     "category_tags": [
       "monetization",
       "difficulty",
-      "controls"
+      "controls",
+      "content_depth"
     ],
     "canonical_theme": "가격 / 과금 불만"
   },
@@ -25303,18 +25334,18 @@
     "hangul_ratio": 1.0,
     "is_low_quality": false,
     "is_profanity_only": false,
-    "ambiguity_flags": [
-      "unclassified_included"
-    ],
+    "ambiguity_flags": [],
     "included_in_analysis": true,
     "rule_decision": "include",
-    "rule_confidence": 0.595,
+    "rule_confidence": 0.795,
     "llm_invoked": false,
     "llm_decision": null,
     "llm_confidence": null,
     "final_decision_source": "rule",
     "final_decision": "include",
-    "category_tags": [],
+    "category_tags": [
+      "monetization"
+    ],
     "canonical_theme": null
   },
   {
@@ -25346,7 +25377,7 @@
     "category_tags": [
       "bugs",
       "performance",
-      "difficulty",
+      "monetization",
       "controls"
     ],
     "canonical_theme": "일반 버그"
@@ -25459,7 +25490,8 @@
     "final_decision_source": "rule",
     "final_decision": "include",
     "category_tags": [
-      "bugs"
+      "bugs",
+      "performance"
     ],
     "canonical_theme": "일반 버그"
   },
@@ -25604,6 +25636,7 @@
     "final_decision": "include",
     "category_tags": [
       "bugs",
+      "balance",
       "graphics",
       "controls"
     ],
@@ -25624,18 +25657,18 @@
     "hangul_ratio": 0.5,
     "is_low_quality": false,
     "is_profanity_only": false,
-    "ambiguity_flags": [
-      "unclassified_included"
-    ],
+    "ambiguity_flags": [],
     "included_in_analysis": true,
     "rule_decision": "include",
-    "rule_confidence": 0.4883,
+    "rule_confidence": 0.6883,
     "llm_invoked": false,
     "llm_decision": null,
     "llm_confidence": null,
     "final_decision_source": "rule",
     "final_decision": "include",
-    "category_tags": [],
+    "category_tags": [
+      "monetization"
+    ],
     "canonical_theme": null
   },
   {
@@ -25682,18 +25715,18 @@
     "hangul_ratio": 0.9830508474576272,
     "is_low_quality": false,
     "is_profanity_only": false,
-    "ambiguity_flags": [
-      "unclassified_included"
-    ],
+    "ambiguity_flags": [],
     "included_in_analysis": true,
     "rule_decision": "include",
-    "rule_confidence": 0.6733,
+    "rule_confidence": 0.8733,
     "llm_invoked": false,
     "llm_decision": null,
     "llm_confidence": null,
     "final_decision_source": "rule",
     "final_decision": "include",
-    "category_tags": [],
+    "category_tags": [
+      "monetization"
+    ],
     "canonical_theme": null
   },
   {
@@ -26465,18 +26498,18 @@
     "hangul_ratio": 1.0,
     "is_low_quality": false,
     "is_profanity_only": false,
-    "ambiguity_flags": [
-      "unclassified_included"
-    ],
+    "ambiguity_flags": [],
     "included_in_analysis": true,
     "rule_decision": "include",
-    "rule_confidence": 0.5933,
+    "rule_confidence": 0.7933,
     "llm_invoked": false,
     "llm_decision": null,
     "llm_confidence": null,
     "final_decision_source": "rule",
     "final_decision": "include",
-    "category_tags": [],
+    "category_tags": [
+      "monetization"
+    ],
     "canonical_theme": null
   },
   {
@@ -26622,6 +26655,7 @@
     "final_decision_source": "rule",
     "final_decision": "include",
     "category_tags": [
+      "performance",
       "difficulty"
     ],
     "canonical_theme": "튜토리얼 / 온보딩 부족"
@@ -26668,18 +26702,18 @@
     "hangul_ratio": 0.7857142857142857,
     "is_low_quality": false,
     "is_profanity_only": false,
-    "ambiguity_flags": [
-      "unclassified_included"
-    ],
+    "ambiguity_flags": [],
     "included_in_analysis": true,
     "rule_decision": "include",
-    "rule_confidence": 0.5931,
+    "rule_confidence": 0.7931,
     "llm_invoked": false,
     "llm_decision": null,
     "llm_confidence": null,
     "final_decision_source": "rule",
     "final_decision": "include",
-    "category_tags": [],
+    "category_tags": [
+      "monetization"
+    ],
     "canonical_theme": null
   },
   {
@@ -26708,7 +26742,6 @@
     "final_decision": "include",
     "category_tags": [
       "bugs",
-      "multiplayer",
       "controls"
     ],
     "canonical_theme": "일반 버그"
@@ -26739,7 +26772,8 @@
     "final_decision": "include",
     "category_tags": [
       "bugs",
-      "controls"
+      "controls",
+      "content_depth"
     ],
     "canonical_theme": "일반 버그"
   },
@@ -26798,8 +26832,7 @@
     "final_decision": "include",
     "category_tags": [
       "bugs",
-      "story",
-      "multiplayer"
+      "story"
     ],
     "canonical_theme": "일반 버그"
   },
@@ -26989,18 +27022,18 @@
     "hangul_ratio": 0.9629629629629629,
     "is_low_quality": false,
     "is_profanity_only": false,
-    "ambiguity_flags": [],
+    "ambiguity_flags": [
+      "unclassified_included"
+    ],
     "included_in_analysis": true,
     "rule_decision": "include",
-    "rule_confidence": 0.865,
+    "rule_confidence": 0.665,
     "llm_invoked": false,
     "llm_decision": null,
     "llm_confidence": null,
     "final_decision_source": "rule",
     "final_decision": "include",
-    "category_tags": [
-      "bugs"
-    ],
+    "category_tags": [],
     "canonical_theme": null
   },
   {
@@ -27045,18 +27078,18 @@
     "hangul_ratio": 1.0,
     "is_low_quality": false,
     "is_profanity_only": false,
-    "ambiguity_flags": [],
+    "ambiguity_flags": [
+      "unclassified_included"
+    ],
     "included_in_analysis": true,
     "rule_decision": "include",
-    "rule_confidence": 0.8067,
+    "rule_confidence": 0.6067,
     "llm_invoked": false,
     "llm_decision": null,
     "llm_confidence": null,
     "final_decision_source": "rule",
     "final_decision": "include",
-    "category_tags": [
-      "bugs"
-    ],
+    "category_tags": [],
     "canonical_theme": null
   },
   {
@@ -27346,7 +27379,8 @@
     "final_decision_source": "rule",
     "final_decision": "include",
     "category_tags": [
-      "bugs"
+      "bugs",
+      "performance"
     ],
     "canonical_theme": "일반 버그"
   },
@@ -27421,19 +27455,19 @@
     "hangul_ratio": 1.0,
     "is_low_quality": false,
     "is_profanity_only": false,
-    "ambiguity_flags": [],
+    "ambiguity_flags": [
+      "unclassified_included"
+    ],
     "included_in_analysis": true,
     "rule_decision": "include",
-    "rule_confidence": 0.8317,
+    "rule_confidence": 0.6317,
     "llm_invoked": false,
     "llm_decision": null,
     "llm_confidence": null,
     "final_decision_source": "rule",
     "final_decision": "include",
-    "category_tags": [
-      "controls"
-    ],
-    "canonical_theme": "UI / 입력 불편"
+    "category_tags": [],
+    "canonical_theme": null
   },
   {
     "review_id": "208619772",
@@ -27700,7 +27734,8 @@
     "final_decision_source": "rule",
     "final_decision": "include",
     "category_tags": [
-      "controls"
+      "controls",
+      "content_depth"
     ],
     "canonical_theme": null
   },
@@ -27759,6 +27794,7 @@
     "final_decision": "include",
     "category_tags": [
       "bugs",
+      "monetization",
       "multiplayer",
       "controls"
     ],
@@ -28076,7 +28112,8 @@
     "final_decision_source": "rule",
     "final_decision": "include",
     "category_tags": [
-      "bugs"
+      "bugs",
+      "multiplayer"
     ],
     "canonical_theme": "일반 버그"
   },
@@ -28161,7 +28198,7 @@
     "final_decision_source": "rule",
     "final_decision": "include",
     "category_tags": [
-      "bugs",
+      "balance",
       "controls"
     ],
     "canonical_theme": null
@@ -28555,18 +28592,18 @@
     "hangul_ratio": 0.9293478260869565,
     "is_low_quality": false,
     "is_profanity_only": false,
-    "ambiguity_flags": [
-      "unclassified_included"
-    ],
+    "ambiguity_flags": [],
     "included_in_analysis": true,
     "rule_decision": "include",
-    "rule_confidence": 0.775,
+    "rule_confidence": 0.975,
     "llm_invoked": false,
     "llm_decision": null,
     "llm_confidence": null,
     "final_decision_source": "rule",
     "final_decision": "include",
-    "category_tags": [],
+    "category_tags": [
+      "monetization"
+    ],
     "canonical_theme": null
   },
   {
@@ -28758,19 +28795,19 @@
     "hangul_ratio": 1.0,
     "is_low_quality": false,
     "is_profanity_only": false,
-    "ambiguity_flags": [],
+    "ambiguity_flags": [
+      "unclassified_included"
+    ],
     "included_in_analysis": true,
     "rule_decision": "include",
-    "rule_confidence": 0.795,
+    "rule_confidence": 0.595,
     "llm_invoked": false,
     "llm_decision": null,
     "llm_confidence": null,
     "final_decision_source": "rule",
     "final_decision": "include",
-    "category_tags": [
-      "controls"
-    ],
-    "canonical_theme": "UI / 입력 불편"
+    "category_tags": [],
+    "canonical_theme": null
   },
   {
     "review_id": "208587067",
@@ -28877,19 +28914,19 @@
     "hangul_ratio": 1.0,
     "is_low_quality": false,
     "is_profanity_only": false,
-    "ambiguity_flags": [],
+    "ambiguity_flags": [
+      "unclassified_included"
+    ],
     "included_in_analysis": true,
     "rule_decision": "include",
-    "rule_confidence": 0.785,
+    "rule_confidence": 0.585,
     "llm_invoked": false,
     "llm_decision": null,
     "llm_confidence": null,
     "final_decision_source": "rule",
     "final_decision": "include",
-    "category_tags": [
-      "difficulty"
-    ],
-    "canonical_theme": "난이도 / 진입장벽"
+    "category_tags": [],
+    "canonical_theme": null
   },
   {
     "review_id": "208573703",
@@ -28918,7 +28955,8 @@
     "category_tags": [
       "story",
       "graphics",
-      "controls"
+      "controls",
+      "save_progression"
     ],
     "canonical_theme": "스토리 / 서사 몰입"
   },
@@ -28949,7 +28987,8 @@
     "final_decision_source": "rule",
     "final_decision": "include",
     "category_tags": [
-      "controls"
+      "controls",
+      "content_depth"
     ],
     "canonical_theme": "UI / 입력 불편"
   },
@@ -29066,8 +29105,7 @@
     "final_decision": "include",
     "category_tags": [
       "bugs",
-      "performance",
-      "controls"
+      "performance"
     ],
     "canonical_theme": "일반 버그"
   },
@@ -29213,8 +29251,7 @@
       "bugs",
       "story",
       "difficulty",
-      "controls",
-      "content_depth"
+      "controls"
     ],
     "canonical_theme": "일반 버그"
   },
@@ -29295,18 +29332,19 @@
     "hangul_ratio": 0.9295774647887324,
     "is_low_quality": false,
     "is_profanity_only": false,
-    "ambiguity_flags": [
-      "unclassified_included"
-    ],
+    "ambiguity_flags": [],
     "included_in_analysis": true,
     "rule_decision": "include",
-    "rule_confidence": 0.6933,
+    "rule_confidence": 0.8933,
     "llm_invoked": false,
     "llm_decision": null,
     "llm_confidence": null,
     "final_decision_source": "rule",
     "final_decision": "include",
-    "category_tags": [],
+    "category_tags": [
+      "bugs",
+      "content_depth"
+    ],
     "canonical_theme": null
   },
   {
@@ -29477,7 +29515,6 @@
     "final_decision_source": "rule",
     "final_decision": "include",
     "category_tags": [
-      "difficulty",
       "controls"
     ],
     "canonical_theme": "UI / 입력 불편"
@@ -29574,8 +29611,8 @@
     "final_decision_source": "rule",
     "final_decision": "include",
     "category_tags": [
-      "difficulty",
-      "controls"
+      "controls",
+      "save_progression"
     ],
     "canonical_theme": "UI / 입력 불편"
   },
@@ -29807,7 +29844,6 @@
     "final_decision_source": "rule",
     "final_decision": "include",
     "category_tags": [
-      "difficulty",
       "controls",
       "customization"
     ],
@@ -29955,7 +29991,6 @@
     "final_decision": "include",
     "category_tags": [
       "story",
-      "difficulty",
       "controls"
     ],
     "canonical_theme": "스토리 / 서사 몰입"
@@ -30199,19 +30234,19 @@
     "hangul_ratio": 0.9,
     "is_low_quality": false,
     "is_profanity_only": false,
-    "ambiguity_flags": [],
+    "ambiguity_flags": [
+      "unclassified_included"
+    ],
     "included_in_analysis": true,
     "rule_decision": "include",
-    "rule_confidence": 0.8083,
+    "rule_confidence": 0.6083,
     "llm_invoked": false,
     "llm_decision": null,
     "llm_confidence": null,
     "final_decision_source": "rule",
     "final_decision": "include",
-    "category_tags": [
-      "controls"
-    ],
-    "canonical_theme": "UI / 입력 불편"
+    "category_tags": [],
+    "canonical_theme": null
   },
   {
     "review_id": "208548814",
@@ -30238,10 +30273,9 @@
     "final_decision_source": "rule",
     "final_decision": "include",
     "category_tags": [
-      "difficulty",
       "controls"
     ],
-    "canonical_theme": "조작 / 규칙 학습 난이도"
+    "canonical_theme": null
   },
   {
     "review_id": "208548398",
@@ -30347,18 +30381,19 @@
     "hangul_ratio": 0.989247311827957,
     "is_low_quality": false,
     "is_profanity_only": false,
-    "ambiguity_flags": [
-      "unclassified_included"
-    ],
+    "ambiguity_flags": [],
     "included_in_analysis": true,
     "rule_decision": "include",
-    "rule_confidence": 0.73,
+    "rule_confidence": 0.93,
     "llm_invoked": false,
     "llm_decision": null,
     "llm_confidence": null,
     "final_decision_source": "rule",
     "final_decision": "include",
-    "category_tags": [],
+    "category_tags": [
+      "gameplay",
+      "monetization"
+    ],
     "canonical_theme": null
   },
   {
@@ -30607,19 +30642,19 @@
     "hangul_ratio": 0.9555555555555556,
     "is_low_quality": false,
     "is_profanity_only": false,
-    "ambiguity_flags": [],
+    "ambiguity_flags": [
+      "unclassified_included"
+    ],
     "included_in_analysis": true,
     "rule_decision": "include",
-    "rule_confidence": 0.85,
+    "rule_confidence": 0.65,
     "llm_invoked": false,
     "llm_decision": null,
     "llm_confidence": null,
     "final_decision_source": "rule",
     "final_decision": "include",
-    "category_tags": [
-      "controls"
-    ],
-    "canonical_theme": "UI / 입력 불편"
+    "category_tags": [],
+    "canonical_theme": null
   },
   {
     "review_id": "208546020",
@@ -30646,7 +30681,6 @@
     "final_decision_source": "rule",
     "final_decision": "include",
     "category_tags": [
-      "bugs",
       "monetization",
       "controls"
     ],
@@ -31318,7 +31352,9 @@
     "final_decision_source": "rule",
     "final_decision": "include",
     "category_tags": [
-      "graphics"
+      "graphics",
+      "controls",
+      "content_depth"
     ],
     "canonical_theme": "그래픽 / 비주얼 호평"
   },
@@ -31532,7 +31568,7 @@
     "review_id": "208538804",
     "appid": 3551340,
     "review_text": "5점 만점에 2점.\n\n[h1] 이 씨발련들아 [/h1]\n2년동안 기다려서 얻은 게 버그투성이 직관성 개좆박은 7만원짜리 미완성 게임인게 말이 된다고 생각하냐???\n게다가 에디터까지 사면 8만원인게 어이가 없네\n심지어 대체할 게임이 없어서 대가리 깨진 채로 사야 한다는게 더 좆같네\n니들은 비추나 받아라",
-    "normalized_text": "5점 만점에 2점. [h1] 이 씨발련들아 [/h1] 2년동안 기다려서 얻은 게 버그투성이 직관성 개좆박은 7만원짜리 미완성 게임인게 말이 된다고 생각하냐??? 게다가 에디터까지 사면 8만원인게 어이가 없네 심지어 대체할 게임이 없어서 대가리 깨진 채로 사야 한다는게 더 좆같네 니들은 비추나 받아라",
+    "normalized_text": "5점 만점에 2점. 이 씨발련들아 2년동안 기다려서 얻은 게 버그투성이 직관성 개좆박은 7만원짜리 미완성 게임인게 말이 된다고 생각하냐??? 게다가 에디터까지 사면 8만원인게 어이가 없네 심지어 대체할 게임이 없어서 대가리 깨진 채로 사야 한다는게 더 좆같네 니들은 비추나 받아라",
     "voted_up": false,
     "timestamp_created": 1762418230,
     "timestamp_updated": 1762418230,
@@ -31540,13 +31576,13 @@
     "playtime_at_review_hours": 4.13,
     "num_reviews": 84,
     "author_steamid": "76561198427909201",
-    "hangul_ratio": 0.9243697478991597,
+    "hangul_ratio": 0.9565217391304348,
     "is_low_quality": false,
     "is_profanity_only": false,
     "ambiguity_flags": [],
     "included_in_analysis": true,
     "rule_decision": "include",
-    "rule_confidence": 0.9733,
+    "rule_confidence": 0.9667,
     "llm_invoked": false,
     "llm_decision": null,
     "llm_confidence": null,
@@ -31582,7 +31618,8 @@
     "final_decision_source": "rule",
     "final_decision": "include",
     "category_tags": [
-      "bugs"
+      "bugs",
+      "content_depth"
     ],
     "canonical_theme": "일반 버그"
   },
@@ -31611,10 +31648,9 @@
     "final_decision_source": "rule",
     "final_decision": "include",
     "category_tags": [
-      "controls",
-      "content_depth"
+      "controls"
     ],
-    "canonical_theme": "콘텐츠 부족"
+    "canonical_theme": null
   },
   {
     "review_id": "208537403",
@@ -31643,7 +31679,8 @@
     "final_decision_source": "rule",
     "final_decision": "include",
     "category_tags": [
-      "controls"
+      "controls",
+      "building_ux"
     ],
     "canonical_theme": "UI / 입력 불편"
   },
@@ -31731,7 +31768,8 @@
     "final_decision": "include",
     "category_tags": [
       "performance",
-      "story"
+      "story",
+      "monetization"
     ],
     "canonical_theme": "최적화 문제"
   },
@@ -31828,7 +31866,6 @@
     "final_decision": "include",
     "category_tags": [
       "bugs",
-      "difficulty",
       "controls"
     ],
     "canonical_theme": "일반 버그"
@@ -31966,18 +32003,19 @@
     "is_low_quality": false,
     "is_profanity_only": false,
     "ambiguity_flags": [
-      "ambiguous_language",
-      "unclassified_included"
+      "ambiguous_language"
     ],
     "included_in_analysis": true,
     "rule_decision": "include",
-    "rule_confidence": 0.4549,
+    "rule_confidence": 0.6549,
     "llm_invoked": false,
     "llm_decision": null,
     "llm_confidence": null,
     "final_decision_source": "rule",
     "final_decision": "include",
-    "category_tags": [],
+    "category_tags": [
+      "monetization"
+    ],
     "canonical_theme": null
   },
   {
@@ -32035,7 +32073,8 @@
     "final_decision": "include",
     "category_tags": [
       "performance",
-      "story"
+      "story",
+      "monetization"
     ],
     "canonical_theme": "최적화 문제"
   },
@@ -32181,6 +32220,8 @@
     "final_decision": "include",
     "category_tags": [
       "bugs",
+      "performance",
+      "monetization",
       "controls"
     ],
     "canonical_theme": "일반 버그"
@@ -32210,6 +32251,7 @@
     "final_decision_source": "rule",
     "final_decision": "include",
     "category_tags": [
+      "multiplayer",
       "controls"
     ],
     "canonical_theme": null
@@ -32270,7 +32312,6 @@
     "category_tags": [
       "bugs",
       "story",
-      "graphics",
       "monetization",
       "controls",
       "building_ux"
@@ -32390,7 +32431,8 @@
     "final_decision": "include",
     "category_tags": [
       "bugs",
-      "controls"
+      "controls",
+      "content_depth"
     ],
     "canonical_theme": "일반 버그"
   },
@@ -32419,6 +32461,7 @@
     "final_decision_source": "rule",
     "final_decision": "include",
     "category_tags": [
+      "multiplayer",
       "controls"
     ],
     "canonical_theme": "UI / 입력 불편"
@@ -32595,8 +32638,7 @@
     "final_decision_source": "rule",
     "final_decision": "include",
     "category_tags": [
-      "bugs",
-      "difficulty"
+      "bugs"
     ],
     "canonical_theme": "일반 버그"
   },
@@ -32760,20 +32802,19 @@
     "is_low_quality": false,
     "is_profanity_only": false,
     "ambiguity_flags": [
-      "ambiguous_profanity"
+      "ambiguous_profanity",
+      "unclassified_included"
     ],
     "included_in_analysis": true,
     "rule_decision": "include",
-    "rule_confidence": 0.7383,
+    "rule_confidence": 0.5383,
     "llm_invoked": false,
     "llm_decision": null,
     "llm_confidence": null,
     "final_decision_source": "rule",
     "final_decision": "include",
-    "category_tags": [
-      "controls"
-    ],
-    "canonical_theme": "UI / 입력 불편"
+    "category_tags": [],
+    "canonical_theme": null
   },
   {
     "review_id": "208519909",
@@ -32790,18 +32831,18 @@
     "hangul_ratio": 1.0,
     "is_low_quality": false,
     "is_profanity_only": false,
-    "ambiguity_flags": [
-      "unclassified_included"
-    ],
+    "ambiguity_flags": [],
     "included_in_analysis": true,
     "rule_decision": "include",
-    "rule_confidence": 0.64,
+    "rule_confidence": 0.84,
     "llm_invoked": false,
     "llm_decision": null,
     "llm_confidence": null,
     "final_decision_source": "rule",
     "final_decision": "include",
-    "category_tags": [],
+    "category_tags": [
+      "monetization"
+    ],
     "canonical_theme": null
   },
   {
@@ -32891,13 +32932,12 @@
     "final_decision_source": "rule",
     "final_decision": "include",
     "category_tags": [
-      "performance",
       "graphics",
-      "gameplay",
       "monetization",
-      "controls"
+      "controls",
+      "save_progression"
     ],
-    "canonical_theme": "실행 불가 / 튕김"
+    "canonical_theme": "그래픽 / 비주얼 호평"
   },
   {
     "review_id": "208518969",
@@ -33213,7 +33253,8 @@
     "final_decision": "include",
     "category_tags": [
       "performance",
-      "story"
+      "story",
+      "monetization"
     ],
     "canonical_theme": "최적화 문제"
   },
@@ -33330,8 +33371,7 @@
     "final_decision_source": "rule",
     "final_decision": "include",
     "category_tags": [
-      "monetization",
-      "content_depth"
+      "monetization"
     ],
     "canonical_theme": "가격 / 과금 불만"
   },
@@ -33379,18 +33419,18 @@
     "hangul_ratio": 1.0,
     "is_low_quality": false,
     "is_profanity_only": false,
-    "ambiguity_flags": [
-      "unclassified_included"
-    ],
+    "ambiguity_flags": [],
     "included_in_analysis": true,
     "rule_decision": "include",
-    "rule_confidence": 0.5883,
+    "rule_confidence": 0.7883,
     "llm_invoked": false,
     "llm_decision": null,
     "llm_confidence": null,
     "final_decision_source": "rule",
     "final_decision": "include",
-    "category_tags": [],
+    "category_tags": [
+      "monetization"
+    ],
     "canonical_theme": null
   },
   {
@@ -33450,7 +33490,8 @@
     "final_decision": "include",
     "category_tags": [
       "performance",
-      "graphics"
+      "graphics",
+      "controls"
     ],
     "canonical_theme": "최적화 문제"
   },
@@ -33542,7 +33583,8 @@
       "story",
       "monetization",
       "multiplayer",
-      "difficulty",
+      "controls",
+      "content_depth",
       "building_ux",
       "save_progression"
     ],
@@ -33576,6 +33618,7 @@
     "final_decision": "include",
     "category_tags": [
       "bugs",
+      "monetization",
       "controls"
     ],
     "canonical_theme": "일반 버그"
@@ -33713,18 +33756,19 @@
     "hangul_ratio": 0.9666666666666667,
     "is_low_quality": false,
     "is_profanity_only": false,
-    "ambiguity_flags": [
-      "unclassified_included"
-    ],
+    "ambiguity_flags": [],
     "included_in_analysis": true,
     "rule_decision": "include",
-    "rule_confidence": 0.625,
+    "rule_confidence": 0.825,
     "llm_invoked": false,
     "llm_decision": null,
     "llm_confidence": null,
     "final_decision_source": "rule",
     "final_decision": "include",
-    "category_tags": [],
+    "category_tags": [
+      "monetization",
+      "multiplayer"
+    ],
     "canonical_theme": null
   },
   {
@@ -33814,6 +33858,7 @@
     "final_decision": "include",
     "category_tags": [
       "performance",
+      "monetization",
       "controls"
     ],
     "canonical_theme": "최적화 문제"
@@ -33845,6 +33890,8 @@
     "final_decision_source": "rule",
     "final_decision": "include",
     "category_tags": [
+      "performance",
+      "monetization",
       "controls"
     ],
     "canonical_theme": "UI / 입력 불편"
@@ -33903,9 +33950,9 @@
     "final_decision_source": "rule",
     "final_decision": "include",
     "category_tags": [
-      "performance"
+      "monetization"
     ],
-    "canonical_theme": "실행 불가 / 튕김"
+    "canonical_theme": null
   },
   {
     "review_id": "208485734",
@@ -33980,18 +34027,18 @@
     "hangul_ratio": 1.0,
     "is_low_quality": false,
     "is_profanity_only": false,
-    "ambiguity_flags": [
-      "unclassified_included"
-    ],
+    "ambiguity_flags": [],
     "included_in_analysis": true,
     "rule_decision": "include",
-    "rule_confidence": 0.6317,
+    "rule_confidence": 0.8317,
     "llm_invoked": false,
     "llm_decision": null,
     "llm_confidence": null,
     "final_decision_source": "rule",
     "final_decision": "include",
-    "category_tags": [],
+    "category_tags": [
+      "monetization"
+    ],
     "canonical_theme": null
   },
   {
@@ -34096,18 +34143,18 @@
     "hangul_ratio": 1.0,
     "is_low_quality": false,
     "is_profanity_only": false,
-    "ambiguity_flags": [
-      "unclassified_included"
-    ],
+    "ambiguity_flags": [],
     "included_in_analysis": true,
     "rule_decision": "include",
-    "rule_confidence": 0.6217,
+    "rule_confidence": 0.8217,
     "llm_invoked": false,
     "llm_decision": null,
     "llm_confidence": null,
     "final_decision_source": "rule",
     "final_decision": "include",
-    "category_tags": [],
+    "category_tags": [
+      "monetization"
+    ],
     "canonical_theme": null
   },
   {
@@ -34212,18 +34259,18 @@
     "hangul_ratio": 0.9629629629629629,
     "is_low_quality": false,
     "is_profanity_only": false,
-    "ambiguity_flags": [
-      "unclassified_included"
-    ],
+    "ambiguity_flags": [],
     "included_in_analysis": true,
     "rule_decision": "include",
-    "rule_confidence": 0.665,
+    "rule_confidence": 0.865,
     "llm_invoked": false,
     "llm_decision": null,
     "llm_confidence": null,
     "final_decision_source": "rule",
     "final_decision": "include",
-    "category_tags": [],
+    "category_tags": [
+      "building_ux"
+    ],
     "canonical_theme": null
   },
   {
@@ -34241,19 +34288,19 @@
     "hangul_ratio": 1.0,
     "is_low_quality": false,
     "is_profanity_only": false,
-    "ambiguity_flags": [],
+    "ambiguity_flags": [
+      "unclassified_included"
+    ],
     "included_in_analysis": true,
     "rule_decision": "include",
-    "rule_confidence": 0.825,
+    "rule_confidence": 0.625,
     "llm_invoked": false,
     "llm_decision": null,
     "llm_confidence": null,
     "final_decision_source": "rule",
     "final_decision": "include",
-    "category_tags": [
-      "controls"
-    ],
-    "canonical_theme": "UI / 입력 불편"
+    "category_tags": [],
+    "canonical_theme": null
   },
   {
     "review_id": "208480923",
@@ -34365,7 +34412,6 @@
     "final_decision_source": "rule",
     "final_decision": "include",
     "category_tags": [
-      "bugs",
       "controls"
     ],
     "canonical_theme": "조작감 문제"
@@ -34599,7 +34645,8 @@
     "final_decision_source": "rule",
     "final_decision": "include",
     "category_tags": [
-      "controls"
+      "controls",
+      "save_progression"
     ],
     "canonical_theme": null
   },
@@ -34773,6 +34820,7 @@
     "final_decision": "include",
     "category_tags": [
       "bugs",
+      "performance",
       "controls"
     ],
     "canonical_theme": "일반 버그"
@@ -34792,18 +34840,18 @@
     "hangul_ratio": 1.0,
     "is_low_quality": false,
     "is_profanity_only": false,
-    "ambiguity_flags": [
-      "unclassified_included"
-    ],
+    "ambiguity_flags": [],
     "included_in_analysis": true,
     "rule_decision": "include",
-    "rule_confidence": 0.59,
+    "rule_confidence": 0.79,
     "llm_invoked": false,
     "llm_decision": null,
     "llm_confidence": null,
     "final_decision_source": "rule",
     "final_decision": "include",
-    "category_tags": [],
+    "category_tags": [
+      "monetization"
+    ],
     "canonical_theme": null
   },
   {
@@ -34943,7 +34991,8 @@
     "final_decision_source": "rule",
     "final_decision": "include",
     "category_tags": [
-      "bugs"
+      "bugs",
+      "performance"
     ],
     "canonical_theme": "일반 버그"
   },
@@ -35047,18 +35096,18 @@
     "hangul_ratio": 1.0,
     "is_low_quality": false,
     "is_profanity_only": false,
-    "ambiguity_flags": [
-      "unclassified_included"
-    ],
+    "ambiguity_flags": [],
     "included_in_analysis": true,
     "rule_decision": "include",
-    "rule_confidence": 0.6017,
+    "rule_confidence": 0.8017,
     "llm_invoked": false,
     "llm_decision": null,
     "llm_confidence": null,
     "final_decision_source": "rule",
     "final_decision": "include",
-    "category_tags": [],
+    "category_tags": [
+      "save_progression"
+    ],
     "canonical_theme": null
   },
   {
@@ -35092,7 +35141,6 @@
       "story",
       "graphics",
       "controls",
-      "content_depth",
       "building_ux",
       "customization"
     ],
@@ -35126,6 +35174,7 @@
     "final_decision": "include",
     "category_tags": [
       "performance",
+      "monetization",
       "controls"
     ],
     "canonical_theme": "최적화 문제"
@@ -35385,7 +35434,8 @@
     "final_decision_source": "rule",
     "final_decision": "include",
     "category_tags": [
-      "performance"
+      "performance",
+      "monetization"
     ],
     "canonical_theme": "최적화 문제"
   },
@@ -35570,7 +35620,7 @@
     "review_id": "208473068",
     "appid": 3551340,
     "review_text": "[h1]그래픽 딸 하나 가지고 유저들 개돼지 취급하는 최악의 망작[/h1]\n\n인게임 그래픽, 전술 제외 모든면에서 전작보다 퇴보됨\n\nUI는 보다가 눈빠질거 같이 적응안되고 정신사납고 눈만 아프고\n[h3]경기 사이 하이라이트 30배를 했는데도 진행이 전작들에 비해 미친듯이 느려서 한게임 한게임 시간이 너무 오래걸림[/h3]\n처음엔 버그인줄 알았는데 의도 한거라는 얘기 듣고 걍 일말의 정나미마저 떨어짐\n\nFM 진짜 시리즈 하나 잡으면 평균 1000시간 박는데 신작이라는게 2시간만에 그냥 하기 싫게 만듦 \n전술 짜본다고 플탐 2시간 넘겨서 환불도 안되는 내 잘못이지 ㅋㅋㅋ\n\n다른 시뮬 게임들이랑 차별점을 둬야지 오히려 [u]여자축구[/u]니 뭐니 하면서 퇴보하고 있고 이딴게 2년만에 나온 결과라면 앞으로 FM은 쳐다도 안볼 듯 \n가뜩이나 로스터도 신작 낼때만 업데이트 하면서 이따구로 하는건 얘네들이 유저를 얼마나 개돼지 취급 하는지 잘 보여준다고 생각함\n\n뭐 UI 패치한다고 했는데 이게 심각한지도 모르고 출시한 제작사한테 정상화는 기대도 안 함\n\n유저 스킨 패치나 UI 패치가 나올지 안나올지 조차 모르겠지만 나온다면 그때 복귀할 듯",
-    "normalized_text": "[h1]그래픽 딸 하나 가지고 유저들 개돼지 취급하는 최악의 망작[/h1] 인게임 그래픽, 전술 제외 모든면에서 전작보다 퇴보됨 UI는 보다가 눈빠질거 같이 적응안되고 정신사납고 눈만 아프고 [h3]경기 사이 하이라이트 30배를 했는데도 진행이 전작들에 비해 미친듯이 느려서 한게임 한게임 시간이 너무 오래걸림[/h3] 처음엔 버그인줄 알았는데 의도 한거라는 얘기 듣고 걍 일말의 정나미마저 떨어짐 FM 진짜 시리즈 하나 잡으면 평균 1000시간 박는데 신작이라는게 2시간만에 그냥 하기 싫게 만듦 전술 짜본다고 플탐 2시간 넘겨서 환불도 안되는 내 잘못이지 ㅋㅋㅋ 다른 시뮬 게임들이랑 차별점을 둬야지 오히려 [u]여자축구[/u]니 뭐니 하면서 퇴보하고 있고 이딴게 2년만에 나온 결과라면 앞으로 FM은 쳐다도 안볼 듯 가뜩이나 로스터도 신작 낼때만 업데이트 하면서 이따구로 하는건 얘네들이 유저를 얼마나 개돼지 취급 하는지 잘 보여준다고 생각함 뭐 UI 패치한다고 했는데 이게 심각한지도 모르고 출시한 제작사한테 정상화는 기대도 안 함 유저 스킨 패치나 UI 패치가 나올지 안나올지 조차 모르겠지만 나온다면 그때 복귀할 듯",
+    "normalized_text": "그래픽 딸 하나 가지고 유저들 개돼지 취급하는 최악의 망작 인게임 그래픽, 전술 제외 모든면에서 전작보다 퇴보됨 UI는 보다가 눈빠질거 같이 적응안되고 정신사납고 눈만 아프고 경기 사이 하이라이트 30배를 했는데도 진행이 전작들에 비해 미친듯이 느려서 한게임 한게임 시간이 너무 오래걸림 처음엔 버그인줄 알았는데 의도 한거라는 얘기 듣고 걍 일말의 정나미마저 떨어짐 FM 진짜 시리즈 하나 잡으면 평균 1000시간 박는데 신작이라는게 2시간만에 그냥 하기 싫게 만듦 전술 짜본다고 플탐 2시간 넘겨서 환불도 안되는 내 잘못이지 ㅋㅋㅋ 다른 시뮬 게임들이랑 차별점을 둬야지 오히려 여자축구 니 뭐니 하면서 퇴보하고 있고 이딴게 2년만에 나온 결과라면 앞으로 FM은 쳐다도 안볼 듯 가뜩이나 로스터도 신작 낼때만 업데이트 하면서 이따구로 하는건 얘네들이 유저를 얼마나 개돼지 취급 하는지 잘 보여준다고 생각함 뭐 UI 패치한다고 했는데 이게 심각한지도 모르고 출시한 제작사한테 정상화는 기대도 안 함 유저 스킨 패치나 UI 패치가 나올지 안나올지 조차 모르겠지만 나온다면 그때 복귀할 듯",
     "voted_up": false,
     "timestamp_created": 1762348268,
     "timestamp_updated": 1762348320,
@@ -35578,7 +35628,7 @@
     "playtime_at_review_hours": 2.35,
     "num_reviews": 1,
     "author_steamid": "76561198263474934",
-    "hangul_ratio": 0.9241706161137441,
+    "hangul_ratio": 0.9466019417475728,
     "is_low_quality": false,
     "is_profanity_only": false,
     "ambiguity_flags": [
@@ -35595,7 +35645,9 @@
     "category_tags": [
       "bugs",
       "graphics",
+      "monetization",
       "controls",
+      "content_depth",
       "customization"
     ],
     "canonical_theme": "일반 버그"
@@ -35626,7 +35678,6 @@
     "final_decision": "include",
     "category_tags": [
       "bugs",
-      "performance",
       "controls",
       "customization"
     ],
@@ -35707,18 +35758,18 @@
     "hangul_ratio": 0.9305555555555556,
     "is_low_quality": false,
     "is_profanity_only": false,
-    "ambiguity_flags": [
-      "unclassified_included"
-    ],
+    "ambiguity_flags": [],
     "included_in_analysis": true,
     "rule_decision": "include",
-    "rule_confidence": 0.695,
+    "rule_confidence": 0.895,
     "llm_invoked": false,
     "llm_decision": null,
     "llm_confidence": null,
     "final_decision_source": "rule",
     "final_decision": "include",
-    "category_tags": [],
+    "category_tags": [
+      "monetization"
+    ],
     "canonical_theme": null
   },
   {
@@ -36117,18 +36168,18 @@
     "hangul_ratio": 0.9223300970873787,
     "is_low_quality": false,
     "is_profanity_only": false,
-    "ambiguity_flags": [
-      "unclassified_included"
-    ],
+    "ambiguity_flags": [],
     "included_in_analysis": true,
     "rule_decision": "include",
-    "rule_confidence": 0.7467,
+    "rule_confidence": 0.9467,
     "llm_invoked": false,
     "llm_decision": null,
     "llm_confidence": null,
     "final_decision_source": "rule",
     "final_decision": "include",
-    "category_tags": [],
+    "category_tags": [
+      "performance"
+    ],
     "canonical_theme": null
   },
   {
@@ -36146,18 +36197,18 @@
     "hangul_ratio": 0.75,
     "is_low_quality": false,
     "is_profanity_only": false,
-    "ambiguity_flags": [
-      "unclassified_included"
-    ],
+    "ambiguity_flags": [],
     "included_in_analysis": true,
     "rule_decision": "include",
-    "rule_confidence": 0.5642,
+    "rule_confidence": 0.7642,
     "llm_invoked": false,
     "llm_decision": null,
     "llm_confidence": null,
     "final_decision_source": "rule",
     "final_decision": "include",
-    "category_tags": [],
+    "category_tags": [
+      "monetization"
+    ],
     "canonical_theme": null
   },
   {
@@ -36216,10 +36267,9 @@
     "final_decision_source": "rule",
     "final_decision": "include",
     "category_tags": [
-      "controls",
       "save_progression"
     ],
-    "canonical_theme": "UI / 입력 불편"
+    "canonical_theme": "저장 / 세이브 손실"
   },
   {
     "review_id": "208470525",
@@ -36276,7 +36326,8 @@
     "final_decision": "include",
     "category_tags": [
       "bugs",
-      "controls"
+      "controls",
+      "content_depth"
     ],
     "canonical_theme": "일반 버그"
   },
@@ -36557,18 +36608,18 @@
     "hangul_ratio": 0.8674698795180723,
     "is_low_quality": false,
     "is_profanity_only": false,
-    "ambiguity_flags": [
-      "unclassified_included"
-    ],
+    "ambiguity_flags": [],
     "included_in_analysis": true,
     "rule_decision": "include",
-    "rule_confidence": 0.7052,
+    "rule_confidence": 0.9052,
     "llm_invoked": false,
     "llm_decision": null,
     "llm_confidence": null,
     "final_decision_source": "rule",
     "final_decision": "include",
-    "category_tags": [],
+    "category_tags": [
+      "monetization"
+    ],
     "canonical_theme": null
   },
   {
@@ -36770,7 +36821,6 @@
     "final_decision": "include",
     "category_tags": [
       "bugs",
-      "performance",
       "controls"
     ],
     "canonical_theme": "일반 버그"
@@ -37077,18 +37127,18 @@
     "hangul_ratio": 1.0,
     "is_low_quality": false,
     "is_profanity_only": false,
-    "ambiguity_flags": [],
+    "ambiguity_flags": [
+      "unclassified_included"
+    ],
     "included_in_analysis": true,
     "rule_decision": "include",
-    "rule_confidence": 0.845,
+    "rule_confidence": 0.645,
     "llm_invoked": false,
     "llm_decision": null,
     "llm_confidence": null,
     "final_decision_source": "rule",
     "final_decision": "include",
-    "category_tags": [
-      "bugs"
-    ],
+    "category_tags": [],
     "canonical_theme": null
   },
   {
@@ -37229,7 +37279,9 @@
     "final_decision": "include",
     "category_tags": [
       "bugs",
-      "controls"
+      "controls",
+      "content_depth",
+      "building_ux"
     ],
     "canonical_theme": "충돌 / 크래시"
   },
@@ -37565,18 +37617,18 @@
     "hangul_ratio": 0.9705882352941176,
     "is_low_quality": false,
     "is_profanity_only": false,
-    "ambiguity_flags": [
-      "unclassified_included"
-    ],
+    "ambiguity_flags": [],
     "included_in_analysis": true,
     "rule_decision": "include",
-    "rule_confidence": 0.6317,
+    "rule_confidence": 0.8317,
     "llm_invoked": false,
     "llm_decision": null,
     "llm_confidence": null,
     "final_decision_source": "rule",
     "final_decision": "include",
-    "category_tags": [],
+    "category_tags": [
+      "controls"
+    ],
     "canonical_theme": null
   },
   {
@@ -37782,6 +37834,7 @@
     "final_decision": "include",
     "category_tags": [
       "graphics",
+      "monetization",
       "controls"
     ],
     "canonical_theme": "그래픽 / 비주얼 호평"
@@ -37989,8 +38042,7 @@
     "final_decision_source": "rule",
     "final_decision": "include",
     "category_tags": [
-      "bugs",
-      "controls"
+      "bugs"
     ],
     "canonical_theme": "일반 버그"
   },
@@ -38169,6 +38221,7 @@
     "final_decision_source": "rule",
     "final_decision": "include",
     "category_tags": [
+      "monetization",
       "controls"
     ],
     "canonical_theme": "UI / 입력 불편"
@@ -38484,7 +38537,9 @@
     "category_tags": [
       "performance",
       "story",
-      "graphics"
+      "graphics",
+      "gameplay",
+      "monetization"
     ],
     "canonical_theme": "최적화 문제"
   },
@@ -38514,7 +38569,7 @@
     "final_decision": "include",
     "category_tags": [
       "bugs",
-      "multiplayer"
+      "performance"
     ],
     "canonical_theme": "일반 버그"
   },
@@ -38719,7 +38774,8 @@
     "final_decision_source": "rule",
     "final_decision": "include",
     "category_tags": [
-      "controls"
+      "controls",
+      "content_depth"
     ],
     "canonical_theme": null
   },
@@ -39146,18 +39202,18 @@
     "hangul_ratio": 1.0,
     "is_low_quality": false,
     "is_profanity_only": false,
-    "ambiguity_flags": [
-      "unclassified_included"
-    ],
+    "ambiguity_flags": [],
     "included_in_analysis": true,
     "rule_decision": "include",
-    "rule_confidence": 0.5817,
+    "rule_confidence": 0.7817,
     "llm_invoked": false,
     "llm_decision": null,
     "llm_confidence": null,
     "final_decision_source": "rule",
     "final_decision": "include",
-    "category_tags": [],
+    "category_tags": [
+      "monetization"
+    ],
     "canonical_theme": null
   },
   {
@@ -39212,8 +39268,8 @@
     "final_decision_source": "rule",
     "final_decision": "include",
     "category_tags": [
-      "bugs",
-      "story"
+      "story",
+      "monetization"
     ],
     "canonical_theme": "스토리 / 서사 몰입"
   },
@@ -39304,7 +39360,9 @@
     "category_tags": [
       "bugs",
       "story",
-      "controls"
+      "monetization",
+      "controls",
+      "content_depth"
     ],
     "canonical_theme": "일반 버그"
   },
@@ -40731,7 +40789,7 @@
     "final_decision_source": "rule",
     "final_decision": "include",
     "category_tags": [
-      "bugs"
+      "monetization"
     ],
     "canonical_theme": null
   },
@@ -40808,18 +40866,18 @@
     "hangul_ratio": 0.9130434782608695,
     "is_low_quality": false,
     "is_profanity_only": false,
-    "ambiguity_flags": [
-      "unclassified_included"
-    ],
+    "ambiguity_flags": [],
     "included_in_analysis": true,
     "rule_decision": "include",
-    "rule_confidence": 0.6133,
+    "rule_confidence": 0.8133,
     "llm_invoked": false,
     "llm_decision": null,
     "llm_confidence": null,
     "final_decision_source": "rule",
     "final_decision": "include",
-    "category_tags": [],
+    "category_tags": [
+      "monetization"
+    ],
     "canonical_theme": null
   },
   {
@@ -41110,7 +41168,6 @@
     "final_decision": "include",
     "category_tags": [
       "bugs",
-      "difficulty",
       "controls"
     ],
     "canonical_theme": "일반 버그"
@@ -41249,19 +41306,19 @@
     "hangul_ratio": 0.9090909090909091,
     "is_low_quality": false,
     "is_profanity_only": false,
-    "ambiguity_flags": [],
+    "ambiguity_flags": [
+      "unclassified_included"
+    ],
     "included_in_analysis": true,
     "rule_decision": "include",
-    "rule_confidence": 0.975,
+    "rule_confidence": 0.775,
     "llm_invoked": false,
     "llm_decision": null,
     "llm_confidence": null,
     "final_decision_source": "rule",
     "final_decision": "include",
-    "category_tags": [
-      "controls"
-    ],
-    "canonical_theme": "UI / 입력 불편"
+    "category_tags": [],
+    "canonical_theme": null
   },
   {
     "review_id": "208452571",
@@ -41375,7 +41432,6 @@
     "final_decision_source": "rule",
     "final_decision": "include",
     "category_tags": [
-      "bugs",
       "difficulty",
       "controls",
       "customization"
@@ -41615,13 +41671,11 @@
     "final_decision": "include",
     "category_tags": [
       "bugs",
-      "performance",
       "graphics",
       "monetization",
       "controls",
       "content_depth",
-      "save_progression",
-      "mod_support"
+      "save_progression"
     ],
     "canonical_theme": "일반 버그"
   },
@@ -41797,7 +41851,8 @@
       "bugs",
       "story",
       "graphics",
-      "controls"
+      "controls",
+      "content_depth"
     ],
     "canonical_theme": "일반 버그"
   },
@@ -41888,7 +41943,6 @@
     "final_decision": "include",
     "category_tags": [
       "bugs",
-      "performance",
       "graphics",
       "difficulty",
       "controls",
@@ -42115,19 +42169,19 @@
     "hangul_ratio": 1.0,
     "is_low_quality": false,
     "is_profanity_only": false,
-    "ambiguity_flags": [],
+    "ambiguity_flags": [
+      "unclassified_included"
+    ],
     "included_in_analysis": true,
     "rule_decision": "include",
-    "rule_confidence": 0.8167,
+    "rule_confidence": 0.6167,
     "llm_invoked": false,
     "llm_decision": null,
     "llm_confidence": null,
     "final_decision_source": "rule",
     "final_decision": "include",
-    "category_tags": [
-      "controls"
-    ],
-    "canonical_theme": "UI / 입력 불편"
+    "category_tags": [],
+    "canonical_theme": null
   },
   {
     "review_id": "208448502",
@@ -42376,19 +42430,19 @@
     "hangul_ratio": 0.9886363636363636,
     "is_low_quality": false,
     "is_profanity_only": false,
-    "ambiguity_flags": [],
+    "ambiguity_flags": [
+      "unclassified_included"
+    ],
     "included_in_analysis": true,
     "rule_decision": "include",
-    "rule_confidence": 0.9217,
+    "rule_confidence": 0.7217,
     "llm_invoked": false,
     "llm_decision": null,
     "llm_confidence": null,
     "final_decision_source": "rule",
     "final_decision": "include",
-    "category_tags": [
-      "difficulty"
-    ],
-    "canonical_theme": "조작 / 규칙 학습 난이도"
+    "category_tags": [],
+    "canonical_theme": null
   },
   {
     "review_id": "208447289",
@@ -42533,7 +42587,8 @@
       "performance",
       "multiplayer",
       "localization",
-      "controls"
+      "controls",
+      "building_ux"
     ],
     "canonical_theme": "일반 버그"
   },
@@ -42707,6 +42762,7 @@
     "category_tags": [
       "story",
       "graphics",
+      "monetization",
       "controls"
     ],
     "canonical_theme": "스토리 / 서사 몰입"
@@ -42804,7 +42860,8 @@
     "category_tags": [
       "performance",
       "graphics",
-      "controls"
+      "controls",
+      "content_depth"
     ],
     "canonical_theme": "최적화 문제"
   },
@@ -42950,7 +43007,8 @@
     "final_decision_source": "rule",
     "final_decision": "include",
     "category_tags": [
-      "bugs"
+      "bugs",
+      "content_depth"
     ],
     "canonical_theme": "일반 버그"
   },
@@ -43356,6 +43414,7 @@
     "final_decision": "include",
     "category_tags": [
       "bugs",
+      "monetization",
       "controls"
     ],
     "canonical_theme": "일반 버그"
@@ -43534,7 +43593,8 @@
     "final_decision_source": "rule",
     "final_decision": "include",
     "category_tags": [
-      "monetization"
+      "monetization",
+      "multiplayer"
     ],
     "canonical_theme": "가격 / 과금 불만"
   },
@@ -43688,6 +43748,7 @@
     "category_tags": [
       "bugs",
       "story",
+      "gameplay",
       "difficulty",
       "controls"
     ],
@@ -43722,7 +43783,6 @@
       "performance",
       "graphics",
       "monetization",
-      "multiplayer",
       "controls"
     ],
     "canonical_theme": "일반 버그"
@@ -43918,19 +43978,19 @@
     "hangul_ratio": 0.9402985074626866,
     "is_low_quality": false,
     "is_profanity_only": false,
-    "ambiguity_flags": [],
+    "ambiguity_flags": [
+      "unclassified_included"
+    ],
     "included_in_analysis": true,
     "rule_decision": "include",
-    "rule_confidence": 0.975,
+    "rule_confidence": 0.775,
     "llm_invoked": false,
     "llm_decision": null,
     "llm_confidence": null,
     "final_decision_source": "rule",
     "final_decision": "include",
-    "category_tags": [
-      "controls"
-    ],
-    "canonical_theme": "UI / 입력 불편"
+    "category_tags": [],
+    "canonical_theme": null
   },
   {
     "review_id": "208440592",
@@ -44137,7 +44197,7 @@
     "final_decision": "include",
     "category_tags": [
       "bugs",
-      "controls"
+      "building_ux"
     ],
     "canonical_theme": "일반 버그"
   },
@@ -44166,7 +44226,8 @@
     "final_decision_source": "rule",
     "final_decision": "include",
     "category_tags": [
-      "monetization"
+      "monetization",
+      "content_depth"
     ],
     "canonical_theme": "가격 / 과금 불만"
   },
@@ -44629,7 +44690,8 @@
     "final_decision_source": "rule",
     "final_decision": "include",
     "category_tags": [
-      "story"
+      "story",
+      "monetization"
     ],
     "canonical_theme": "스토리 / 서사 몰입"
   },
@@ -44658,10 +44720,9 @@
     "final_decision_source": "rule",
     "final_decision": "include",
     "category_tags": [
-      "difficulty",
       "controls"
     ],
-    "canonical_theme": "조작 / 규칙 학습 난이도"
+    "canonical_theme": null
   },
   {
     "review_id": "208438616",
@@ -44809,7 +44870,8 @@
     "final_decision": "include",
     "category_tags": [
       "graphics",
-      "controls"
+      "controls",
+      "mod_support"
     ],
     "canonical_theme": "그래픽 / 비주얼 호평"
   },
@@ -44929,7 +44991,8 @@
       "story",
       "graphics",
       "difficulty",
-      "controls"
+      "controls",
+      "building_ux"
     ],
     "canonical_theme": "일반 버그"
   },
@@ -44988,7 +45051,6 @@
     "final_decision": "include",
     "category_tags": [
       "bugs",
-      "performance",
       "monetization",
       "localization",
       "controls",
@@ -45135,7 +45197,8 @@
     "final_decision_source": "rule",
     "final_decision": "include",
     "category_tags": [
-      "performance"
+      "performance",
+      "monetization"
     ],
     "canonical_theme": "최적화 문제"
   },
@@ -45284,7 +45347,8 @@
     "final_decision_source": "rule",
     "final_decision": "include",
     "category_tags": [
-      "controls"
+      "controls",
+      "save_progression"
     ],
     "canonical_theme": "UI / 입력 불편"
   },
@@ -45314,7 +45378,8 @@
     "final_decision": "include",
     "category_tags": [
       "bugs",
-      "monetization"
+      "monetization",
+      "content_depth"
     ],
     "canonical_theme": "일반 버그"
   },
@@ -45360,19 +45425,19 @@
     "hangul_ratio": 1.0,
     "is_low_quality": false,
     "is_profanity_only": false,
-    "ambiguity_flags": [],
+    "ambiguity_flags": [
+      "unclassified_included"
+    ],
     "included_in_analysis": true,
     "rule_decision": "include",
-    "rule_confidence": 0.785,
+    "rule_confidence": 0.585,
     "llm_invoked": false,
     "llm_decision": null,
     "llm_confidence": null,
     "final_decision_source": "rule",
     "final_decision": "include",
-    "category_tags": [
-      "controls"
-    ],
-    "canonical_theme": "UI / 입력 불편"
+    "category_tags": [],
+    "canonical_theme": null
   },
   {
     "review_id": "208434673",
@@ -45507,19 +45572,19 @@
     "hangul_ratio": 0.96,
     "is_low_quality": false,
     "is_profanity_only": false,
-    "ambiguity_flags": [],
+    "ambiguity_flags": [
+      "unclassified_included"
+    ],
     "included_in_analysis": true,
     "rule_decision": "include",
-    "rule_confidence": 0.9417,
+    "rule_confidence": 0.7417,
     "llm_invoked": false,
     "llm_decision": null,
     "llm_confidence": null,
     "final_decision_source": "rule",
     "final_decision": "include",
-    "category_tags": [
-      "content_depth"
-    ],
-    "canonical_theme": "반복 / 목적성 부족"
+    "category_tags": [],
+    "canonical_theme": null
   },
   {
     "review_id": "208434163",
@@ -45721,10 +45786,10 @@
     "final_decision": "include",
     "category_tags": [
       "bugs",
-      "performance",
       "graphics",
       "monetization",
-      "controls"
+      "controls",
+      "building_ux"
     ],
     "canonical_theme": "일반 버그"
   },
@@ -46002,18 +46067,18 @@
     "hangul_ratio": 0.9634146341463414,
     "is_low_quality": false,
     "is_profanity_only": false,
-    "ambiguity_flags": [
-      "unclassified_included"
-    ],
+    "ambiguity_flags": [],
     "included_in_analysis": true,
     "rule_decision": "include",
-    "rule_confidence": 0.7117,
+    "rule_confidence": 0.9117,
     "llm_invoked": false,
     "llm_decision": null,
     "llm_confidence": null,
     "final_decision_source": "rule",
     "final_decision": "include",
-    "category_tags": [],
+    "category_tags": [
+      "monetization"
+    ],
     "canonical_theme": null
   },
   {
@@ -46407,19 +46472,19 @@
     "hangul_ratio": 1.0,
     "is_low_quality": false,
     "is_profanity_only": false,
-    "ambiguity_flags": [],
+    "ambiguity_flags": [
+      "unclassified_included"
+    ],
     "included_in_analysis": true,
     "rule_decision": "include",
-    "rule_confidence": 0.82,
+    "rule_confidence": 0.62,
     "llm_invoked": false,
     "llm_decision": null,
     "llm_confidence": null,
     "final_decision_source": "rule",
     "final_decision": "include",
-    "category_tags": [
-      "controls"
-    ],
-    "canonical_theme": "UI / 입력 불편"
+    "category_tags": [],
+    "canonical_theme": null
   },
   {
     "review_id": "208427314",
@@ -46535,7 +46600,8 @@
     "category_tags": [
       "bugs",
       "graphics",
-      "controls"
+      "controls",
+      "save_progression"
     ],
     "canonical_theme": "일반 버그"
   },
@@ -46709,7 +46775,9 @@
     "final_decision": "include",
     "category_tags": [
       "bugs",
-      "controls"
+      "controls",
+      "content_depth",
+      "building_ux"
     ],
     "canonical_theme": "일반 버그"
   },
@@ -46797,6 +46865,7 @@
     "final_decision": "include",
     "category_tags": [
       "story",
+      "multiplayer",
       "controls",
       "save_progression"
     ],
@@ -47362,7 +47431,7 @@
     "review_id": "208416267",
     "appid": 3551340,
     "review_text": "[h1] 2년동안 시간들여서 똥 만들어놓음 [/h1]\r\n25는 26을 위해서 스킵한다고 할 때 진짜 기대했음. 26이 얼마나 재밌게 나올지.\r\n근데 막상 까놓고 보니까 완전 그냥 똥이네?\r\n그냥 하나부터 열까지 싹 다 불편해짐\r\n뭐 하나 할라고 하면 원래는 클릭 한번이면 되던게 클릭 세네번씩 해야하고, 심지어 인게임 에디터도 전작까지는 화면 하나에서 수정 다 됐는데 이것도 클릭 세네번씩 해야됨\r\n그리고 UI도 그냥 가시성이 ㅈ박아버림\r\n한 화면에 너무 많은 정보가 있으니까 뭐 하나도 눈에 들어오질 않음\r\n단 하나 칭찬?할거는 인게임 딱 하나. 근데 솔직히 유니티로 엔진 바뀐거면 이것보다 더 좋게 뽑을수도 있었을 것 같음.",
-    "normalized_text": "[h1] 2년동안 시간들여서 똥 만들어놓음 [/h1] 25는 26을 위해서 스킵한다고 할 때 진짜 기대했음. 26이 얼마나 재밌게 나올지. 근데 막상 까놓고 보니까 완전 그냥 똥이네? 그냥 하나부터 열까지 싹 다 불편해짐 뭐 하나 할라고 하면 원래는 클릭 한번이면 되던게 클릭 세네번씩 해야하고, 심지어 인게임 에디터도 전작까지는 화면 하나에서 수정 다 됐는데 이것도 클릭 세네번씩 해야됨 그리고 UI도 그냥 가시성이 ㅈ박아버림 한 화면에 너무 많은 정보가 있으니까 뭐 하나도 눈에 들어오질 않음 단 하나 칭찬?할거는 인게임 딱 하나. 근데 솔직히 유니티로 엔진 바뀐거면 이것보다 더 좋게 뽑을수도 있었을 것 같음.",
+    "normalized_text": "2년동안 시간들여서 똥 만들어놓음 25는 26을 위해서 스킵한다고 할 때 진짜 기대했음. 26이 얼마나 재밌게 나올지. 근데 막상 까놓고 보니까 완전 그냥 똥이네? 그냥 하나부터 열까지 싹 다 불편해짐 뭐 하나 할라고 하면 원래는 클릭 한번이면 되던게 클릭 세네번씩 해야하고, 심지어 인게임 에디터도 전작까지는 화면 하나에서 수정 다 됐는데 이것도 클릭 세네번씩 해야됨 그리고 UI도 그냥 가시성이 ㅈ박아버림 한 화면에 너무 많은 정보가 있으니까 뭐 하나도 눈에 들어오질 않음 단 하나 칭찬?할거는 인게임 딱 하나. 근데 솔직히 유니티로 엔진 바뀐거면 이것보다 더 좋게 뽑을수도 있었을 것 같음.",
     "voted_up": false,
     "timestamp_created": 1762283101,
     "timestamp_updated": 1762283101,
@@ -47370,7 +47439,7 @@
     "playtime_at_review_hours": 95.93,
     "num_reviews": 8,
     "author_steamid": "76561198148607858",
-    "hangul_ratio": 0.9426229508196722,
+    "hangul_ratio": 0.9583333333333334,
     "is_low_quality": false,
     "is_profanity_only": false,
     "ambiguity_flags": [
@@ -47445,7 +47514,8 @@
     "category_tags": [
       "bugs",
       "graphics",
-      "controls"
+      "controls",
+      "building_ux"
     ],
     "canonical_theme": "일반 버그"
   },
@@ -47535,6 +47605,7 @@
     "final_decision": "include",
     "category_tags": [
       "bugs",
+      "monetization",
       "controls"
     ],
     "canonical_theme": "일반 버그"
@@ -47730,18 +47801,18 @@
     "hangul_ratio": 0.8095238095238095,
     "is_low_quality": false,
     "is_profanity_only": false,
-    "ambiguity_flags": [
-      "unclassified_included"
-    ],
+    "ambiguity_flags": [],
     "included_in_analysis": true,
     "rule_decision": "include",
-    "rule_confidence": 0.5874,
+    "rule_confidence": 0.7874,
     "llm_invoked": false,
     "llm_decision": null,
     "llm_confidence": null,
     "final_decision_source": "rule",
     "final_decision": "include",
-    "category_tags": [],
+    "category_tags": [
+      "content_depth"
+    ],
     "canonical_theme": null
   },
   {
@@ -48031,8 +48102,6 @@
     "final_decision_source": "rule",
     "final_decision": "include",
     "category_tags": [
-      "bugs",
-      "performance",
       "balance",
       "graphics",
       "monetization",
@@ -48041,7 +48110,7 @@
       "controls",
       "save_progression"
     ],
-    "canonical_theme": "실행 불가 / 튕김"
+    "canonical_theme": "밸런스 불만"
   },
   {
     "review_id": "208411154",
@@ -48157,7 +48226,7 @@
     "category_tags": [
       "performance",
       "story",
-      "multiplayer"
+      "monetization"
     ],
     "canonical_theme": "최적화 문제"
   },
@@ -48187,6 +48256,7 @@
     "final_decision": "include",
     "category_tags": [
       "bugs",
+      "monetization",
       "controls"
     ],
     "canonical_theme": "일반 버그"
@@ -48235,19 +48305,19 @@
     "hangul_ratio": 0.8620689655172413,
     "is_low_quality": false,
     "is_profanity_only": false,
-    "ambiguity_flags": [],
+    "ambiguity_flags": [
+      "unclassified_included"
+    ],
     "included_in_analysis": true,
     "rule_decision": "include",
-    "rule_confidence": 0.8139,
+    "rule_confidence": 0.6139,
     "llm_invoked": false,
     "llm_decision": null,
     "llm_confidence": null,
     "final_decision_source": "rule",
     "final_decision": "include",
-    "category_tags": [
-      "controls"
-    ],
-    "canonical_theme": "UI / 입력 불편"
+    "category_tags": [],
+    "canonical_theme": null
   },
   {
     "review_id": "208410004",
@@ -48453,7 +48523,6 @@
     "category_tags": [
       "story",
       "graphics",
-      "multiplayer",
       "controls",
       "customization"
     ],
@@ -48602,6 +48671,7 @@
       "bugs",
       "graphics",
       "monetization",
+      "multiplayer",
       "controls"
     ],
     "canonical_theme": "일반 버그"
@@ -48695,7 +48765,7 @@
     "review_id": "208408341",
     "appid": 3551340,
     "review_text": "[h2] 개발진의 무능력 + 병신 같은 상황판단의 환장의 컬래버레이션 [/h2]\n\n[h2] 1. 개발진의 무능력 [/h2]\n\n 작년 에펨25의 개발이 취소되면서 2년이란 시간을 벌었지만 유니티엔진(세상에서 가장 널리 쓰이는 게임 개발툴)으로 이 따위 수준의 결과물을 내놓는게 대단할 지경입니다.\n\n 이전 시리즈의 세로 배열의 직관적인 메뉴 구성을 버리고, 가로 배열로 메뉴를 구성했는데 자기들 딴에는 \"스마트\", \"혁신\"이니 포장하지만 결국은 이전 세부 메뉴들을 더욱 복잡하게 배치하고 일부 삭제한게 전부입니다.\n\n 게다가 가벼운 유니티 엔진으로 메뉴를 제작했는데 왜 선딜레이 0.5초, 후딜레이 0.5초가 생기는지 이해도 못하겠고, 구성 요소들도 서로 열과 행이 맞지 않아서 삐쭉빼쭉한 부분이 수두룩하며, 버튼의 클릭 영역도 여기저기 죄다 달라서 창을 열거나 닫거나 할 때 몇번씩이나 반복해서 메뉴을 클릭을 해야 합니다.(저장이 안되거나 크래쉬덤프 등으로 강제종료 되는 \"기본적인 버그\"는 제외)\n\n 이러한 기능적인 조잡함에 적응하더라도 구성 자체가 폴더 아래 다시 폴더를 넣어두는 카테고리 방식이라서 필요한 항목을 찾아보기 위해서는 몇번씩이나 폴더들을 들락거려야 합니다.\n\n 기본적으로 에펨은 다양한 정보를 비교 확인해야 하는 매니지먼트 시뮬레이션 게임입니다.\n\n 이런 시뮬레이션 게임에서 어떻게 햄버거 가게의 키오스크 같은 인박스 형식의 메뉴 구성을 생각했는지 의아할 따름니다.\n\n 선수를 영입하고 전술을 구상함에 있어서도 다양한 자료와 경기기록 등을 읽고 그걸 토대로 결정을 내려야 하지만, 정보를 보는 곳도 없고... 그리고 그러한 정보가 있다고 하더라도 그걸 적용시키는 화면은 다른 폴더를 찾아 들어가야 합니다.\n\n 화장실에서 똥 싸고 있는데, 화장지는 뒷베란다에 걸려 있습니다.\n\n 애초에 게임을 제대로 오랜 시간 플레이 해봤다면 이런 식의 메뉴 구성을 생각할 수가 없습니다.\n(이런 키오스크 방식의 메뉴 구성은 이후 서술할 2번-병신 같은 상황판단에서 기인합니다)\n\n 최신 모션 캡쳐로 만들어진 3D 인게임 화면 자체는 만족스럽습니다.\n\n 이전에는 볼 수 없었던 다양한 움직임과 조금 더 실제에 가까워진 표현으로 확실히 보는 맛이 좋아졌습니다... 만.\n\n 매치엔진의 아케이드성이 너무 강해서 26.3 버전이 나오기 전까지는 전술의 접근이나 분석은 어려워 보입니다.\n(앞서 말한 경기기록을 보여주지 않는다는 점과 맞물려서 자신의 전술이 제대로 통하고 있는지 조차 알 수 없습니다.)\n\n 패스 능력치 10 짜리 선수가 아놀트를 빙의해서 100M 짜리 대륙횡단 롱패스를 날려주면, 드리블 능력치 10 짜리 선수가 그 공을 잡아서 호날두처럼 상대 선수 2명을 제치면서 골대 옆으로 파고 듭니다.\n\n 그리고 이어지는 각도가 좁은 구석에서 반대쪽 그물을 바라보고 무각슈팅을 날리지만, 골대를 맞추면서 경기장 밖으로 튕겨나갑니다.\n\n 이런 상황이 한두번이 아니라 매경기 계속해서 끊임없이 발생합니다.\n\n 처음 한두번은 보는 재미가 있을지 모르지만, 패스를 짧게 해도 알론소의 대지를 가르는 패스 발동, 드리블을 자제시켜도 메시 빙의해서 3~4명 드리블돌파... 이런 상황이 계속 됩니다.\n\n\"전 세계 유저들아 해줘!\"를 통해 피드백을 받으면 언젠가는 개선되겠지만, 매년 이 모양인게 참 씁쓸합니다.\n\n\n[h2] 2. 병신 같은 상황판단 [/h2]\n\n신장의 야망, 삼국지, 그리고 최근의 문명... 모두 시대를 주름 잡았던 시뮬레이션 게임이었습니다.\n\n그리고 어설프게 콘솔화, 모바일화를 진행하다가 대차게 말아먹었다는 공통점이 있습니다.\n\n디아블로의 \"님폰없?\" 사태처럼 모바일화, 콘솔화에 집착하여 거기에만 맞춰 UI를 제작한다든지, 기존의 코어 유저층의 바람과는 맞지 않는 방향성을 가지고 개발이 진행된다든지 그 결과는 대부분이 좋지 않게 끝났습니다.\n\n에펨26의 베타를 플레이했던 유저들은 다들 알겠지만, 이전까지 편하게 사용했던 스페이스바를 눌러서 메시지를 넘기는 방식을 바꾼 것도 이러한 콘솔화, 모바일 버전을 위한 밑그림입니다.\n\n새로운 신규유저를 유입시키기 위해서 쉬운 접근방식, 그리고 시각적으로 예쁜 디자인 등을 노리고 바꾼 UI였지만, 현상유지는 고사하고 크게 실패한 결과물이 바로 에펨26입니다.\n\n기존의 코어 유저층이 어떤 방식으로 에펨을 즐기는지에 대한 고민도 전혀 없이 그냥 햄버거 가게의 키오스크처럼 터치, 터치를 통해 게임을 진행하도록 하면 좋아하겠지? 라는 단순한 접근법으로 탄생한 UI입니다.\n\n이런 키오스크 방식의 딸깍딸깍으로 진행할 수 있도록 만든건 콘솔화, 모바일버전 등을 통해 추가적인 수익을 만들기 위해서입니다.\n\n[u] 정식버전 출시일에 같이 풀린 콘솔 버전을 확인해보면 아시겠지만, \"이적자금 3000억 당장 받으세요!\" 단돈 6,799원! 과 같은 인앱결제 항목이 있습니다.[/u]\n\n이렇게 추가적인 인앱구매를 위해서 기존의 매니지먼트 시뮬레이션 게임을 그냥 화면을 터치하는 모바일게임 구성처럼 바꾼 것입니다.\n\n아마도 개발진은 옆집의 FC처럼 엘링 홀란드 1성 9,900원! 주드 벨링엄 1성 9,900원! 강화실패 보석 11,900원! 이런것 까지 팔고 싶었을지도 모르겠습니다.\n\n개발과 사업 방향성이 대충 예상되는 바, 이제 우리가 알던 Football manager 는 더이상 없을지도 모르겠습니다.",
-    "normalized_text": "[h2] 개발진의 무능력 + 병신 같은 상황판단의 환장의 컬래버레이션 [/h2] [h2] 1. 개발진의 무능력 [/h2] 작년 에펨25의 개발이 취소되면서 2년이란 시간을 벌었지만 유니티엔진(세상에서 가장 널리 쓰이는 게임 개발툴)으로 이 따위 수준의 결과물을 내놓는게 대단할 지경입니다. 이전 시리즈의 세로 배열의 직관적인 메뉴 구성을 버리고, 가로 배열로 메뉴를 구성했는데 자기들 딴에는 \"스마트\", \"혁신\"이니 포장하지만 결국은 이전 세부 메뉴들을 더욱 복잡하게 배치하고 일부 삭제한게 전부입니다. 게다가 가벼운 유니티 엔진으로 메뉴를 제작했는데 왜 선딜레이 0.5초, 후딜레이 0.5초가 생기는지 이해도 못하겠고, 구성 요소들도 서로 열과 행이 맞지 않아서 삐쭉빼쭉한 부분이 수두룩하며, 버튼의 클릭 영역도 여기저기 죄다 달라서 창을 열거나 닫거나 할 때 몇번씩이나 반복해서 메뉴을 클릭을 해야 합니다.(저장이 안되거나 크래쉬덤프 등으로 강제종료 되는 \"기본적인 버그\"는 제외) 이러한 기능적인 조잡함에 적응하더라도 구성 자체가 폴더 아래 다시 폴더를 넣어두는 카테고리 방식이라서 필요한 항목을 찾아보기 위해서는 몇번씩이나 폴더들을 들락거려야 합니다. 기본적으로 에펨은 다양한 정보를 비교 확인해야 하는 매니지먼트 시뮬레이션 게임입니다. 이런 시뮬레이션 게임에서 어떻게 햄버거 가게의 키오스크 같은 인박스 형식의 메뉴 구성을 생각했는지 의아할 따름니다. 선수를 영입하고 전술을 구상함에 있어서도 다양한 자료와 경기기록 등을 읽고 그걸 토대로 결정을 내려야 하지만, 정보를 보는 곳도 없고... 그리고 그러한 정보가 있다고 하더라도 그걸 적용시키는 화면은 다른 폴더를 찾아 들어가야 합니다. 화장실에서 똥 싸고 있는데, 화장지는 뒷베란다에 걸려 있습니다. 애초에 게임을 제대로 오랜 시간 플레이 해봤다면 이런 식의 메뉴 구성을 생각할 수가 없습니다. (이런 키오스크 방식의 메뉴 구성은 이후 서술할 2번-병신 같은 상황판단에서 기인합니다) 최신 모션 캡쳐로 만들어진 3D 인게임 화면 자체는 만족스럽습니다. 이전에는 볼 수 없었던 다양한 움직임과 조금 더 실제에 가까워진 표현으로 확실히 보는 맛이 좋아졌습니다... 만. 매치엔진의 아케이드성이 너무 강해서 26.3 버전이 나오기 전까지는 전술의 접근이나 분석은 어려워 보입니다. (앞서 말한 경기기록을 보여주지 않는다는 점과 맞물려서 자신의 전술이 제대로 통하고 있는지 조차 알 수 없습니다.) 패스 능력치 10 짜리 선수가 아놀트를 빙의해서 100M 짜리 대륙횡단 롱패스를 날려주면, 드리블 능력치 10 짜리 선수가 그 공을 잡아서 호날두처럼 상대 선수 2명을 제치면서 골대 옆으로 파고 듭니다. 그리고 이어지는 각도가 좁은 구석에서 반대쪽 그물을 바라보고 무각슈팅을 날리지만, 골대를 맞추면서 경기장 밖으로 튕겨나갑니다. 이런 상황이 한두번이 아니라 매경기 계속해서 끊임없이 발생합니다. 처음 한두번은 보는 재미가 있을지 모르지만, 패스를 짧게 해도 알론소의 대지를 가르는 패스 발동, 드리블을 자제시켜도 메시 빙의해서 3~4명 드리블돌파... 이런 상황이 계속 됩니다. \"전 세계 유저들아 해줘!\"를 통해 피드백을 받으면 언젠가는 개선되겠지만, 매년 이 모양인게 참 씁쓸합니다. [h2] 2. 병신 같은 상황판단 [/h2] 신장의 야망, 삼국지, 그리고 최근의 문명... 모두 시대를 주름 잡았던 시뮬레이션 게임이었습니다. 그리고 어설프게 콘솔화, 모바일화를 진행하다가 대차게 말아먹었다는 공통점이 있습니다. 디아블로의 \"님폰없?\" 사태처럼 모바일화, 콘솔화에 집착하여 거기에만 맞춰 UI를 제작한다든지, 기존의 코어 유저층의 바람과는 맞지 않는 방향성을 가지고 개발이 진행된다든지 그 결과는 대부분이 좋지 않게 끝났습니다. 에펨26의 베타를 플레이했던 유저들은 다들 알겠지만, 이전까지 편하게 사용했던 스페이스바를 눌러서 메시지를 넘기는 방식을 바꾼 것도 이러한 콘솔화, 모바일 버전을 위한 밑그림입니다. 새로운 신규유저를 유입시키기 위해서 쉬운 접근방식, 그리고 시각적으로 예쁜 디자인 등을 노리고 바꾼 UI였지만, 현상유지는 고사하고 크게 실패한 결과물이 바로 에펨26입니다. 기존의 코어 유저층이 어떤 방식으로 에펨을 즐기는지에 대한 고민도 전혀 없이 그냥 햄버거 가게의 키오스크처럼 터치, 터치를 통해 게임을 진행하도록 하면 좋아하겠지? 라는 단순한 접근법으로 탄생한 UI입니다. 이런 키오스크 방식의 딸깍딸깍으로 진행할 수 있도록 만든건 콘솔화, 모바일버전 등을 통해 추가적인 수익을 만들기 위해서입니다. [u] 정식버전 출시일에 같이 풀린 콘솔 버전을 확인해보면 아시겠지만, \"이적자금 3000억 당장 받으세요!\" 단돈 6,799원! 과 같은 인앱결제 항목이 있습니다.[/u] 이렇게 추가적인 인앱구매를 위해서 기존의 매니지먼트 시뮬레이션 게임을 그냥 화면을 터치하는 모바일게임 구성처럼 바꾼 것입니다. 아마도 개발진은 옆집의 FC처럼 엘링 홀란드 1성 9,900원! 주드 벨링엄 1성 9,900원! 강화실패 보석 11,900원! 이런것 까지 팔고 싶었을지도 모르겠습니다. 개발과 사업 방향성이 대충 예상되는 바, 이제 우리가 알던 Football manager 는 더이상 없을지도 모르겠습니다.",
+    "normalized_text": "개발진의 무능력 + 병신 같은 상황판단의 환장의 컬래버레이션 1. 개발진의 무능력 작년 에펨25의 개발이 취소되면서 2년이란 시간을 벌었지만 유니티엔진(세상에서 가장 널리 쓰이는 게임 개발툴)으로 이 따위 수준의 결과물을 내놓는게 대단할 지경입니다. 이전 시리즈의 세로 배열의 직관적인 메뉴 구성을 버리고, 가로 배열로 메뉴를 구성했는데 자기들 딴에는 \"스마트\", \"혁신\"이니 포장하지만 결국은 이전 세부 메뉴들을 더욱 복잡하게 배치하고 일부 삭제한게 전부입니다. 게다가 가벼운 유니티 엔진으로 메뉴를 제작했는데 왜 선딜레이 0.5초, 후딜레이 0.5초가 생기는지 이해도 못하겠고, 구성 요소들도 서로 열과 행이 맞지 않아서 삐쭉빼쭉한 부분이 수두룩하며, 버튼의 클릭 영역도 여기저기 죄다 달라서 창을 열거나 닫거나 할 때 몇번씩이나 반복해서 메뉴을 클릭을 해야 합니다.(저장이 안되거나 크래쉬덤프 등으로 강제종료 되는 \"기본적인 버그\"는 제외) 이러한 기능적인 조잡함에 적응하더라도 구성 자체가 폴더 아래 다시 폴더를 넣어두는 카테고리 방식이라서 필요한 항목을 찾아보기 위해서는 몇번씩이나 폴더들을 들락거려야 합니다. 기본적으로 에펨은 다양한 정보를 비교 확인해야 하는 매니지먼트 시뮬레이션 게임입니다. 이런 시뮬레이션 게임에서 어떻게 햄버거 가게의 키오스크 같은 인박스 형식의 메뉴 구성을 생각했는지 의아할 따름니다. 선수를 영입하고 전술을 구상함에 있어서도 다양한 자료와 경기기록 등을 읽고 그걸 토대로 결정을 내려야 하지만, 정보를 보는 곳도 없고... 그리고 그러한 정보가 있다고 하더라도 그걸 적용시키는 화면은 다른 폴더를 찾아 들어가야 합니다. 화장실에서 똥 싸고 있는데, 화장지는 뒷베란다에 걸려 있습니다. 애초에 게임을 제대로 오랜 시간 플레이 해봤다면 이런 식의 메뉴 구성을 생각할 수가 없습니다. (이런 키오스크 방식의 메뉴 구성은 이후 서술할 2번-병신 같은 상황판단에서 기인합니다) 최신 모션 캡쳐로 만들어진 3D 인게임 화면 자체는 만족스럽습니다. 이전에는 볼 수 없었던 다양한 움직임과 조금 더 실제에 가까워진 표현으로 확실히 보는 맛이 좋아졌습니다... 만. 매치엔진의 아케이드성이 너무 강해서 26.3 버전이 나오기 전까지는 전술의 접근이나 분석은 어려워 보입니다. (앞서 말한 경기기록을 보여주지 않는다는 점과 맞물려서 자신의 전술이 제대로 통하고 있는지 조차 알 수 없습니다.) 패스 능력치 10 짜리 선수가 아놀트를 빙의해서 100M 짜리 대륙횡단 롱패스를 날려주면, 드리블 능력치 10 짜리 선수가 그 공을 잡아서 호날두처럼 상대 선수 2명을 제치면서 골대 옆으로 파고 듭니다. 그리고 이어지는 각도가 좁은 구석에서 반대쪽 그물을 바라보고 무각슈팅을 날리지만, 골대를 맞추면서 경기장 밖으로 튕겨나갑니다. 이런 상황이 한두번이 아니라 매경기 계속해서 끊임없이 발생합니다. 처음 한두번은 보는 재미가 있을지 모르지만, 패스를 짧게 해도 알론소의 대지를 가르는 패스 발동, 드리블을 자제시켜도 메시 빙의해서 3~4명 드리블돌파... 이런 상황이 계속 됩니다. \"전 세계 유저들아 해줘!\"를 통해 피드백을 받으면 언젠가는 개선되겠지만, 매년 이 모양인게 참 씁쓸합니다. 2. 병신 같은 상황판단 신장의 야망, 삼국지, 그리고 최근의 문명... 모두 시대를 주름 잡았던 시뮬레이션 게임이었습니다. 그리고 어설프게 콘솔화, 모바일화를 진행하다가 대차게 말아먹었다는 공통점이 있습니다. 디아블로의 \"님폰없?\" 사태처럼 모바일화, 콘솔화에 집착하여 거기에만 맞춰 UI를 제작한다든지, 기존의 코어 유저층의 바람과는 맞지 않는 방향성을 가지고 개발이 진행된다든지 그 결과는 대부분이 좋지 않게 끝났습니다. 에펨26의 베타를 플레이했던 유저들은 다들 알겠지만, 이전까지 편하게 사용했던 스페이스바를 눌러서 메시지를 넘기는 방식을 바꾼 것도 이러한 콘솔화, 모바일 버전을 위한 밑그림입니다. 새로운 신규유저를 유입시키기 위해서 쉬운 접근방식, 그리고 시각적으로 예쁜 디자인 등을 노리고 바꾼 UI였지만, 현상유지는 고사하고 크게 실패한 결과물이 바로 에펨26입니다. 기존의 코어 유저층이 어떤 방식으로 에펨을 즐기는지에 대한 고민도 전혀 없이 그냥 햄버거 가게의 키오스크처럼 터치, 터치를 통해 게임을 진행하도록 하면 좋아하겠지? 라는 단순한 접근법으로 탄생한 UI입니다. 이런 키오스크 방식의 딸깍딸깍으로 진행할 수 있도록 만든건 콘솔화, 모바일버전 등을 통해 추가적인 수익을 만들기 위해서입니다. 정식버전 출시일에 같이 풀린 콘솔 버전을 확인해보면 아시겠지만, \"이적자금 3000억 당장 받으세요!\" 단돈 6,799원! 과 같은 인앱결제 항목이 있습니다. 이렇게 추가적인 인앱구매를 위해서 기존의 매니지먼트 시뮬레이션 게임을 그냥 화면을 터치하는 모바일게임 구성처럼 바꾼 것입니다. 아마도 개발진은 옆집의 FC처럼 엘링 홀란드 1성 9,900원! 주드 벨링엄 1성 9,900원! 강화실패 보석 11,900원! 이런것 까지 팔고 싶었을지도 모르겠습니다. 개발과 사업 방향성이 대충 예상되는 바, 이제 우리가 알던 Football manager 는 더이상 없을지도 모르겠습니다.",
     "voted_up": false,
     "timestamp_created": 1762277697,
     "timestamp_updated": 1762278270,
@@ -48703,7 +48773,7 @@
     "playtime_at_review_hours": 71.12,
     "num_reviews": 14,
     "author_steamid": "76561198009621930",
-    "hangul_ratio": 0.9515868746637978,
+    "hangul_ratio": 0.9588075880758807,
     "is_low_quality": false,
     "is_profanity_only": false,
     "ambiguity_flags": [
@@ -48720,8 +48790,8 @@
     "category_tags": [
       "bugs",
       "monetization",
-      "difficulty",
       "controls",
+      "content_depth",
       "building_ux",
       "save_progression"
     ],
@@ -48731,7 +48801,7 @@
     "review_id": "208407828",
     "appid": 3551340,
     "review_text": "[h1] 개발진들이 게임을 하지 않고 보여주기식 개발을 하면 탄생하는 물건  [/h1]\n\n\n\n배짱장사 분야에서 최고 전문가인 스포츠 인터랙티브에서\n\nFM 25 출시를 취소하고\n\n새롭게 유니티 엔진 (후술할 최적화와 이어지는 단점으로 이어짐)으로 전부 바꾸면서 \n\n야심차게 내놓은 FM 26.\n\n마케팅 및 개발진 방송에서 보여 주듯이 \n\n게임 자체는 겉으로 보기엔 새롭게 일신된 모습과\n\n발전된 그래픽, 그리고 나름 실제 라이센스를 따려고 노력한 모습 등이 겹쳐 \n \n출시 전에는 나름 긍정적인 여론이 생기나 했으나\n\n연이은 베타동안 \n\n시뮬레이션 게임의 본질을 망각한 처참한 꼬라지의 물건을 직접 마주하니 \n\n개발진이 게임을 30분이라도\n\n직접  했는지 의심이 되는 부분이 상당히 많다\n\n\n\n1. 유니티 엔진의 명과 암\n\n유니티 엔진으로 바꾸면서 기존 엔진보다 게임이 비쥬얼적으로는 나아진 것이 맞다\n\n선수들 움직임과 관련된 애니메이션도 상당히 개선되었고 \n\n바둑알, 목각인형을 거치면서 드디어 사람 다운 무언가로 바뀌면서 경기 몰입감이 보다 배가 되었다\n\n다만 유니티 엔진의 단점도 하나 같이 딸려왔는데 \n\n유니티 엔진은 싱글 스레딩 기반으로 설계된 엔진 자체의 한계로 \n\n타 엔진과 비교해서 멀티 스레딩 지원과 관련해서 개발자의 신중한 컨트롤이 필요한데\n\n림월드의 타이난같이 자신이 만든 게임에 큰 애정이 있는 사람도 \n\n적용하기 힘들어 하는 작업에\n\n스포츠 인터랙티브의 직원들이 그런 모습을 보여줄리는 전혀 없었기에\n\n게임은 시리즈 역사상 최악의 버벅임을 보여준다\n\n모든 리그 + 모든 데이터베이스 + 각종 리그 활성화를 해도 \n\nCPU, 메모리 사양만 충족되면 버벅임이 없었던 전작들과 달리\n\n시작하고 얼마 지나지 않아 \n\n탄산음료를 온 사방에 쳐 흘린 것 마냥 끈적한 미묘하고 불쾌한 딜레이가 생겼다.\n\n나름 불필요한 데이터를 쳐낸 유저 스킨들이나 몇몇 유저 패치를 통해 바로 고쳐지는 것을 보면\n\n엔진 자체의 한계도 있지만 그냥 개발진이 최적화를 그냥 안했다고 보는게 편하다.\n\n또한 UI 관련 유저 패치에서 이러한 불쾌한 딜레이가 줄어드는 것을 보아 \n\n후술할 UI 구조 및 로직과 관계가 있을 것으로 보임 \n\n\n\n2. 처참한 UI \n\n\n어지간한 시뮬레이션 게임, UI 불친절한 게임 거진 다 해봤는데\n\nFM 26만큼 불쾌한 클릭 동선과 \n\n각종 기능 숨기기로 무장한 게임을 찾기는 쉽지 않다\n \n처음에는 사람들에게 일부러 엿먹이려고 한건가 싶었는데 \n\n콘솔 / 모바일 버전도 갈수록 수익이 나다보니 그쪽 플랫폼들 기준으로 그냥 일괄로 이따구로 만든 듯 싶다가도\n\n팝업 형식의 UI는 모든 플랫폼에서도 불쾌할텐데\n\n도대체 어느 유저층을 타겟하여 개발한지 의문이 드는 UI.\n\n디렉터나 개발진들이 틀린 그림찾기를 엄청 좋아하는게 아닌 이상\n\n이런 불필요한 동선은 시뮬레이션 게임에서 유입 문제 + 피로도만 양산해서 하루 빨리 고쳐야한다고 본다.\n\n\n3. 버그 / 오역 제보는 왜 받는지 의문\n\n\n한국 기준으로 FM 시리즈는 시리즈 내내 각종 오역과 오타가 있었고\n\n이를 제보하는 국내 유저들에게도 선물도 주고 그랬었는데\n\n그런 것도 그냥 보여주기식 그 자체였다\n\n23~24에 있던 오역, 오타도 그대로 있는데 도대체 제보를 왜 받는건지 궁금하다\n\n버그도 마찬가지인데  \n\n시리즈 내내 방치하고 있는 루마니아 리그 버그는 물론이고\n\n베타 당시에 있던 각종 크래쉬를 그냥 방치하고 정식 출시했다.\n\n보통 베타는 핫픽스나 데이원 패치를 위해서 하는 것이 일반적인데\n\n유저들이 이런 것을 찾아주고 관련해서 소통하는 것만 좋아하고\n\n고칠 의지가 전혀 없다.\n\n\n4. '매니저' 게임이 맞는가\n\n\n앞선 경기 보는 즐거움은 늘었고\n\n마케팅 중 하나로 자리 잡았던 공격 / 수비 시 포메이션 등 요소는 괜찮다고 보지만\n\n문제는 시리즈 내내 중요했던 '매니저'의 역할이 대다수 삭제되었다.\n\n매치 중에 각종 스탯은 사라졌고, 경기 내 외침 기능도 삭제, 경기 도중 상대 선수 조회, 상대팀 정보,\n\n역할별 주요 능력치 강조, 보기 싶은 통계 선택, 라인업 저장, 임대 선수 기록 등등 \n\n이런 기능이 대부분 사라졌다\n\n시뮬레이션 게임에서 가장 중요한건 몰입인데\n\n비쥬얼적인 몰입 요소를 제외한 대부분의 몰입 요소가 그냥 거세되었다.\n\n\n\n장점\n\n+ 유니티 엔진으로 바뀌면서 매치 비쥬얼 자체는 향상됨\n\n단점\n\n- 불쾌한 딜레이 (유저 패치로 어느정도 해결 가능)\n- 틀린 그림 찾기 수준의 불쾌한 UI\n- 시뮬레이션 게임에 CPU 연산 부담 늘려주는 팝업 형식 UI \n- 전작에 있던 매니저 기능 대부분이 삭제됨\n- 전작에 있던 오역, 오타, 베타때 있던 버그 다 그대로 있음",
-    "normalized_text": "[h1] 개발진들이 게임을 하지 않고 보여주기식 개발을 하면 탄생하는 물건 [/h1] 배짱장사 분야에서 최고 전문가인 스포츠 인터랙티브에서 FM 25 출시를 취소하고 새롭게 유니티 엔진 (후술할 최적화와 이어지는 단점으로 이어짐)으로 전부 바꾸면서 야심차게 내놓은 FM 26. 마케팅 및 개발진 방송에서 보여 주듯이 게임 자체는 겉으로 보기엔 새롭게 일신된 모습과 발전된 그래픽, 그리고 나름 실제 라이센스를 따려고 노력한 모습 등이 겹쳐 출시 전에는 나름 긍정적인 여론이 생기나 했으나 연이은 베타동안 시뮬레이션 게임의 본질을 망각한 처참한 꼬라지의 물건을 직접 마주하니 개발진이 게임을 30분이라도 직접 했는지 의심이 되는 부분이 상당히 많다 1. 유니티 엔진의 명과 암 유니티 엔진으로 바꾸면서 기존 엔진보다 게임이 비쥬얼적으로는 나아진 것이 맞다 선수들 움직임과 관련된 애니메이션도 상당히 개선되었고 바둑알, 목각인형을 거치면서 드디어 사람 다운 무언가로 바뀌면서 경기 몰입감이 보다 배가 되었다 다만 유니티 엔진의 단점도 하나 같이 딸려왔는데 유니티 엔진은 싱글 스레딩 기반으로 설계된 엔진 자체의 한계로 타 엔진과 비교해서 멀티 스레딩 지원과 관련해서 개발자의 신중한 컨트롤이 필요한데 림월드의 타이난같이 자신이 만든 게임에 큰 애정이 있는 사람도 적용하기 힘들어 하는 작업에 스포츠 인터랙티브의 직원들이 그런 모습을 보여줄리는 전혀 없었기에 게임은 시리즈 역사상 최악의 버벅임을 보여준다 모든 리그 + 모든 데이터베이스 + 각종 리그 활성화를 해도 CPU, 메모리 사양만 충족되면 버벅임이 없었던 전작들과 달리 시작하고 얼마 지나지 않아 탄산음료를 온 사방에 쳐 흘린 것 마냥 끈적한 미묘하고 불쾌한 딜레이가 생겼다. 나름 불필요한 데이터를 쳐낸 유저 스킨들이나 몇몇 유저 패치를 통해 바로 고쳐지는 것을 보면 엔진 자체의 한계도 있지만 그냥 개발진이 최적화를 그냥 안했다고 보는게 편하다. 또한 UI 관련 유저 패치에서 이러한 불쾌한 딜레이가 줄어드는 것을 보아 후술할 UI 구조 및 로직과 관계가 있을 것으로 보임 2. 처참한 UI 어지간한 시뮬레이션 게임, UI 불친절한 게임 거진 다 해봤는데 FM 26만큼 불쾌한 클릭 동선과 각종 기능 숨기기로 무장한 게임을 찾기는 쉽지 않다 처음에는 사람들에게 일부러 엿먹이려고 한건가 싶었는데 콘솔 / 모바일 버전도 갈수록 수익이 나다보니 그쪽 플랫폼들 기준으로 그냥 일괄로 이따구로 만든 듯 싶다가도 팝업 형식의 UI는 모든 플랫폼에서도 불쾌할텐데 도대체 어느 유저층을 타겟하여 개발한지 의문이 드는 UI. 디렉터나 개발진들이 틀린 그림찾기를 엄청 좋아하는게 아닌 이상 이런 불필요한 동선은 시뮬레이션 게임에서 유입 문제 + 피로도만 양산해서 하루 빨리 고쳐야한다고 본다. 3. 버그 / 오역 제보는 왜 받는지 의문 한국 기준으로 FM 시리즈는 시리즈 내내 각종 오역과 오타가 있었고 이를 제보하는 국내 유저들에게도 선물도 주고 그랬었는데 그런 것도 그냥 보여주기식 그 자체였다 23~24에 있던 오역, 오타도 그대로 있는데 도대체 제보를 왜 받는건지 궁금하다 버그도 마찬가지인데 시리즈 내내 방치하고 있는 루마니아 리그 버그는 물론이고 베타 당시에 있던 각종 크래쉬를 그냥 방치하고 정식 출시했다. 보통 베타는 핫픽스나 데이원 패치를 위해서 하는 것이 일반적인데 유저들이 이런 것을 찾아주고 관련해서 소통하는 것만 좋아하고 고칠 의지가 전혀 없다. 4. '매니저' 게임이 맞는가 앞선 경기 보는 즐거움은 늘었고 마케팅 중 하나로 자리 잡았던 공격 / 수비 시 포메이션 등 요소는 괜찮다고 보지만 문제는 시리즈 내내 중요했던 '매니저'의 역할이 대다수 삭제되었다. 매치 중에 각종 스탯은 사라졌고, 경기 내 외침 기능도 삭제, 경기 도중 상대 선수 조회, 상대팀 정보, 역할별 주요 능력치 강조, 보기 싶은 통계 선택, 라인업 저장, 임대 선수 기록 등등 이런 기능이 대부분 사라졌다 시뮬레이션 게임에서 가장 중요한건 몰입인데 비쥬얼적인 몰입 요소를 제외한 대부분의 몰입 요소가 그냥 거세되었다. 장점 + 유니티 엔진으로 바뀌면서 매치 비쥬얼 자체는 향상됨 단점 - 불쾌한 딜레이 (유저 패치로 어느정도 해결 가능) - 틀린 그림 찾기 수준의 불쾌한 UI - 시뮬레이션 게임에 CPU 연산 부담 늘려주는 팝업 형식 UI - 전작에 있던 매니저 기능 대부분이 삭제됨 - 전작에 있던 오역, 오타, 베타때 있던 버그 다 그대로 있음",
+    "normalized_text": "개발진들이 게임을 하지 않고 보여주기식 개발을 하면 탄생하는 물건 배짱장사 분야에서 최고 전문가인 스포츠 인터랙티브에서 FM 25 출시를 취소하고 새롭게 유니티 엔진 (후술할 최적화와 이어지는 단점으로 이어짐)으로 전부 바꾸면서 야심차게 내놓은 FM 26. 마케팅 및 개발진 방송에서 보여 주듯이 게임 자체는 겉으로 보기엔 새롭게 일신된 모습과 발전된 그래픽, 그리고 나름 실제 라이센스를 따려고 노력한 모습 등이 겹쳐 출시 전에는 나름 긍정적인 여론이 생기나 했으나 연이은 베타동안 시뮬레이션 게임의 본질을 망각한 처참한 꼬라지의 물건을 직접 마주하니 개발진이 게임을 30분이라도 직접 했는지 의심이 되는 부분이 상당히 많다 1. 유니티 엔진의 명과 암 유니티 엔진으로 바꾸면서 기존 엔진보다 게임이 비쥬얼적으로는 나아진 것이 맞다 선수들 움직임과 관련된 애니메이션도 상당히 개선되었고 바둑알, 목각인형을 거치면서 드디어 사람 다운 무언가로 바뀌면서 경기 몰입감이 보다 배가 되었다 다만 유니티 엔진의 단점도 하나 같이 딸려왔는데 유니티 엔진은 싱글 스레딩 기반으로 설계된 엔진 자체의 한계로 타 엔진과 비교해서 멀티 스레딩 지원과 관련해서 개발자의 신중한 컨트롤이 필요한데 림월드의 타이난같이 자신이 만든 게임에 큰 애정이 있는 사람도 적용하기 힘들어 하는 작업에 스포츠 인터랙티브의 직원들이 그런 모습을 보여줄리는 전혀 없었기에 게임은 시리즈 역사상 최악의 버벅임을 보여준다 모든 리그 + 모든 데이터베이스 + 각종 리그 활성화를 해도 CPU, 메모리 사양만 충족되면 버벅임이 없었던 전작들과 달리 시작하고 얼마 지나지 않아 탄산음료를 온 사방에 쳐 흘린 것 마냥 끈적한 미묘하고 불쾌한 딜레이가 생겼다. 나름 불필요한 데이터를 쳐낸 유저 스킨들이나 몇몇 유저 패치를 통해 바로 고쳐지는 것을 보면 엔진 자체의 한계도 있지만 그냥 개발진이 최적화를 그냥 안했다고 보는게 편하다. 또한 UI 관련 유저 패치에서 이러한 불쾌한 딜레이가 줄어드는 것을 보아 후술할 UI 구조 및 로직과 관계가 있을 것으로 보임 2. 처참한 UI 어지간한 시뮬레이션 게임, UI 불친절한 게임 거진 다 해봤는데 FM 26만큼 불쾌한 클릭 동선과 각종 기능 숨기기로 무장한 게임을 찾기는 쉽지 않다 처음에는 사람들에게 일부러 엿먹이려고 한건가 싶었는데 콘솔 / 모바일 버전도 갈수록 수익이 나다보니 그쪽 플랫폼들 기준으로 그냥 일괄로 이따구로 만든 듯 싶다가도 팝업 형식의 UI는 모든 플랫폼에서도 불쾌할텐데 도대체 어느 유저층을 타겟하여 개발한지 의문이 드는 UI. 디렉터나 개발진들이 틀린 그림찾기를 엄청 좋아하는게 아닌 이상 이런 불필요한 동선은 시뮬레이션 게임에서 유입 문제 + 피로도만 양산해서 하루 빨리 고쳐야한다고 본다. 3. 버그 / 오역 제보는 왜 받는지 의문 한국 기준으로 FM 시리즈는 시리즈 내내 각종 오역과 오타가 있었고 이를 제보하는 국내 유저들에게도 선물도 주고 그랬었는데 그런 것도 그냥 보여주기식 그 자체였다 23~24에 있던 오역, 오타도 그대로 있는데 도대체 제보를 왜 받는건지 궁금하다 버그도 마찬가지인데 시리즈 내내 방치하고 있는 루마니아 리그 버그는 물론이고 베타 당시에 있던 각종 크래쉬를 그냥 방치하고 정식 출시했다. 보통 베타는 핫픽스나 데이원 패치를 위해서 하는 것이 일반적인데 유저들이 이런 것을 찾아주고 관련해서 소통하는 것만 좋아하고 고칠 의지가 전혀 없다. 4. '매니저' 게임이 맞는가 앞선 경기 보는 즐거움은 늘었고 마케팅 중 하나로 자리 잡았던 공격 / 수비 시 포메이션 등 요소는 괜찮다고 보지만 문제는 시리즈 내내 중요했던 '매니저'의 역할이 대다수 삭제되었다. 매치 중에 각종 스탯은 사라졌고, 경기 내 외침 기능도 삭제, 경기 도중 상대 선수 조회, 상대팀 정보, 역할별 주요 능력치 강조, 보기 싶은 통계 선택, 라인업 저장, 임대 선수 기록 등등 이런 기능이 대부분 사라졌다 시뮬레이션 게임에서 가장 중요한건 몰입인데 비쥬얼적인 몰입 요소를 제외한 대부분의 몰입 요소가 그냥 거세되었다. 장점 + 유니티 엔진으로 바뀌면서 매치 비쥬얼 자체는 향상됨 단점 - 불쾌한 딜레이 (유저 패치로 어느정도 해결 가능) - 틀린 그림 찾기 수준의 불쾌한 UI - 시뮬레이션 게임에 CPU 연산 부담 늘려주는 팝업 형식 UI - 전작에 있던 매니저 기능 대부분이 삭제됨 - 전작에 있던 오역, 오타, 베타때 있던 버그 다 그대로 있음",
     "voted_up": false,
     "timestamp_created": 1762277327,
     "timestamp_updated": 1762277403,
@@ -48739,7 +48809,7 @@
     "playtime_at_review_hours": 155.68,
     "num_reviews": 129,
     "author_steamid": "76561198012830693",
-    "hangul_ratio": 0.9682136045772409,
+    "hangul_ratio": 0.9706819630337795,
     "is_low_quality": false,
     "is_profanity_only": false,
     "ambiguity_flags": [
@@ -48759,13 +48829,12 @@
       "performance",
       "story",
       "graphics",
-      "gameplay",
       "multiplayer",
       "localization",
       "difficulty",
       "controls",
+      "building_ux",
       "save_progression",
-      "mod_support",
       "customization"
     ],
     "canonical_theme": "일반 버그"
@@ -48859,11 +48928,10 @@
     "final_decision_source": "rule",
     "final_decision": "include",
     "category_tags": [
-      "performance",
       "monetization",
       "controls"
     ],
-    "canonical_theme": "실행 불가 / 튕김"
+    "canonical_theme": "가격 / 과금 불만"
   },
   {
     "review_id": "208407531",
@@ -48893,8 +48961,7 @@
       "bugs",
       "performance",
       "story",
-      "controls",
-      "building_ux"
+      "controls"
     ],
     "canonical_theme": "일반 버그"
   },
@@ -48985,8 +49052,9 @@
     "final_decision": "include",
     "category_tags": [
       "bugs",
-      "performance",
+      "monetization",
       "controls",
+      "content_depth",
       "save_progression"
     ],
     "canonical_theme": "일반 버그"
@@ -49006,19 +49074,19 @@
     "hangul_ratio": 1.0,
     "is_low_quality": false,
     "is_profanity_only": false,
-    "ambiguity_flags": [],
+    "ambiguity_flags": [
+      "unclassified_included"
+    ],
     "included_in_analysis": true,
     "rule_decision": "include",
-    "rule_confidence": 0.8017,
+    "rule_confidence": 0.6017,
     "llm_invoked": false,
     "llm_decision": null,
     "llm_confidence": null,
     "final_decision_source": "rule",
     "final_decision": "include",
-    "category_tags": [
-      "controls"
-    ],
-    "canonical_theme": "UI / 입력 불편"
+    "category_tags": [],
+    "canonical_theme": null
   },
   {
     "review_id": "208407297",
@@ -49178,18 +49246,18 @@
     "hangul_ratio": 1.0,
     "is_low_quality": false,
     "is_profanity_only": false,
-    "ambiguity_flags": [
-      "unclassified_included"
-    ],
+    "ambiguity_flags": [],
     "included_in_analysis": true,
     "rule_decision": "include",
-    "rule_confidence": 0.6033,
+    "rule_confidence": 0.8033,
     "llm_invoked": false,
     "llm_decision": null,
     "llm_confidence": null,
     "final_decision_source": "rule",
     "final_decision": "include",
-    "category_tags": [],
+    "category_tags": [
+      "monetization"
+    ],
     "canonical_theme": null
   },
   {
@@ -49366,6 +49434,7 @@
     "final_decision_source": "rule",
     "final_decision": "include",
     "category_tags": [
+      "monetization",
       "controls"
     ],
     "canonical_theme": null
@@ -49599,7 +49668,8 @@
     "final_decision_source": "rule",
     "final_decision": "include",
     "category_tags": [
-      "bugs"
+      "bugs",
+      "content_depth"
     ],
     "canonical_theme": "일반 버그"
   },
@@ -49799,6 +49869,8 @@
     "final_decision_source": "rule",
     "final_decision": "include",
     "category_tags": [
+      "monetization",
+      "multiplayer",
       "customization"
     ],
     "canonical_theme": "헤어 / 의상 옵션 부족"
@@ -49942,7 +50014,8 @@
     "final_decision_source": "rule",
     "final_decision": "include",
     "category_tags": [
-      "bugs"
+      "bugs",
+      "monetization"
     ],
     "canonical_theme": "일반 버그"
   },
@@ -50182,8 +50255,8 @@
     "final_decision": "include",
     "category_tags": [
       "bugs",
-      "gameplay",
       "monetization",
+      "multiplayer",
       "difficulty",
       "controls",
       "save_progression"
@@ -50393,6 +50466,7 @@
       "performance",
       "balance",
       "story",
+      "monetization",
       "controls"
     ],
     "canonical_theme": "일반 버그"
@@ -50747,7 +50821,6 @@
     "category_tags": [
       "graphics",
       "controls",
-      "building_ux",
       "save_progression"
     ],
     "canonical_theme": "그래픽 / 비주얼 호평"
@@ -50834,7 +50907,6 @@
     "final_decision": "include",
     "category_tags": [
       "performance",
-      "difficulty",
       "controls"
     ],
     "canonical_theme": "최적화 문제"
@@ -50868,6 +50940,7 @@
     "category_tags": [
       "bugs",
       "story",
+      "monetization",
       "controls"
     ],
     "canonical_theme": "일반 버그"
@@ -51218,7 +51291,8 @@
       "graphics",
       "multiplayer",
       "controls",
-      "building_ux"
+      "building_ux",
+      "save_progression"
     ],
     "canonical_theme": "일반 버그"
   },
@@ -51270,18 +51344,18 @@
     "hangul_ratio": 1.0,
     "is_low_quality": false,
     "is_profanity_only": false,
-    "ambiguity_flags": [
-      "unclassified_included"
-    ],
+    "ambiguity_flags": [],
     "included_in_analysis": true,
     "rule_decision": "include",
-    "rule_confidence": 0.585,
+    "rule_confidence": 0.785,
     "llm_invoked": false,
     "llm_decision": null,
     "llm_confidence": null,
     "final_decision_source": "rule",
     "final_decision": "include",
-    "category_tags": [],
+    "category_tags": [
+      "monetization"
+    ],
     "canonical_theme": null
   },
   {
@@ -51491,11 +51565,9 @@
     "final_decision_source": "rule",
     "final_decision": "include",
     "category_tags": [
-      "controls",
-      "content_depth",
-      "save_progression"
+      "controls"
     ],
-    "canonical_theme": "상호작용 / 생동감 부족"
+    "canonical_theme": null
   },
   {
     "review_id": "208402833",
@@ -51628,18 +51700,18 @@
     "hangul_ratio": 1.0,
     "is_low_quality": false,
     "is_profanity_only": false,
-    "ambiguity_flags": [
-      "unclassified_included"
-    ],
+    "ambiguity_flags": [],
     "included_in_analysis": true,
     "rule_decision": "include",
-    "rule_confidence": 0.6067,
+    "rule_confidence": 0.8067,
     "llm_invoked": false,
     "llm_decision": null,
     "llm_confidence": null,
     "final_decision_source": "rule",
     "final_decision": "include",
-    "category_tags": [],
+    "category_tags": [
+      "monetization"
+    ],
     "canonical_theme": null
   },
   {
@@ -51984,7 +52056,7 @@
     "review_id": "208402280",
     "appid": 3551340,
     "review_text": "[h1] 역대 최악의 풋볼 매니저 [/h1]\n\n모바일 스타일의 UI에 유용한 기능들은 대거 삭제한 채로 등장한 최신작 되시겠다\n다르다고 장담하던 매치엔진조차 단조로운 측면 공격 패턴만 무수히 반복해서 나올 뿐 중앙 스루는 한 번도 본 적이 없다\n1인 개발보다 못 한 완성도를 2년 동안 준비했다는 것이 이들의 최선이라면, 그냥 니들끼리 놀아라\n\n언제까지 니들 무능함을 유저에게서 채울 것인가?\n\n동아리 모임의 어설픈 졸작은 돈을 주고 구매할 필요가 없다 무료 공개라면 모를까\n\n-------------------\n지금까지 수정 안 된 버그들\n\n1. 알트탭 하면 탭키가 무한으로 눌러 스크롤이 자동으로 내려가는 버그 수정 안 됨\n2. 경기 리플레이를 누르면 무한 로딩에 걸려 소리만 출력 되는 버그(강제 종료해야 됨) 수정 안 됨\n3. 수석 코치의 조언대로 팀 선발 명단을 고를 시 홈&원정 포메이션대로 하지 않는 버그 수정 안 됨(이는 스리백에서 미소유시 포메이션의 수미, 중미 역할과 충돌되는 버그로 추정)\n4. 상세 메뉴가 켜진 상태에서 다른 상세 메뉴를 보기 위해 마우스 커서를 옮길 시 두 개의 상세 메뉴 표시가 되는 버그 수정 안 됨\n5. 수석 코치 조언대로 팀 선발하기를 누르거나, 인게임 에디터를 사용해 데이터를 수정할 시 곧바로 적용이 안 되는 버그 수정 안 됨\n6. 경기 리플레이를 보고 난 뒤 비교 분석표가 제대로 표기 되지 않는 버그 수정 안 됨\n7. 경기 리플레이 후 자동으로 나가지는 것이 아닌 계속하기를 눌러 다음 날로 강제 진행해야 되는 번거로움 수정 안 됨\n8. 경기 중 선수가 드리블을 할 때 재생 속도가 순간 비정상적으로 빨라지는 것 수정 안 됨\n9. 인게임 에디터로 다른 구단으로 강제 이적을 시키려는 시도를 하면 오류로 인해 게임이 강제 종료되는 것 수정 안 됨\n10. 경기 중에 갑자기 경기 화면이 사라지는 버그 수정 안 됨\n\n26 긍정 평가 남긴 사람은 도대체 뭘 보고 긍정적이라 평가한 거임? 진짜 이해를 못 하겠네 ㅋㅋㅋ",
-    "normalized_text": "[h1] 역대 최악의 풋볼 매니저 [/h1] 모바일 스타일의 UI에 유용한 기능들은 대거 삭제한 채로 등장한 최신작 되시겠다 다르다고 장담하던 매치엔진조차 단조로운 측면 공격 패턴만 무수히 반복해서 나올 뿐 중앙 스루는 한 번도 본 적이 없다 1인 개발보다 못 한 완성도를 2년 동안 준비했다는 것이 이들의 최선이라면, 그냥 니들끼리 놀아라 언제까지 니들 무능함을 유저에게서 채울 것인가? 동아리 모임의 어설픈 졸작은 돈을 주고 구매할 필요가 없다 무료 공개라면 모를까 -- 지금까지 수정 안 된 버그들 1. 알트탭 하면 탭키가 무한으로 눌러 스크롤이 자동으로 내려가는 버그 수정 안 됨 2. 경기 리플레이를 누르면 무한 로딩에 걸려 소리만 출력 되는 버그(강제 종료해야 됨) 수정 안 됨 3. 수석 코치의 조언대로 팀 선발 명단을 고를 시 홈&원정 포메이션대로 하지 않는 버그 수정 안 됨(이는 스리백에서 미소유시 포메이션의 수미, 중미 역할과 충돌되는 버그로 추정) 4. 상세 메뉴가 켜진 상태에서 다른 상세 메뉴를 보기 위해 마우스 커서를 옮길 시 두 개의 상세 메뉴 표시가 되는 버그 수정 안 됨 5. 수석 코치 조언대로 팀 선발하기를 누르거나, 인게임 에디터를 사용해 데이터를 수정할 시 곧바로 적용이 안 되는 버그 수정 안 됨 6. 경기 리플레이를 보고 난 뒤 비교 분석표가 제대로 표기 되지 않는 버그 수정 안 됨 7. 경기 리플레이 후 자동으로 나가지는 것이 아닌 계속하기를 눌러 다음 날로 강제 진행해야 되는 번거로움 수정 안 됨 8. 경기 중 선수가 드리블을 할 때 재생 속도가 순간 비정상적으로 빨라지는 것 수정 안 됨 9. 인게임 에디터로 다른 구단으로 강제 이적을 시키려는 시도를 하면 오류로 인해 게임이 강제 종료되는 것 수정 안 됨 10. 경기 중에 갑자기 경기 화면이 사라지는 버그 수정 안 됨 26 긍정 평가 남긴 사람은 도대체 뭘 보고 긍정적이라 평가한 거임? 진짜 이해를 못 하겠네 ㅋㅋㅋ",
+    "normalized_text": "역대 최악의 풋볼 매니저 모바일 스타일의 UI에 유용한 기능들은 대거 삭제한 채로 등장한 최신작 되시겠다 다르다고 장담하던 매치엔진조차 단조로운 측면 공격 패턴만 무수히 반복해서 나올 뿐 중앙 스루는 한 번도 본 적이 없다 1인 개발보다 못 한 완성도를 2년 동안 준비했다는 것이 이들의 최선이라면, 그냥 니들끼리 놀아라 언제까지 니들 무능함을 유저에게서 채울 것인가? 동아리 모임의 어설픈 졸작은 돈을 주고 구매할 필요가 없다 무료 공개라면 모를까 -- 지금까지 수정 안 된 버그들 1. 알트탭 하면 탭키가 무한으로 눌러 스크롤이 자동으로 내려가는 버그 수정 안 됨 2. 경기 리플레이를 누르면 무한 로딩에 걸려 소리만 출력 되는 버그(강제 종료해야 됨) 수정 안 됨 3. 수석 코치의 조언대로 팀 선발 명단을 고를 시 홈&원정 포메이션대로 하지 않는 버그 수정 안 됨(이는 스리백에서 미소유시 포메이션의 수미, 중미 역할과 충돌되는 버그로 추정) 4. 상세 메뉴가 켜진 상태에서 다른 상세 메뉴를 보기 위해 마우스 커서를 옮길 시 두 개의 상세 메뉴 표시가 되는 버그 수정 안 됨 5. 수석 코치 조언대로 팀 선발하기를 누르거나, 인게임 에디터를 사용해 데이터를 수정할 시 곧바로 적용이 안 되는 버그 수정 안 됨 6. 경기 리플레이를 보고 난 뒤 비교 분석표가 제대로 표기 되지 않는 버그 수정 안 됨 7. 경기 리플레이 후 자동으로 나가지는 것이 아닌 계속하기를 눌러 다음 날로 강제 진행해야 되는 번거로움 수정 안 됨 8. 경기 중 선수가 드리블을 할 때 재생 속도가 순간 비정상적으로 빨라지는 것 수정 안 됨 9. 인게임 에디터로 다른 구단으로 강제 이적을 시키려는 시도를 하면 오류로 인해 게임이 강제 종료되는 것 수정 안 됨 10. 경기 중에 갑자기 경기 화면이 사라지는 버그 수정 안 됨 26 긍정 평가 남긴 사람은 도대체 뭘 보고 긍정적이라 평가한 거임? 진짜 이해를 못 하겠네 ㅋㅋㅋ",
     "voted_up": false,
     "timestamp_created": 1762273461,
     "timestamp_updated": 1762919338,
@@ -51992,7 +52064,7 @@
     "playtime_at_review_hours": 117.28,
     "num_reviews": 28,
     "author_steamid": "76561198052030885",
-    "hangul_ratio": 0.9640718562874252,
+    "hangul_ratio": 0.9698795180722891,
     "is_low_quality": false,
     "is_profanity_only": false,
     "ambiguity_flags": [
@@ -52010,6 +52082,8 @@
       "bugs",
       "performance",
       "controls",
+      "content_depth",
+      "building_ux",
       "customization"
     ],
     "canonical_theme": "충돌 / 크래시"
@@ -52029,18 +52103,18 @@
     "hangul_ratio": 1.0,
     "is_low_quality": false,
     "is_profanity_only": false,
-    "ambiguity_flags": [
-      "unclassified_included"
-    ],
+    "ambiguity_flags": [],
     "included_in_analysis": true,
     "rule_decision": "include",
-    "rule_confidence": 0.585,
+    "rule_confidence": 0.785,
     "llm_invoked": false,
     "llm_decision": null,
     "llm_confidence": null,
     "final_decision_source": "rule",
     "final_decision": "include",
-    "category_tags": [],
+    "category_tags": [
+      "monetization"
+    ],
     "canonical_theme": null
   },
   {
@@ -52155,8 +52229,7 @@
     "final_decision_source": "rule",
     "final_decision": "include",
     "category_tags": [
-      "bugs",
-      "controls"
+      "bugs"
     ],
     "canonical_theme": "일반 버그"
   },
@@ -52273,11 +52346,9 @@
     "final_decision": "include",
     "category_tags": [
       "bugs",
-      "performance",
       "story",
       "difficulty",
-      "controls",
-      "content_depth"
+      "controls"
     ],
     "canonical_theme": "일반 버그"
   },
@@ -52367,7 +52438,8 @@
     "final_decision": "include",
     "category_tags": [
       "multiplayer",
-      "controls"
+      "controls",
+      "content_depth"
     ],
     "canonical_theme": "멀티플레이 경험"
   },
@@ -52698,7 +52770,9 @@
     "category_tags": [
       "bugs",
       "story",
-      "controls"
+      "monetization",
+      "controls",
+      "content_depth"
     ],
     "canonical_theme": "일반 버그"
   },
@@ -52717,19 +52791,19 @@
     "hangul_ratio": 0.975609756097561,
     "is_low_quality": false,
     "is_profanity_only": false,
-    "ambiguity_flags": [],
+    "ambiguity_flags": [
+      "unclassified_included"
+    ],
     "included_in_analysis": true,
     "rule_decision": "include",
-    "rule_confidence": 0.8433,
+    "rule_confidence": 0.6433,
     "llm_invoked": false,
     "llm_decision": null,
     "llm_confidence": null,
     "final_decision_source": "rule",
     "final_decision": "include",
-    "category_tags": [
-      "controls"
-    ],
-    "canonical_theme": "UI / 입력 불편"
+    "category_tags": [],
+    "canonical_theme": null
   },
   {
     "review_id": "208401794",
@@ -52775,19 +52849,19 @@
     "hangul_ratio": 1.0,
     "is_low_quality": false,
     "is_profanity_only": false,
-    "ambiguity_flags": [],
+    "ambiguity_flags": [
+      "unclassified_included"
+    ],
     "included_in_analysis": true,
     "rule_decision": "include",
-    "rule_confidence": 0.8467,
+    "rule_confidence": 0.6467,
     "llm_invoked": false,
     "llm_decision": null,
     "llm_confidence": null,
     "final_decision_source": "rule",
     "final_decision": "include",
-    "category_tags": [
-      "controls"
-    ],
-    "canonical_theme": "UI / 입력 불편"
+    "category_tags": [],
+    "canonical_theme": null
   },
   {
     "review_id": "208401697",
@@ -53024,6 +53098,7 @@
       "bugs",
       "performance",
       "graphics",
+      "monetization",
       "controls",
       "customization"
     ],
@@ -53149,7 +53224,7 @@
     "review_id": "208401402",
     "appid": 3551340,
     "review_text": "[h1]불쾌함의 극치, 기괴함의 끝을 달리는 게임. (무려 2년을 개발함)[/h1]\n\n이 기괴하고 불쾌한 게임 사겠다고 2년 존버한 내가 레전드\n\n[b]결론부터 말하자면 [/b] 이 게임은 잘 만든 [i]축구 경기 시뮬레이터[/i]와 끔찍하게 못 만든 [i]감독 시뮬레이터[/i]를 하나로 합쳐놓은 기괴한 물건임.\n\n[hr][/hr]\n[h2]1. UI/UX: 직관성이라는 단어를 모르는 수준[/h2]\n[list]\n[*]대체 무슨 생각으로 이렇게 만든 건지 개발자 인터뷰라도 따고 싶다. 전작들보다 명백히 퇴보함. 원하는 메뉴 하나 찾으려면 숨은그림찾기를 해야 하고, 불필요한 클릭은 왜 이렇게 늘려놨는지 모르겠음. 그냥 예뻐 보이기만 하면 장땡이라는 마인드인가? 게임의 근간이 되는 편의성을 갖다 버린 UI는 처음 봄.\n\n[/list]\n[h2]2. 버그와 끔찍한 반응성[/h2]\n[list]\n[*]신작 버그야 뭐, 있을 수 있다 치자. 선수 이름이나 UI 깨지고 경기 끝난 뒤 가끔 튕기는 거야 애교로 봐줄 수 있음. 진짜 문제는 게임의 근본적인 '쾌적함'이 사라졌다.\n\n[*]클릭할 때마다 느껴지는 이 미세한 딜레이가 사람 돌아버리게 만든다. 스페이스바 연타로 경기 넘기는데 예전보다 답답하고 메뉴 이동할 때마다 한 템포씩 늦는 게 느껴짐. 존나게 불쾌하다 그냥\n\n게임 플레이 내내 컴퓨터에 바이러스 걸린 것 같은 불쾌감을 안고 가야 함. 이게 말이 되나?\n[/list]\n[h2]3. 유일한 장점: 인게임 매치 엔진[/h2]\n[list]\n[*]물론 딱 하나 깔 수 없는 부분 있긴 하다. 인게임 매치 엔진/그래픽\n\n[*]매치엔진/그래픽은 솔직히 역대급 맞다. 선수들 움직임, 전술 구현도, 그냥 보는 맛 자체가 차원이 다름. 정말 현실 축구 중계 보는 것처럼 눈이 즐거움.\n[/list]\n[h2]4. 그래서 더 화가 나는 이유[/h2]\n[list]\n[*]바로 이 3번 때문에 더 분노가 치밀어 오름. 전작보다 진일보한 매치 엔진을 구현해놓고 이 기술을 가진 애들이 왜 정작 감독의 주 무대인 메뉴 화면, 선수 관리, 이적 시장 파트는 이따위로 만들어 놓은 거냐는 거임.\n\n[*] 이건 명백히 개발 방향을 잘못 잡은 거임. 유저들은 축구 경기만 보려고 FM을 하는 게 아님 우리는 감독이 되어서 구단을 운영하는 경험을 하고 싶은 건데 정작 그 경험을 제공해야 할 모든 부분이 불편하고 짜증만 유발함\n\n[/list]\n[hr][/hr]\n[b]총평:[/b]\n[b]훌륭한 축구 '관람' 시뮬레이터.[/b]\n\n[b]하지만 최악의 축구 '감독' 시뮬레이터.[/b]\n\nSI는 FM이라는 IP에 대한 이해도가 [u]바닥을 쳤다는 걸[/u] 스스로 증명했음.\n대규모 패치나 할인을 기다려라. 아니면 그냥 마음 편하게 FM24 하는 게 정신 건강에 훨씬 이롭다. [i]진심으로 하는 조언.[/i]",
-    "normalized_text": "[h1]불쾌함의 극치, 기괴함의 끝을 달리는 게임. (무려 2년을 개발함)[/h1] 이 기괴하고 불쾌한 게임 사겠다고 2년 존버한 내가 레전드 [b]결론부터 말하자면 [/b] 이 게임은 잘 만든 [i]축구 경기 시뮬레이터[/i]와 끔찍하게 못 만든 [i]감독 시뮬레이터[/i]를 하나로 합쳐놓은 기괴한 물건임. [hr][/hr] [h2]1. UI/UX: 직관성이라는 단어를 모르는 수준[/h2] [list] [*]대체 무슨 생각으로 이렇게 만든 건지 개발자 인터뷰라도 따고 싶다. 전작들보다 명백히 퇴보함. 원하는 메뉴 하나 찾으려면 숨은그림찾기를 해야 하고, 불필요한 클릭은 왜 이렇게 늘려놨는지 모르겠음. 그냥 예뻐 보이기만 하면 장땡이라는 마인드인가? 게임의 근간이 되는 편의성을 갖다 버린 UI는 처음 봄. [/list] [h2]2. 버그와 끔찍한 반응성[/h2] [list] [*]신작 버그야 뭐, 있을 수 있다 치자. 선수 이름이나 UI 깨지고 경기 끝난 뒤 가끔 튕기는 거야 애교로 봐줄 수 있음. 진짜 문제는 게임의 근본적인 '쾌적함'이 사라졌다. [*]클릭할 때마다 느껴지는 이 미세한 딜레이가 사람 돌아버리게 만든다. 스페이스바 연타로 경기 넘기는데 예전보다 답답하고 메뉴 이동할 때마다 한 템포씩 늦는 게 느껴짐. 존나게 불쾌하다 그냥 게임 플레이 내내 컴퓨터에 바이러스 걸린 것 같은 불쾌감을 안고 가야 함. 이게 말이 되나? [/list] [h2]3. 유일한 장점: 인게임 매치 엔진[/h2] [list] [*]물론 딱 하나 깔 수 없는 부분 있긴 하다. 인게임 매치 엔진/그래픽 [*]매치엔진/그래픽은 솔직히 역대급 맞다. 선수들 움직임, 전술 구현도, 그냥 보는 맛 자체가 차원이 다름. 정말 현실 축구 중계 보는 것처럼 눈이 즐거움. [/list] [h2]4. 그래서 더 화가 나는 이유[/h2] [list] [*]바로 이 3번 때문에 더 분노가 치밀어 오름. 전작보다 진일보한 매치 엔진을 구현해놓고 이 기술을 가진 애들이 왜 정작 감독의 주 무대인 메뉴 화면, 선수 관리, 이적 시장 파트는 이따위로 만들어 놓은 거냐는 거임. [*] 이건 명백히 개발 방향을 잘못 잡은 거임. 유저들은 축구 경기만 보려고 FM을 하는 게 아님 우리는 감독이 되어서 구단을 운영하는 경험을 하고 싶은 건데 정작 그 경험을 제공해야 할 모든 부분이 불편하고 짜증만 유발함 [/list] [hr][/hr] [b]총평:[/b] [b]훌륭한 축구 '관람' 시뮬레이터.[/b] [b]하지만 최악의 축구 '감독' 시뮬레이터.[/b] SI는 FM이라는 IP에 대한 이해도가 [u]바닥을 쳤다는 걸[/u] 스스로 증명했음. 대규모 패치나 할인을 기다려라. 아니면 그냥 마음 편하게 FM24 하는 게 정신 건강에 훨씬 이롭다. [i]진심으로 하는 조언.[/i]",
+    "normalized_text": "불쾌함의 극치, 기괴함의 끝을 달리는 게임. (무려 2년을 개발함) 이 기괴하고 불쾌한 게임 사겠다고 2년 존버한 내가 레전드 결론부터 말하자면 이 게임은 잘 만든 축구 경기 시뮬레이터 와 끔찍하게 못 만든 감독 시뮬레이터 를 하나로 합쳐놓은 기괴한 물건임. 1. UI/UX: 직관성이라는 단어를 모르는 수준 [*]대체 무슨 생각으로 이렇게 만든 건지 개발자 인터뷰라도 따고 싶다. 전작들보다 명백히 퇴보함. 원하는 메뉴 하나 찾으려면 숨은그림찾기를 해야 하고, 불필요한 클릭은 왜 이렇게 늘려놨는지 모르겠음. 그냥 예뻐 보이기만 하면 장땡이라는 마인드인가? 게임의 근간이 되는 편의성을 갖다 버린 UI는 처음 봄. 2. 버그와 끔찍한 반응성 [*]신작 버그야 뭐, 있을 수 있다 치자. 선수 이름이나 UI 깨지고 경기 끝난 뒤 가끔 튕기는 거야 애교로 봐줄 수 있음. 진짜 문제는 게임의 근본적인 '쾌적함'이 사라졌다. [*]클릭할 때마다 느껴지는 이 미세한 딜레이가 사람 돌아버리게 만든다. 스페이스바 연타로 경기 넘기는데 예전보다 답답하고 메뉴 이동할 때마다 한 템포씩 늦는 게 느껴짐. 존나게 불쾌하다 그냥 게임 플레이 내내 컴퓨터에 바이러스 걸린 것 같은 불쾌감을 안고 가야 함. 이게 말이 되나? 3. 유일한 장점: 인게임 매치 엔진 [*]물론 딱 하나 깔 수 없는 부분 있긴 하다. 인게임 매치 엔진/그래픽 [*]매치엔진/그래픽은 솔직히 역대급 맞다. 선수들 움직임, 전술 구현도, 그냥 보는 맛 자체가 차원이 다름. 정말 현실 축구 중계 보는 것처럼 눈이 즐거움. 4. 그래서 더 화가 나는 이유 [*]바로 이 3번 때문에 더 분노가 치밀어 오름. 전작보다 진일보한 매치 엔진을 구현해놓고 이 기술을 가진 애들이 왜 정작 감독의 주 무대인 메뉴 화면, 선수 관리, 이적 시장 파트는 이따위로 만들어 놓은 거냐는 거임. [*] 이건 명백히 개발 방향을 잘못 잡은 거임. 유저들은 축구 경기만 보려고 FM을 하는 게 아님 우리는 감독이 되어서 구단을 운영하는 경험을 하고 싶은 건데 정작 그 경험을 제공해야 할 모든 부분이 불편하고 짜증만 유발함 총평: 훌륭한 축구 '관람' 시뮬레이터. 하지만 최악의 축구 '감독' 시뮬레이터. SI는 FM이라는 IP에 대한 이해도가 바닥을 쳤다는 걸 스스로 증명했음. 대규모 패치나 할인을 기다려라. 아니면 그냥 마음 편하게 FM24 하는 게 정신 건강에 훨씬 이롭다. 진심으로 하는 조언.",
     "voted_up": false,
     "timestamp_created": 1762272885,
     "timestamp_updated": 1762274443,
@@ -53157,7 +53232,7 @@
     "playtime_at_review_hours": 117.72,
     "num_reviews": 2,
     "author_steamid": "76561199573972562",
-    "hangul_ratio": 0.8842696629213483,
+    "hangul_ratio": 0.9668304668304668,
     "is_low_quality": false,
     "is_profanity_only": false,
     "ambiguity_flags": [
@@ -53165,7 +53240,7 @@
     ],
     "included_in_analysis": true,
     "rule_decision": "include",
-    "rule_confidence": 0.9211,
+    "rule_confidence": 0.925,
     "llm_invoked": false,
     "llm_decision": null,
     "llm_confidence": null,
@@ -53173,7 +53248,9 @@
     "final_decision": "include",
     "category_tags": [
       "bugs",
+      "performance",
       "graphics",
+      "monetization",
       "controls"
     ],
     "canonical_theme": "일반 버그"
@@ -53336,19 +53413,19 @@
     "hangul_ratio": 0.84,
     "is_low_quality": false,
     "is_profanity_only": false,
-    "ambiguity_flags": [],
+    "ambiguity_flags": [
+      "unclassified_included"
+    ],
     "included_in_analysis": true,
     "rule_decision": "include",
-    "rule_confidence": 0.8017,
+    "rule_confidence": 0.6017,
     "llm_invoked": false,
     "llm_decision": null,
     "llm_confidence": null,
     "final_decision_source": "rule",
     "final_decision": "include",
-    "category_tags": [
-      "performance"
-    ],
-    "canonical_theme": "실행 불가 / 튕김"
+    "category_tags": [],
+    "canonical_theme": null
   },
   {
     "review_id": "208401301",
@@ -53510,19 +53587,19 @@
     "hangul_ratio": 1.0,
     "is_low_quality": false,
     "is_profanity_only": false,
-    "ambiguity_flags": [],
+    "ambiguity_flags": [
+      "unclassified_included"
+    ],
     "included_in_analysis": true,
     "rule_decision": "include",
-    "rule_confidence": 0.7833,
+    "rule_confidence": 0.5833,
     "llm_invoked": false,
     "llm_decision": null,
     "llm_confidence": null,
     "final_decision_source": "rule",
     "final_decision": "include",
-    "category_tags": [
-      "controls"
-    ],
-    "canonical_theme": "UI / 입력 불편"
+    "category_tags": [],
+    "canonical_theme": null
   },
   {
     "review_id": "208401257",
@@ -53661,7 +53738,8 @@
     "final_decision_source": "rule",
     "final_decision": "include",
     "category_tags": [
-      "bugs"
+      "bugs",
+      "monetization"
     ],
     "canonical_theme": "일반 버그"
   },
@@ -53962,7 +54040,7 @@
     "review_id": "208400956",
     "appid": 3551340,
     "review_text": "엔진 변경 및 전면 리뉴얼이라는 명목하에 시뮬레이션 게임으로서는 크게 퇴보함.\n그나마 장단점으로 리뷰해보자면..\n\n [h2] 장점  [/h2]\n------------------------------------------------------------------------------------\n1. 유니티 엔진으로 변경하며 발전한 그래픽\n\n24시절의 그래픽에 비하면 확실히 발전함.\n근데 이 것도 솔직히 장점이라고 해주기는 뭐한게 25년 기준 유니티 엔진으로 출시한 게임들 그래픽을 보면 이게 엔진까지 바꿔낄정도의 발전인가 하면 의문부호가 있음.\n뭐 유니티에서 SI에만 성능이 떨어지는 엔진을 준 것도 아니건데 왜 같은 엔진으로 깎은 그래픽이...\n그래도 발전하긴 했으니 장점으로 넣어줌.\n\n2. 공격 - 수비 포메이션 분리 및 지침 다양화\n\n공격 - 수비 포메이션이 분리되었고, 관련해서 지침도 매우 다양해짐.\n본인이 구현하고 싶은 전술을 구현하는데 사용할 도구들이 많아졌고 확실한 강점.\n\n------------------------------------------------------------------------------------\n\n장점은 놀랍게도 이게 끝임.\n이제 단점을 큰 것만 몇개 말해보겠음. \n\n[h2] 단점 [/h2]\n\n------------------------------------------------------------------------------------\n\n1. 극단적으로 퇴보한 UI/UX\n\n모바일, 콘솔까지 하나의 UI로 우려먹겠다는 생각인지 전체적으로 정보량을 매우 줄이고 가볍게 만듬.\n당연히 한 화면에서 많은 정보를 취득하고, 불필요한 클릭과 화면 전환을 줄이는 것을 선호하여, 스킨까지 만들어서 쓰던 코어 유저들에게는 압도적으로 부정적인 평가가 나올 수 밖에 없음.\n\n24까지 한 화면에서 취득할 수 있던 정보가 여러 화면으로 파편화되어 여러 화면을 넘나들며 찾아야하며, \n불필요한 팝업을 남발하며 팝업에서 발생하는 지연은 이런 화면 이동에 대한 불쾌감을 제곱으로 늘어나게 함.\n전체적으로 웹페이지처럼 만들려고 했던거 같은데, 웹페이지도 이렇게 만들면 클라이언트한테 인수거부당함.\n\n더 놀라운 건 이런 처참한 UI를 만들어놓고 디렉터는 '익숙해지면 괜찮을거임. UI에 시간을 좀 주십시오' 라고 말하고, \n공식 피드로 'UI를 마스터 하는 방법' 같은 글을 올려서 화난 유저들의 마음에 불을 지름. \n참고로 피드에 올라온 저 글은 놀랍게도 0따봉, 420 댓글이라는 살면서 처음 보는 수치의 유저 반응을 기록함.\n\n아, 그리고 제발 보라색 배경은 누가 생각한건지 한대 떄려줬으면 좋겠음.\n\n2. 사라진 수많은 기능\n\n24대비 수 많은 기능과 컨텐츠들이 사라짐.\n크게는 이미 공지되었던 국가대표감독과 같은 기능이 사라졌고, 이 부분에 대해서는 이미 공지된 내용도 있고 어느 정도 다들 이해할 수 있다고 쳐도..\n\n실제로 사용하던 수많은 편의 기능들이 사라졌음. \n가장 먼저 모딩툴을 제공하지 않으며, 처참한 UI를 유저들이 개선하기도 매우 힘들어졌고,\n환경설정에서는 스킨 새로고침, 캐시 삭제 등의 기능이 사라져서 페이스팩을 적용하기 위해서는 게임을 껐다가 켜야 함.\n능력치 색상을 변경하는 기능도 사라져서 보라색 배경색과 겹치며 가시성이 매우 떨어짐.\nU21/U18 팀을 관리하고 스탭들을 고용하는 것도 여러 화면의 소실로 굉장히 어려워졌고, 유소년 팀의 코치 배정이나 훈련 일정을 컨트롤 하는 것도 불가능해짐.\n라인업을 저장하는 기능도 사라져서, 매 경기마다 라인업을 직접 수정해줘야 하며 추가적으로 마우스로 드래그시 어떤 선수가 선택되어 있는지 선택표시 나오던 것도 사라지고, 반응성도 구려져서 불쾌감이 두배.\n데이터 센터의 내용물도 대단히 많이 축소되어 패스맵, 히트맵 등의 정보를 확인하는 것이 불가.\n\n일단 기억나는 굵직한 내용만 해도 이 정도이고, 실제로 레딧 등에서는 없어진 기능을 정리해서 공유하고 있는데 여기 기록된 내용은 빙산의 일각 수준.\n\n\n3.  QA와 알파테스트를 진행한 건가 싶을 정도의 수많은 버그\n\n베타버전인 것을 감안하더라도 감당이 안될 정도의 수많은 버그들이 속출하고 있음.\n베타 개시이후 4번의 핫픽스를 진행했지만 고친건 매우 일부 뿐이고 정식 버전에도 그대로 진행될 버그들이 매우 많음.\n\n현재는 수정된 버그이지만 경기감상 후 경기장에 갇히는 버그부터 시작해서..\n선수 기록이 사라지는 버그, 이적 기록이 사라지는 버그, 특정 페이지 접근시 크래시가 발생하는 상황 등등\n유저의 몰입감을 해치고, 시뮬레이션 게임의 가장 큰 매력인 '내가 만들어가는 스토리라인' 을 방해하는 수많은 요소들이 넘쳐남.\n\n------------------------------------------------------------------------------------\n\n어디까지나 굵직한 단점만 적었지만 자잘한 단점음이나 유저들이 느끼는 호불호 요소도 매우 많아져서\n종합적으로 많은 유저들이 시즌 진행에 피로감을 호소하고 있음. \n\n항상 .3패치 전까지는 완성본이 아니다라고 하는 FM이지만,\n이번 26버전은 그 수준을 넘어서 .3에도 발전은 커녕 전작만큼도 따라가지 못할거라는 의심이 듬.\n\n아직 구매를 하지 않은 사람이라면 구매를 보류하는 것을 진지하게 추천드림.\n이상 서드파티업체에서 구매해서 환불 못하고 강제로 퍼먹고 있는 사람의 리뷰였음.",
-    "normalized_text": "엔진 변경 및 전면 리뉴얼이라는 명목하에 시뮬레이션 게임으로서는 크게 퇴보함. 그나마 장단점으로 리뷰해보자면.. [h2] 장점 [/h2] -- 1. 유니티 엔진으로 변경하며 발전한 그래픽 24시절의 그래픽에 비하면 확실히 발전함. 근데 이 것도 솔직히 장점이라고 해주기는 뭐한게 25년 기준 유니티 엔진으로 출시한 게임들 그래픽을 보면 이게 엔진까지 바꿔낄정도의 발전인가 하면 의문부호가 있음. 뭐 유니티에서 SI에만 성능이 떨어지는 엔진을 준 것도 아니건데 왜 같은 엔진으로 깎은 그래픽이... 그래도 발전하긴 했으니 장점으로 넣어줌. 2. 공격 - 수비 포메이션 분리 및 지침 다양화 공격 - 수비 포메이션이 분리되었고, 관련해서 지침도 매우 다양해짐. 본인이 구현하고 싶은 전술을 구현하는데 사용할 도구들이 많아졌고 확실한 강점. -- 장점은 놀랍게도 이게 끝임. 이제 단점을 큰 것만 몇개 말해보겠음. [h2] 단점 [/h2] -- 1. 극단적으로 퇴보한 UI/UX 모바일, 콘솔까지 하나의 UI로 우려먹겠다는 생각인지 전체적으로 정보량을 매우 줄이고 가볍게 만듬. 당연히 한 화면에서 많은 정보를 취득하고, 불필요한 클릭과 화면 전환을 줄이는 것을 선호하여, 스킨까지 만들어서 쓰던 코어 유저들에게는 압도적으로 부정적인 평가가 나올 수 밖에 없음. 24까지 한 화면에서 취득할 수 있던 정보가 여러 화면으로 파편화되어 여러 화면을 넘나들며 찾아야하며, 불필요한 팝업을 남발하며 팝업에서 발생하는 지연은 이런 화면 이동에 대한 불쾌감을 제곱으로 늘어나게 함. 전체적으로 웹페이지처럼 만들려고 했던거 같은데, 웹페이지도 이렇게 만들면 클라이언트한테 인수거부당함. 더 놀라운 건 이런 처참한 UI를 만들어놓고 디렉터는 '익숙해지면 괜찮을거임. UI에 시간을 좀 주십시오' 라고 말하고, 공식 피드로 'UI를 마스터 하는 방법' 같은 글을 올려서 화난 유저들의 마음에 불을 지름. 참고로 피드에 올라온 저 글은 놀랍게도 0따봉, 420 댓글이라는 살면서 처음 보는 수치의 유저 반응을 기록함. 아, 그리고 제발 보라색 배경은 누가 생각한건지 한대 떄려줬으면 좋겠음. 2. 사라진 수많은 기능 24대비 수 많은 기능과 콘텐츠들이 사라짐. 크게는 이미 공지되었던 국가대표감독과 같은 기능이 사라졌고, 이 부분에 대해서는 이미 공지된 내용도 있고 어느 정도 다들 이해할 수 있다고 쳐도.. 실제로 사용하던 수많은 편의 기능들이 사라졌음. 가장 먼저 모딩툴을 제공하지 않으며, 처참한 UI를 유저들이 개선하기도 매우 힘들어졌고, 환경설정에서는 스킨 새로고침, 캐시 삭제 등의 기능이 사라져서 페이스팩을 적용하기 위해서는 게임을 껐다가 켜야 함. 능력치 색상을 변경하는 기능도 사라져서 보라색 배경색과 겹치며 가시성이 매우 떨어짐. U21/U18 팀을 관리하고 스탭들을 고용하는 것도 여러 화면의 소실로 굉장히 어려워졌고, 유소년 팀의 코치 배정이나 훈련 일정을 컨트롤 하는 것도 불가능해짐. 라인업을 저장하는 기능도 사라져서, 매 경기마다 라인업을 직접 수정해줘야 하며 추가적으로 마우스로 드래그시 어떤 선수가 선택되어 있는지 선택표시 나오던 것도 사라지고, 반응성도 구려져서 불쾌감이 두배. 데이터 센터의 내용물도 대단히 많이 축소되어 패스맵, 히트맵 등의 정보를 확인하는 것이 불가. 일단 기억나는 굵직한 내용만 해도 이 정도이고, 실제로 레딧 등에서는 없어진 기능을 정리해서 공유하고 있는데 여기 기록된 내용은 빙산의 일각 수준. 3. QA와 알파테스트를 진행한 건가 싶을 정도의 수많은 버그 베타버전인 것을 감안하더라도 감당이 안될 정도의 수많은 버그들이 속출하고 있음. 베타 개시이후 4번의 핫픽스를 진행했지만 고친건 매우 일부 뿐이고 정식 버전에도 그대로 진행될 버그들이 매우 많음. 현재는 수정된 버그이지만 경기감상 후 경기장에 갇히는 버그부터 시작해서.. 선수 기록이 사라지는 버그, 이적 기록이 사라지는 버그, 특정 페이지 접근시 크래시가 발생하는 상황 등등 유저의 몰입감을 해치고, 시뮬레이션 게임의 가장 큰 매력인 '내가 만들어가는 스토리라인' 을 방해하는 수많은 요소들이 넘쳐남. -- 어디까지나 굵직한 단점만 적었지만 자잘한 단점음이나 유저들이 느끼는 호불호 요소도 매우 많아져서 종합적으로 많은 유저들이 시즌 진행에 피로감을 호소하고 있음. 항상 .3패치 전까지는 완성본이 아니다라고 하는 FM이지만, 이번 26버전은 그 수준을 넘어서 .3에도 발전은 커녕 전작만큼도 따라가지 못할거라는 의심이 듬. 아직 구매를 하지 않은 사람이라면 구매를 보류하는 것을 진지하게 추천드림. 이상 서드파티업체에서 구매해서 환불 못하고 강제로 퍼먹고 있는 사람의 리뷰였음.",
+    "normalized_text": "엔진 변경 및 전면 리뉴얼이라는 명목하에 시뮬레이션 게임으로서는 크게 퇴보함. 그나마 장단점으로 리뷰해보자면.. 장점 -- 1. 유니티 엔진으로 변경하며 발전한 그래픽 24시절의 그래픽에 비하면 확실히 발전함. 근데 이 것도 솔직히 장점이라고 해주기는 뭐한게 25년 기준 유니티 엔진으로 출시한 게임들 그래픽을 보면 이게 엔진까지 바꿔낄정도의 발전인가 하면 의문부호가 있음. 뭐 유니티에서 SI에만 성능이 떨어지는 엔진을 준 것도 아니건데 왜 같은 엔진으로 깎은 그래픽이... 그래도 발전하긴 했으니 장점으로 넣어줌. 2. 공격 - 수비 포메이션 분리 및 지침 다양화 공격 - 수비 포메이션이 분리되었고, 관련해서 지침도 매우 다양해짐. 본인이 구현하고 싶은 전술을 구현하는데 사용할 도구들이 많아졌고 확실한 강점. -- 장점은 놀랍게도 이게 끝임. 이제 단점을 큰 것만 몇개 말해보겠음. 단점 -- 1. 극단적으로 퇴보한 UI/UX 모바일, 콘솔까지 하나의 UI로 우려먹겠다는 생각인지 전체적으로 정보량을 매우 줄이고 가볍게 만듬. 당연히 한 화면에서 많은 정보를 취득하고, 불필요한 클릭과 화면 전환을 줄이는 것을 선호하여, 스킨까지 만들어서 쓰던 코어 유저들에게는 압도적으로 부정적인 평가가 나올 수 밖에 없음. 24까지 한 화면에서 취득할 수 있던 정보가 여러 화면으로 파편화되어 여러 화면을 넘나들며 찾아야하며, 불필요한 팝업을 남발하며 팝업에서 발생하는 지연은 이런 화면 이동에 대한 불쾌감을 제곱으로 늘어나게 함. 전체적으로 웹페이지처럼 만들려고 했던거 같은데, 웹페이지도 이렇게 만들면 클라이언트한테 인수거부당함. 더 놀라운 건 이런 처참한 UI를 만들어놓고 디렉터는 '익숙해지면 괜찮을거임. UI에 시간을 좀 주십시오' 라고 말하고, 공식 피드로 'UI를 마스터 하는 방법' 같은 글을 올려서 화난 유저들의 마음에 불을 지름. 참고로 피드에 올라온 저 글은 놀랍게도 0따봉, 420 댓글이라는 살면서 처음 보는 수치의 유저 반응을 기록함. 아, 그리고 제발 보라색 배경은 누가 생각한건지 한대 떄려줬으면 좋겠음. 2. 사라진 수많은 기능 24대비 수 많은 기능과 콘텐츠들이 사라짐. 크게는 이미 공지되었던 국가대표감독과 같은 기능이 사라졌고, 이 부분에 대해서는 이미 공지된 내용도 있고 어느 정도 다들 이해할 수 있다고 쳐도.. 실제로 사용하던 수많은 편의 기능들이 사라졌음. 가장 먼저 모딩툴을 제공하지 않으며, 처참한 UI를 유저들이 개선하기도 매우 힘들어졌고, 환경설정에서는 스킨 새로고침, 캐시 삭제 등의 기능이 사라져서 페이스팩을 적용하기 위해서는 게임을 껐다가 켜야 함. 능력치 색상을 변경하는 기능도 사라져서 보라색 배경색과 겹치며 가시성이 매우 떨어짐. U21/U18 팀을 관리하고 스탭들을 고용하는 것도 여러 화면의 소실로 굉장히 어려워졌고, 유소년 팀의 코치 배정이나 훈련 일정을 컨트롤 하는 것도 불가능해짐. 라인업을 저장하는 기능도 사라져서, 매 경기마다 라인업을 직접 수정해줘야 하며 추가적으로 마우스로 드래그시 어떤 선수가 선택되어 있는지 선택표시 나오던 것도 사라지고, 반응성도 구려져서 불쾌감이 두배. 데이터 센터의 내용물도 대단히 많이 축소되어 패스맵, 히트맵 등의 정보를 확인하는 것이 불가. 일단 기억나는 굵직한 내용만 해도 이 정도이고, 실제로 레딧 등에서는 없어진 기능을 정리해서 공유하고 있는데 여기 기록된 내용은 빙산의 일각 수준. 3. QA와 알파테스트를 진행한 건가 싶을 정도의 수많은 버그 베타버전인 것을 감안하더라도 감당이 안될 정도의 수많은 버그들이 속출하고 있음. 베타 개시이후 4번의 핫픽스를 진행했지만 고친건 매우 일부 뿐이고 정식 버전에도 그대로 진행될 버그들이 매우 많음. 현재는 수정된 버그이지만 경기감상 후 경기장에 갇히는 버그부터 시작해서.. 선수 기록이 사라지는 버그, 이적 기록이 사라지는 버그, 특정 페이지 접근시 크래시가 발생하는 상황 등등 유저의 몰입감을 해치고, 시뮬레이션 게임의 가장 큰 매력인 '내가 만들어가는 스토리라인' 을 방해하는 수많은 요소들이 넘쳐남. -- 어디까지나 굵직한 단점만 적었지만 자잘한 단점음이나 유저들이 느끼는 호불호 요소도 매우 많아져서 종합적으로 많은 유저들이 시즌 진행에 피로감을 호소하고 있음. 항상 .3패치 전까지는 완성본이 아니다라고 하는 FM이지만, 이번 26버전은 그 수준을 넘어서 .3에도 발전은 커녕 전작만큼도 따라가지 못할거라는 의심이 듬. 아직 구매를 하지 않은 사람이라면 구매를 보류하는 것을 진지하게 추천드림. 이상 서드파티업체에서 구매해서 환불 못하고 강제로 퍼먹고 있는 사람의 리뷰였음.",
     "voted_up": false,
     "timestamp_created": 1762272609,
     "timestamp_updated": 1762272665,
@@ -53970,7 +54048,7 @@
     "playtime_at_review_hours": 151.2,
     "num_reviews": 4,
     "author_steamid": "76561198256414800",
-    "hangul_ratio": 0.9660194174757282,
+    "hangul_ratio": 0.9707317073170731,
     "is_low_quality": false,
     "is_profanity_only": false,
     "ambiguity_flags": [
@@ -53992,7 +54070,6 @@
       "graphics",
       "monetization",
       "multiplayer",
-      "difficulty",
       "controls",
       "content_depth",
       "save_progression",
@@ -54073,18 +54150,18 @@
     "hangul_ratio": 0.5675675675675675,
     "is_low_quality": false,
     "is_profanity_only": false,
-    "ambiguity_flags": [
-      "unclassified_included"
-    ],
+    "ambiguity_flags": [],
     "included_in_analysis": true,
     "rule_decision": "include",
-    "rule_confidence": 0.5536,
+    "rule_confidence": 0.7536,
     "llm_invoked": false,
     "llm_decision": null,
     "llm_confidence": null,
     "final_decision_source": "rule",
     "final_decision": "include",
-    "category_tags": [],
+    "category_tags": [
+      "monetization"
+    ],
     "canonical_theme": null
   },
   {
@@ -54230,7 +54307,6 @@
     "final_decision": "include",
     "category_tags": [
       "graphics",
-      "difficulty",
       "controls",
       "customization"
     ],
@@ -54725,18 +54801,19 @@
     "is_low_quality": false,
     "is_profanity_only": false,
     "ambiguity_flags": [
-      "ambiguous_profanity",
-      "unclassified_included"
+      "ambiguous_profanity"
     ],
     "included_in_analysis": true,
     "rule_decision": "include",
-    "rule_confidence": 0.5374,
+    "rule_confidence": 0.7374,
     "llm_invoked": false,
     "llm_decision": null,
     "llm_confidence": null,
     "final_decision_source": "rule",
     "final_decision": "include",
-    "category_tags": [],
+    "category_tags": [
+      "monetization"
+    ],
     "canonical_theme": null
   },
   {

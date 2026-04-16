@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+from difflib import SequenceMatcher
 import os
 import re
 from datetime import datetime, timezone
@@ -74,6 +75,13 @@ POSITIVE_THEME_HINTS = {
 EVIDENCE_POSITIVE_HINTS = {
     "재밌",
     "재미",
+    "꿀잼",
+    "갓겜",
+    "할만",
+    "good",
+    "best",
+    "재밌",
+    "재미",
     "좋",
     "만족",
     "몰입",
@@ -83,6 +91,27 @@ EVIDENCE_POSITIVE_HINTS = {
 }
 
 EVIDENCE_NEGATIVE_HINTS = {
+    "핵",
+    "해킹",
+    "정지",
+    "밴",
+    "팅김",
+    "팅기",
+    "강퇴",
+    "안티치트",
+    "팀킬",
+    "최적화",
+    "불안정",
+    "말썽",
+    "어뷰징",
+    "hack",
+    "cheat",
+    "ban",
+    "kick",
+    "disconnect",
+    "stutter",
+    "lag",
+    "crash",
     "불편",
     "문제",
     "버그",
@@ -276,6 +305,15 @@ def _should_use_llm_report_writer() -> bool:
 
 def _should_use_llm_evidence_judge() -> bool:
     return os.getenv("USE_LLM_EVIDENCE_JUDGE", "false").strip().lower() in {
+        "1",
+        "true",
+        "yes",
+        "on",
+    }
+
+
+def _should_use_title_why_similarity_ranking() -> bool:
+    return os.getenv("USE_TITLE_WHY_SIMILARITY_RANKING", "true").strip().lower() in {
         "1",
         "true",
         "yes",
@@ -1748,9 +1786,7 @@ def _snippet_matches_theme(text: str, theme_tokens: list[str]) -> bool:
 
 
 def _snippet_matches_stance(text: str, stance: str) -> bool:
-    normalized = str(text).lower()
-    pos_hits = sum(1 for token in EVIDENCE_POSITIVE_HINTS if token in normalized)
-    neg_hits = sum(1 for token in EVIDENCE_NEGATIVE_HINTS if token in normalized)
+    pos_hits, neg_hits = _snippet_stance_hits(text)
     if stance == "positive":
         if pos_hits == 0 and neg_hits == 0:
             return True
@@ -1762,10 +1798,24 @@ def _snippet_matches_stance(text: str, stance: str) -> bool:
     return True
 
 
-def _classify_snippet_stance(text: str, *, voted_up: bool) -> str:
+def _snippet_stance_hits(text: str) -> tuple[int, int]:
     normalized = str(text).lower()
     pos_hits = sum(1 for token in EVIDENCE_POSITIVE_HINTS if token in normalized)
     neg_hits = sum(1 for token in EVIDENCE_NEGATIVE_HINTS if token in normalized)
+    return pos_hits, neg_hits
+
+
+def _snippet_detected_stance(text: str) -> str | None:
+    pos_hits, neg_hits = _snippet_stance_hits(text)
+    if pos_hits >= neg_hits + 1:
+        return "positive"
+    if neg_hits >= pos_hits + 1:
+        return "negative"
+    return None
+
+
+def _classify_snippet_stance(text: str, *, voted_up: bool) -> str:
+    pos_hits, neg_hits = _snippet_stance_hits(text)
     if pos_hits >= neg_hits + 1:
         return "positive"
     if neg_hits >= pos_hits + 1:
@@ -1944,6 +1994,8 @@ def _build_guaranteed_fill_block(
             continue
 
         snippets: list[str] = []
+        signal_matched: list[str] = []
+        signal_seen: set[str] = set()
         seen: set[str] = set()
         for raw in merged_candidates[:12]:
             normalized = _prepare_evidence_source_text(str(raw), limit=1200)
@@ -1955,22 +2007,16 @@ def _build_guaranteed_fill_block(
                 continue
             seen.add(normalized)
             snippets.append(normalized)
+            if _snippet_detected_stance(normalized) == stance and normalized not in signal_seen:
+                signal_seen.add(normalized)
+                signal_matched.append(normalized)
             if len(snippets) >= 3:
                 break
 
+        if len(signal_matched) >= 2:
+            snippets = signal_matched[:3]
         if len(snippets) < 2:
-            for raw in merged_candidates[:12]:
-                normalized = _prepare_evidence_source_text(str(raw), limit=1200)
-                if not normalized or normalized in seen:
-                    continue
-                if _is_noisy_evidence_text(normalized):
-                    continue
-                seen.add(normalized)
-                snippets.append(normalized)
-                if len(snippets) >= 3:
-                    break
-
-        if len(snippets) < 2:
+            # stance가 어긋나는 증거로 억지 채움을 하지 않는다.
             continue
 
         next_block = dict(block)
@@ -1989,11 +2035,32 @@ def _select_evidence_snippets_for_block(
     judge: OpenAIEvidenceJudge | None,
 ) -> list[str]:
     stance = str(block.get("stance", "mixed"))
+    block_title = str(block.get("title", "핵심 근거"))
+    block_why = str(block.get("why_it_matters", ""))
     match_tokens = _build_theme_match_tokens(
         str(block.get("theme", "")),
         [str(item) for item in list(block.get("aspect_keys", []) or [])],
     )
-    ranked = _rank_evidence_candidates(candidates=candidates, stance=stance, match_tokens=match_tokens)
+    # 1) stance/theme 하드 필터를 먼저 적용한다.
+    hard_theme_filtered = [
+        text
+        for text in candidates
+        if _snippet_matches_stance(text, stance)
+        and (not match_tokens or _snippet_matches_theme(text, match_tokens))
+    ]
+    hard_stance_filtered = [
+        text
+        for text in candidates
+        if _snippet_matches_stance(text, stance)
+    ]
+    ranked_source = hard_theme_filtered if len(hard_theme_filtered) >= 2 else hard_stance_filtered
+    ranked = _rank_evidence_candidates(
+        candidates=ranked_source,
+        stance=stance,
+        match_tokens=match_tokens,
+        block_title=block_title,
+        block_why_it_matters=block_why,
+    )
     if len(ranked) < 2:
         return ranked
 
@@ -2023,37 +2090,40 @@ def _select_evidence_snippets_for_block(
         ordered.append(text)
 
     strict: list[str] = []
+    strict_known: list[str] = []
     for text in ordered:
         if not _snippet_matches_stance(text, stance):
             continue
         if match_tokens and not _snippet_matches_theme(text, match_tokens):
             continue
         strict.append(text)
-        if len(strict) >= 3:
+        if _snippet_detected_stance(text) == stance:
+            strict_known.append(text)
+        if len(strict) >= 6 and len(strict_known) >= 3:
             break
+    if len(strict_known) >= 2:
+        return strict_known[:3]
     if len(strict) >= 2:
         return strict[:3]
 
     relaxed = list(strict)
+    relaxed_known = list(strict_known)
     for text in ordered:
         if text in relaxed:
             continue
         if not _snippet_matches_stance(text, stance):
             continue
         relaxed.append(text)
-        if len(relaxed) >= 3:
+        if _snippet_detected_stance(text) == stance:
+            relaxed_known.append(text)
+        if len(relaxed) >= 6 and len(relaxed_known) >= 3:
             break
+    if len(relaxed_known) >= 2:
+        return relaxed_known[:3]
     if len(relaxed) >= 2:
         return relaxed[:3]
 
-    fallback = list(relaxed)
-    for text in ordered:
-        if text in fallback:
-            continue
-        fallback.append(text)
-        if len(fallback) >= 3:
-            break
-    return fallback[:3] if len(fallback) >= 2 else []
+    return []
 
 
 def _rank_evidence_candidates(
@@ -2061,23 +2131,68 @@ def _rank_evidence_candidates(
     candidates: list[str],
     stance: str,
     match_tokens: list[str],
+    block_title: str = "",
+    block_why_it_matters: str = "",
 ) -> list[str]:
-    scored: list[tuple[int, int, str]] = []
+    query_text = f"{block_title} {block_why_it_matters}".strip()
+    use_similarity = _should_use_title_why_similarity_ranking()
+    scored: list[tuple[float, int, str]] = []
     for index, text in enumerate(candidates):
         normalized = str(text).strip()
         if not normalized:
             continue
-        score = 0
+        score = 0.0
         if _snippet_matches_stance(normalized, stance):
-            score += 4
+            score += 4.0
+        detected_stance = _snippet_detected_stance(normalized)
+        if detected_stance == stance:
+            score += 1.5
+        elif detected_stance is None:
+            score -= 1.2
+        else:
+            score -= 2.0
         if match_tokens and _snippet_matches_theme(normalized, match_tokens):
-            score += 2
+            score += 2.0
+        if use_similarity and query_text:
+            score += 3.0 * _title_query_similarity(query_text, normalized)
         if 20 <= len(normalized) <= 320:
-            score += 1
+            score += 1.0
+        elif len(normalized) > 550:
+            score -= 1.5
         scored.append((score, index, normalized))
 
     scored.sort(key=lambda item: (-item[0], item[1]))
     return [item[2] for item in scored]
+
+
+def _title_query_similarity(query_text: str, candidate_text: str) -> float:
+    query = _normalize_similarity_text(query_text)
+    candidate = _normalize_similarity_text(candidate_text)
+    if not query or not candidate:
+        return 0.0
+
+    query_tokens = _similarity_tokens(query)
+    candidate_tokens = _similarity_tokens(candidate)
+    if not query_tokens or not candidate_tokens:
+        return 0.0
+
+    common = query_tokens & candidate_tokens
+    jaccard = len(common) / max(len(query_tokens | candidate_tokens), 1)
+    recall = len(common) / max(len(query_tokens), 1)
+    sequence = SequenceMatcher(None, query, candidate).ratio()
+    return round((0.45 * recall) + (0.35 * jaccard) + (0.20 * sequence), 6)
+
+
+def _normalize_similarity_text(text: str) -> str:
+    return re.sub(r"\s+", " ", str(text or "").strip().lower())
+
+
+def _similarity_tokens(text: str) -> set[str]:
+    return {
+        token
+        for token in re.findall(r"[0-9A-Za-z가-힣]{2,}", text)
+        if token
+    }
 
 
 def _compress_evidence_reviews(

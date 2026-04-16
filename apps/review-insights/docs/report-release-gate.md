@@ -10,13 +10,20 @@
 3. 근거 존재 (`evidence_sections.strengths`, `evidence_sections.risks`)
 4. 금지 라벨 노출 0 (분류형 라벨 미노출)
 
+## 추가 품질 지표 (점수 외 참고)
+- `evidence_mismatch_rate`
+  - 카드 기대 stance(강점=positive, 리스크=negative)와
+    스니펫 자동 판정 stance가 어긋난 비율
+  - 값이 높을수록 카드-근거 정합성 품질이 낮음
+
 ## 실행
 
 ```bash
 python apps/review-insights/scripts/check_report_release_gate.py ^
   --cohort-file apps/review-insights/data/catalog/cohort_v2_32.json ^
   --output apps/review-insights/data/reports/report_release_gate.json ^
-  --min-score 4
+  --min-score 4 ^
+  --max-unknown-snippet-rate 0.40
 ```
 
 ## 출력
@@ -27,3 +34,6 @@ python apps/review-insights/scripts/check_report_release_gate.py ^
 - `0`: 게이트 통과
 - `1`: 게이트 실패
 
+## 추가 보조 게이트
+- `unknown_snippet_rate` 상한을 넘으면 점수(4점)가 통과여도 실패 처리
+- 기본값: `0.40`

@@ -114,6 +114,21 @@ python apps/review-insights/scripts/batch_quality_report.py --appids 2456740 104
 - `apps/review-insights/data/reports/batch_quality_report.json`
 - `apps/review-insights/data/reports/batch_quality_report.md`
 
+카드-근거 정합성 점검:
+
+```bash
+python apps/review-insights/scripts/check_report_release_gate.py \
+  --cohort-file apps/review-insights/data/reports/_tmp_demo6_cohort.json \
+  --output apps/review-insights/data/reports/report_release_gate.demo6.json \
+  --min-score 4 \
+  --max-unknown-snippet-rate 0.40
+```
+
+핵심 확인 지표:
+- `evidence_mismatch_rate` (낮을수록 좋음)
+- `evidence_unknown_snippet_rate` (상한 이내여야 통과)
+- `evidence_quality_level_distribution` (`strict/relaxed/guaranteed_fill/unknown`)
+
 ---
 
 ## 8. 비범위
