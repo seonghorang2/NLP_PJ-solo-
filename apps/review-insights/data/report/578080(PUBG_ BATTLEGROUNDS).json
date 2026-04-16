@@ -1,8 +1,8 @@
 {
   "report_version": "v4-planned-sections",
   "appid": 578080,
-  "pipeline_run_id": "578080-20260415T082620Z-judge-only",
-  "generated_at": "2026-04-15T08:27:01.972477+00:00",
+  "pipeline_run_id": "578080-20260416T005525Z-report-only",
+  "generated_at": "2026-04-16T00:56:12.775448+00:00",
   "source_review_count": 19999,
   "included_review_count": 6884,
   "game": {
@@ -79,7 +79,7 @@
     "top_risks": [
       {
         "title": "일반 버그",
-        "summary": "일반 버그가 진행 리듬을 자주 끊어 플레이 피로를 높일 수 있습니다."
+        "summary": "일반적인 버그가 진행 리듬을 자주 끊어 플레이 피로를 높일 수 있습니다."
       },
       {
         "title": "매칭/서버 문제",
@@ -195,7 +195,7 @@
   "top_risks": [
     {
       "title": "일반 버그",
-      "summary": "일반 버그가 진행 리듬을 자주 끊어 플레이 피로를 높일 수 있습니다."
+      "summary": "일반적인 버그가 진행 리듬을 자주 끊어 플레이 피로를 높일 수 있습니다."
     },
     {
       "title": "매칭/서버 문제",

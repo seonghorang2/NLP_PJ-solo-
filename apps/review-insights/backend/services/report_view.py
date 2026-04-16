@@ -1714,7 +1714,7 @@ def _compress_evidence_sections(
                     and (not match_tokens or _snippet_matches_theme(normalized, match_tokens))
                 )
                 if not passes_filters:
-                    fallback_text = _normalize_compressed_snippet(raw_text)
+                    fallback_text = _prepare_evidence_source_text(raw_text, limit=1200)
                     if (
                         fallback_text
                         and not _is_noisy_evidence_text(fallback_text)
