@@ -68,6 +68,20 @@
 - 원문 리뷰 저장
 - 메타데이터 저장
 
+### Step 1.5. Markup Cleaning 0단계 (LLM 없음)
+
+- **원문(`review_text`)은 변경하지 않고 보존**
+- 분석용 텍스트에만 마크업 정리를 적용
+- 처리 순서:
+  1. HTML entity decode (`&lt;`, `&amp;` 등)
+  2. HTML 태그 제거 (`<p>`, `<br>`, `<div>` 등)
+  3. BBCode 제거 (`[h1]`, `[b]`, `[url=...]` 등)
+  4. 공백 정리
+- 안전 규칙:
+  - `<3` 같은 일반 텍스트는 태그로 오인 제거하지 않음
+  - `script/style` 블록은 통째 제거
+  - 제거 여부와 제거 문자 수를 추적 가능하게 설계 (`markup_cleaned`, `removed_markup_chars`)
+
 ### Step 2. Deterministic Core Preprocess (LLM 없음)
 
 - 텍스트 정규화(공백/기호)

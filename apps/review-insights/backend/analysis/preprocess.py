@@ -6,6 +6,7 @@ from analysis.categorize import extract_category_tags
 from analysis.rules import (
     calculate_hangul_ratio,
     calculate_rule_confidence,
+    clean_markup_text,
     detect_ambiguity_flags,
     is_low_quality_review,
     is_profanity_only_review,
@@ -16,7 +17,8 @@ from models.schemas import ProcessedReview, RawReview
 
 def preprocess_review(raw_review: RawReview) -> ProcessedReview:
     """Run deterministic preprocessing on a single raw review."""
-    normalized_text = normalize_text(raw_review.review_text)
+    cleaned_text = clean_markup_text(raw_review.review_text)
+    normalized_text = normalize_text(cleaned_text)
     hangul_ratio = calculate_hangul_ratio(normalized_text)
     low_quality = is_low_quality_review(normalized_text)
     profanity_only = is_profanity_only_review(normalized_text)

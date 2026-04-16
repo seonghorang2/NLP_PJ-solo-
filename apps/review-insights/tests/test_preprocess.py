@@ -10,6 +10,7 @@ BACKEND_DIR = Path(__file__).resolve().parents[1] / "backend"
 if str(BACKEND_DIR) not in sys.path:
     sys.path.insert(0, str(BACKEND_DIR))
 
+from analysis.rules import clean_markup_text
 from analysis.preprocess import preprocess_review
 from models.schemas import RawReview
 
@@ -86,6 +87,34 @@ class PreprocessReviewTests(unittest.TestCase):
         self.assertEqual(review.rule_decision, "include")
         self.assertEqual(review.category_tags, [])
         self.assertIn("unclassified_included", review.ambiguity_flags)
+
+    def test_markup_cleaning_boundary_cases(self):
+        cases = [
+            ("진짜 재밌다 <3", "진짜 재밌다 <3"),
+            ("2 < 3 이고 5 > 1", "2 < 3 이고 5 > 1"),
+            ("<b>전투</b>는 좋고 <br> 최적화는 별로", "전투 는 좋고 최적화는 별로"),
+            ("<script>alert('x')</script> 게임은 재밌음", "게임은 재밌음"),
+            ("[h3]장점[/h3] 타격감 좋음", "장점 타격감 좋음"),
+            ("[url=https://example.com]링크[/url] 때문에 튕김", "링크 때문에 튕김"),
+            ("코드: <div class='x'>if(a<b){...}</div>", "코드: if(a<b){...}"),
+            ("&lt;b&gt;가짜태그&lt;/b&gt;", "가짜태그"),
+            ("<<< 진짜 구림 >>>", "<<< 진짜 구림 >>>"),
+            ("<p>[b]혼합[/b] 마크업</p>", "혼합 마크업"),
+        ]
+
+        for index, (raw, expected) in enumerate(cases, start=1):
+            with self.subTest(case=index):
+                self.assertEqual(clean_markup_text(raw), expected)
+
+    def test_preprocess_applies_markup_cleaning_before_normalization(self):
+        review = preprocess_review(
+            make_raw_review("<b>최적화</b>는 안 좋고 [h3]버그[/h3]가 많음")
+        )
+
+        self.assertIn("최적화", review.normalized_text)
+        self.assertIn("버그", review.normalized_text)
+        self.assertNotIn("<b>", review.normalized_text)
+        self.assertNotIn("[h3]", review.normalized_text)
 
 
 if __name__ == "__main__":

@@ -164,10 +164,10 @@
       ]
     },
     "monetization": {
-      "mention_count": 961,
-      "negative_ratio": 0.09573361082206035,
+      "mention_count": 960,
+      "negative_ratio": 0.09583333333333334,
       "recent_trend": "down",
-      "experienced_player_share": 0.9895941727367326,
+      "experienced_player_share": 0.9895833333333334,
       "themes": [
         "DLC / 확장팩 언급",
         "가격 / 과금 불만"
@@ -242,8 +242,8 @@
     "fit_for": "초반 진입 장벽이나 조작 적응 여부를 중요하게 보는 플레이어는 사전 확인이 필요합니다.",
     "risks": "difficulty 관련 이슈는 반복적으로 언급되지만 최근 급격한 악화 신호는 제한적입니다."
   },
-  "pipeline_run_id": "1245620-20260415T085712Z",
-  "generated_at": "2026-04-15T09:00:18.972404+00:00",
+  "pipeline_run_id": "1245620-20260416T011459Z-post-markup",
+  "generated_at": "2026-04-16T01:14:59.830202+00:00",
   "source_review_count": 19997,
   "review_pages": "all",
   "fetched_pages": 200,
@@ -253,7 +253,7 @@
   "all_mode_page_cap": 200,
   "all_mode_cap_reached": true,
   "llm_stats": {
-    "considered": 12027,
+    "considered": 12026,
     "selected": 50,
     "invoked": 50,
     "success": 50,
@@ -268,7 +268,7 @@
     "llm_min_confidence": 0.7,
     "material_count": 50,
     "stats": {
-      "considered": 12027,
+      "considered": 12026,
       "selected": 50,
       "invoked": 50,
       "success": 50,

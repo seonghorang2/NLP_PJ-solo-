@@ -7,6 +7,7 @@ import re
 from datetime import datetime, timezone
 from typing import Any
 
+from analysis.rules import clean_markup_text
 from models.schemas import AnalysisResult, GameMetadata, ProcessedReview, RawReview
 from services.evidence_judge_llm import OpenAIEvidenceJudge
 from services.korean_report_proofreader import KoreanReportProofreader
@@ -829,7 +830,7 @@ def _collect_grouped_evidence(
         material = refined_material_map.get(review_id, {})
         refined_text = str(material.get("refined_text", ""))
         snippet_source = refined_text if refined_text else str(review.get("review_text", ""))
-        snippet = _prepare_evidence_source_text(snippet_source, limit=1200)
+        snippet = _prepare_evidence_source_text(clean_markup_text(snippet_source), limit=1200)
         if not snippet or snippet in seen:
             continue
         if _is_noisy_evidence_text(snippet):
@@ -854,7 +855,7 @@ def _collect_grouped_evidence(
 
     if not positive and not negative:
         for index, snippet in enumerate(fallback_snippets[:3]):
-            normalized = _prepare_evidence_source_text(str(snippet), limit=1200)
+            normalized = _prepare_evidence_source_text(clean_markup_text(str(snippet)), limit=1200)
             if normalized and not _is_noisy_evidence_text(normalized):
                 negative.append(
                     {

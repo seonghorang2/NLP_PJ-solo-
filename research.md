@@ -119,12 +119,14 @@
 
 을 JSON 계약으로 생성/보정한다.
 
-### 6.3 근거 문장 압축 LLM
+### 6.3 근거 판정 LLM (judge-only)
 
-파일: `services/evidence_snippet_llm.py`
+파일: `services/evidence_judge_llm.py`
 
 역할:
-- evidence 스니펫을 읽기 좋은 짧은 문장으로 정리
+- 근거 후보(블록별 최대 6~8개) 중에서 stance/theme 일치도가 높은 스니펫만 최종 선택
+- **문장 재작성은 하지 않고 판정/선별만 수행**
+- 불일치 후보는 다음 후보로 교체
 
 ### 6.4 한국어 교정 LLM
 
@@ -200,7 +202,7 @@ uvicorn app:app --app-dir apps/review-insights/backend --reload
 - `OPENAI_API_KEY`
 - `OPENAI_MODEL` (기본 `gpt-4o-mini`)
 - `USE_LLM_REPORT_WRITER`
-- `USE_LLM_EVIDENCE_COMPRESSION`
+- `USE_LLM_EVIDENCE_JUDGE`
 - `USE_LLM_REPORT_PROOFREAD`
 
 ---
@@ -217,3 +219,65 @@ uvicorn app:app --app-dir apps/review-insights/backend --reload
 - 오프라인 파이프라인을 누가/언제 돌릴지 운영 룰 필요
 - 품질 튜닝은 규칙 사전 + 리포트 재료 정제가 핵심
 
+---
+
+## 13. 전처리 Markup Cleaning 0단계 규칙
+
+목표:
+- HTML/BBCode가 포함된 리뷰에서 분석 노이즈를 줄인다.
+- 원문 증거 보존을 위해 `review_text` 원문은 유지하고, 분석용 텍스트에만 적용한다.
+
+적용 순서:
+1. HTML entity decode
+2. HTML 태그 제거
+3. BBCode 제거
+4. 공백 정리
+
+안전 규칙:
+- `<3` 같은 일반 텍스트는 태그로 오인 제거하지 않는다.
+- `script/style` 블록은 통째 제거한다.
+
+---
+
+## 14. 경계 케이스 10개 테스트 시나리오
+
+1. `진짜 재밌다 <3`  
+   - 기대: `<3` 보존, 텍스트 유지
+2. `2 < 3 이고 5 > 1`  
+   - 기대: 수학 비교 표현 보존
+3. `<b>전투</b>는 좋고 <br> 최적화는 별로`  
+   - 기대: 태그 제거 후 문장 보존
+4. `<script>alert('x')</script> 게임은 재밌음`  
+   - 기대: script 블록 제거, 본문만 남김
+5. `[h3]장점[/h3] 타격감 좋음`  
+   - 기대: BBCode 제거, 본문 유지
+6. `[url=https://example.com]링크[/url] 때문에 튕김`  
+   - 기대: BBCode 제거, 의미 텍스트 유지
+7. `코드: <div class='x'>if(a<b){...}</div>`  
+   - 기대: 태그만 제거, 코드 텍스트 최대한 보존
+8. `&lt;b&gt;가짜태그&lt;/b&gt;`  
+   - 기대: decode 후 태그 처리 정책에 맞게 정리
+9. `<<< 진짜 구림 >>>`  
+   - 기대: 태그 오인 제거 없이 일반 텍스트 유지
+10. `<p>[b]혼합[/b] 마크업</p>`  
+   - 기대: HTML + BBCode 모두 제거, 본문만 유지
+
+---
+
+## 15. 적용 후 부작용 점검(최소 지표)
+
+비교 방법:
+- 동일 appid / 동일 raw 데이터 기준으로 적용 전후를 비교한다.
+
+필수 비교 지표:
+- `included_count` 변화량
+- `low_quality_count` 변화량
+
+판단 기준(초기안):
+- `included_count` 급감(예: 10% 이상 감소) 시 과필터링 의심
+- `low_quality_count` 급증 시 마크업 제거 규칙 오작동 의심
+
+점검 절차:
+1. 적용 전 `analysis/processed`에서 두 지표 기록
+2. markup cleaning 적용 후 동일 지표 재측정
+3. 변화가 큰 샘플 20개 수동 확인

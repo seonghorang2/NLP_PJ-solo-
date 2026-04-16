@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import html
 import re
 
 HANGUL_PATTERN = re.compile(r"[가-힣]")
@@ -9,6 +10,12 @@ VISIBLE_CHAR_PATTERN = re.compile(r"[A-Za-z0-9가-힣ㄱ-ㅎㅏ-ㅣ]")
 TOKEN_PATTERN = re.compile(r"[A-Za-z0-9가-힣]+")
 REPEATED_CHAR_PATTERN = re.compile(r"(.)\1{3,}")
 WHITESPACE_PATTERN = re.compile(r"\s+")
+HTML_SCRIPT_STYLE_PATTERN = re.compile(
+    r"<(script|style)\b[^>]*>.*?</\1>",
+    re.IGNORECASE | re.DOTALL,
+)
+HTML_TAG_PATTERN = re.compile(r"</?[A-Za-z][A-Za-z0-9]*(?:\s+[^<>]*)?>")
+BB_CODE_PATTERN = re.compile(r"\[(?:/?[A-Za-z][A-Za-z0-9]*)(?:=[^\]]+)?\]")
 
 LOW_QUALITY_TEXTS = {
     "",
@@ -264,6 +271,15 @@ def normalize_text(text: str) -> str:
         normalized = normalized.replace(source, target)
     normalized = REPEATED_CHAR_PATTERN.sub(r"\1\1", normalized)
     return normalized
+
+
+def clean_markup_text(text: str) -> str:
+    """Remove HTML/BBCode noise from analysis text while keeping plain text intact."""
+    decoded = html.unescape(text or "")
+    no_script = HTML_SCRIPT_STYLE_PATTERN.sub(" ", decoded)
+    no_html = HTML_TAG_PATTERN.sub(" ", no_script)
+    no_bbcode = BB_CODE_PATTERN.sub(" ", no_html)
+    return WHITESPACE_PATTERN.sub(" ", no_bbcode).strip()
 
 
 def _visible_chars(text: str) -> list[str]:

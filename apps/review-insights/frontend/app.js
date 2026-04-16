@@ -149,7 +149,10 @@ function normalizeEvidenceBlock(block) {
 function renderEvidenceSection(container, blocks, emptyMessage) {
   container.innerHTML = "";
   if (blocks.length === 0) {
-    container.innerHTML = `<p class="placeholder">${emptyMessage}</p>`;
+    const placeholder = document.createElement("p");
+    placeholder.className = "placeholder";
+    placeholder.textContent = emptyMessage;
+    container.appendChild(placeholder);
     return;
   }
 
@@ -158,13 +161,24 @@ function renderEvidenceSection(container, blocks, emptyMessage) {
     const card = document.createElement("article");
     card.className = "evidence-card";
 
-    const snippetsHtml = snippets.map((snippet) => `<li>"${snippet}"</li>`).join("");
+    const title = document.createElement("h3");
+    title.textContent = block.title || "-";
 
-    card.innerHTML = `
-      <h3>${block.title || "-"}</h3>
-      <p class="evidence-why">${block.whyItMatters || "-"}</p>
-      <ul class="evidence-snippets">${snippetsHtml}</ul>
-    `;
+    const why = document.createElement("p");
+    why.className = "evidence-why";
+    why.textContent = block.whyItMatters || "-";
+
+    const list = document.createElement("ul");
+    list.className = "evidence-snippets";
+    snippets.forEach((snippet) => {
+      const li = document.createElement("li");
+      li.textContent = `"${snippet}"`;
+      list.appendChild(li);
+    });
+
+    card.appendChild(title);
+    card.appendChild(why);
+    card.appendChild(list);
     container.appendChild(card);
   });
 }
