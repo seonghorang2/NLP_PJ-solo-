@@ -781,6 +781,13 @@ def _consensus_rank(level: str) -> int:
 
 
 def _infer_aspect_tone(negative_ratio: float, themes: list[str]) -> str:
+    # 데이터가 명확한 구간은 즉시 확정 (테마 라벨보다 실제 추천율 우선)
+    if negative_ratio <= 0.10:
+        return "positive"
+    if negative_ratio >= 0.55:
+        return "negative"
+
+    # 애매한 구간(10~55%)에서만 테마 힌트로 보조 판정
     score = 0
     for theme in themes:
         text = str(theme)
@@ -793,9 +800,9 @@ def _infer_aspect_tone(negative_ratio: float, themes: list[str]) -> str:
         return "negative"
     if score >= 1:
         return "positive"
-    if negative_ratio >= 0.58:
+    if negative_ratio >= 0.40:
         return "negative"
-    if negative_ratio <= 0.40:
+    if negative_ratio <= 0.25:
         return "positive"
     return "mixed"
 
@@ -935,6 +942,14 @@ def _select_risks(high: list[dict[str, Any]], medium: list[dict[str, Any]]) -> l
         for item in pool
         if item.get("tone") == "negative" or float(item.get("negative_ratio", 0.0)) >= 0.50
     ]
+    # 후보가 없으면 negative_ratio가 가장 높은 항목을 차선 리스크로 선정
+    if not candidates and pool:
+        fallback = [
+            item for item in pool
+            if float(item.get("negative_ratio", 0.0)) > 0.0
+        ]
+        fallback.sort(key=lambda item: -float(item.get("negative_ratio", 0.0)))
+        candidates = fallback[:2]
     ranked = sorted(
         candidates,
         key=lambda item: (
@@ -1210,6 +1225,51 @@ def _build_evidence_blocks(consensus_payload: dict[str, Any]) -> list[dict[str, 
         )
         if len(blocks) >= 4:
             break
+
+    # negative 블록이 없으면 전체 aspects에서 negative_ratio 상위 항목으로 폴백
+    has_negative = any(b["stance"] == "negative" for b in blocks)
+    if not has_negative:
+        fallback_candidates = sorted(
+            [item for item in aspects if float(item.get("negative_ratio", 0.0)) > 0.0],
+            key=lambda item: -float(item.get("negative_ratio", 0.0)),
+        )
+        for item in fallback_candidates[:2]:
+            theme = _pick_block_theme(item, "negative") or str(item.get("aspect_label", "핵심 의견"))
+            evidence_group = item.get("evidence_group", {}) or {}
+            neg_snippets = list(evidence_group.get("negative", []) or [])
+            match_tokens = _build_theme_match_tokens(theme, [str(item.get("aspect", ""))])
+            snippets: list[str] = []
+            for snippet in neg_snippets:
+                text = _prepare_evidence_source_text(str(snippet.get("snippet", "")), limit=1200)
+                if not text or text in snippets:
+                    continue
+                if match_tokens and not _snippet_matches_theme(text, match_tokens):
+                    continue
+                snippets.append(text)
+                if len(snippets) >= 3:
+                    break
+            if len(snippets) < 2:
+                continue
+            blocks.append(
+                {
+                    "title": _build_block_title(theme, "negative"),
+                    "theme": theme,
+                    "why_it_matters": _build_block_why_it_matters(
+                        stance="negative", theme=theme,
+                        aspect_labels=[str(item.get("aspect_label", ""))],
+                    ),
+                    "explanation": _build_block_why_it_matters(
+                        stance="negative", theme=theme,
+                        aspect_labels=[str(item.get("aspect_label", ""))],
+                    ),
+                    "aspect_keys": [str(item.get("aspect", ""))],
+                    "stance": "negative",
+                    "consensus_level": str(item.get("consensus_level", "medium")),
+                    "mention_count": int(item.get("mention_count", 0)),
+                    "evidence_snippets": snippets[:3],
+                }
+            )
+
     return blocks
 
 
@@ -1648,10 +1708,22 @@ def _compress_evidence_sections(
                     continue
                 if _is_noisy_evidence_text(normalized):
                     continue
-                if not _snippet_matches_stance(normalized, stance):
-                    continue
-                if match_tokens and not _snippet_matches_theme(normalized, match_tokens):
-                    continue
+                # 압축 후 stance/theme 필터 탈락 시 원본 스니펫으로 재시도
+                passes_filters = (
+                    _snippet_matches_stance(normalized, stance)
+                    and (not match_tokens or _snippet_matches_theme(normalized, match_tokens))
+                )
+                if not passes_filters:
+                    fallback_text = _normalize_compressed_snippet(raw_text)
+                    if (
+                        fallback_text
+                        and not _is_noisy_evidence_text(fallback_text)
+                        and _snippet_matches_stance(fallback_text, stance)
+                        and (not match_tokens or _snippet_matches_theme(fallback_text, match_tokens))
+                    ):
+                        normalized = fallback_text
+                    else:
+                        continue
 
                 if normalized not in seen:
                     seen.add(normalized)
