@@ -1909,29 +1909,69 @@ def _attach_evidence_sections(report_payload: dict[str, Any]) -> dict[str, Any]:
 
 
 def _prepare_evidence_source_text(text: str, limit: int = 1200) -> str:
-    """Keep source text readable and avoid mid-sentence truncation."""
-    compact = " ".join((text or "").split())
-    if not compact:
+    """Keep source text readable, preserve line breaks, and avoid mid-sentence truncation."""
+    normalized = str(text or "").replace("\r\n", "\n").replace("\r", "\n")
+    normalized = re.sub(r"[ \t\f\v]+", " ", normalized)
+    normalized = re.sub(r" *\n *", "\n", normalized)
+    normalized = re.sub(r"\n{3,}", "\n\n", normalized).strip()
+    if not normalized:
         return ""
-    if len(compact) <= limit:
-        return compact
+    if len(normalized) <= limit:
+        return normalized
 
-    sentences = _split_sentences(compact)
-    if not sentences:
-        return compact[:limit].rstrip()
+    tokens: list[str] = []
+    for part in re.split(r"(\n+)", normalized):
+        if not part:
+            continue
+        if "\n" in part:
+            tokens.append("\n\n" if len(part) >= 2 else "\n")
+            continue
+        sentences = _split_sentences(part)
+        if sentences:
+            tokens.extend(sentences)
+            continue
+        chunk = part.strip()
+        if chunk:
+            tokens.append(chunk)
+
+    if not tokens:
+        return normalized[:limit].rstrip()
 
     selected: list[str] = []
     total = 0
-    for sentence in sentences:
-        extra = len(sentence) + (1 if selected else 0)
+    last_was_text = False
+    for token in tokens:
+        if token in {"\n", "\n\n"}:
+            if total == 0:
+                continue
+            if selected and selected[-1] in {"\n", "\n\n"}:
+                if selected[-1] == "\n\n" or token == "\n":
+                    continue
+                selected[-1] = "\n\n"
+                continue
+            if total + len(token) > limit:
+                break
+            selected.append(token)
+            total += len(token)
+            last_was_text = False
+            continue
+
+        chunk = token.strip()
+        if not chunk:
+            continue
+        prefix = " " if last_was_text else ""
+        extra = len(prefix) + len(chunk)
         if total + extra > limit:
             break
-        selected.append(sentence)
+        if prefix:
+            selected.append(prefix)
+        selected.append(chunk)
         total += extra
+        last_was_text = True
 
     if selected:
-        return " ".join(selected)
-    return sentences[0][:limit].rstrip()
+        return "".join(selected).strip()
+    return normalized[:limit].rstrip()
 
 
 def _split_sentences(text: str) -> list[str]:

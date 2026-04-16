@@ -122,6 +122,40 @@ function normalizeEvidenceSections(report) {
   };
 }
 
+function normalizeSnippetText(value) {
+  return String(value || "")
+    .replace(/\r\n/g, "\n")
+    .replace(/\r/g, "\n")
+    .replace(/[ \t\f\v]+/g, " ")
+    .replace(/\n{3,}/g, "\n\n")
+    .trim();
+}
+
+function splitSnippetSentences(text) {
+  return String(text || "")
+    .replace(/\n+/g, " ")
+    .split(/(?<=[.!?。！？])\s+/u)
+    .map((part) => part.trim())
+    .filter(Boolean);
+}
+
+function formatSnippetForDisplay(snippet) {
+  const normalized = normalizeSnippetText(snippet);
+  if (!normalized) {
+    return "";
+  }
+
+  const sentences = splitSnippetSentences(normalized);
+  if (sentences.length <= 1) {
+    return normalized;
+  }
+  const lines = [];
+  for (let index = 0; index < sentences.length; index += 2) {
+    lines.push(sentences.slice(index, index + 2).join(" ").trim());
+  }
+  return lines.join("\n");
+}
+
 function normalizeEvidenceBlock(block) {
   if (!block || typeof block !== "object") {
     return null;
@@ -131,7 +165,7 @@ function normalizeEvidenceBlock(block) {
     .trim()
     .replace(/\s+/g, " ");
   const snippets = toList(block.evidence_snippets)
-    .map((snippet) => String(snippet || "").trim().replace(/\s+/g, " "))
+    .map((snippet) => normalizeSnippetText(snippet))
     .filter(Boolean)
     .slice(0, 3);
 
@@ -157,7 +191,10 @@ function renderEvidenceSection(container, blocks, emptyMessage) {
   }
 
   blocks.forEach((block) => {
-    const snippets = toList(block.evidence_snippets);
+    const finalSnippets = toList(block.evidence_snippets)
+      .map((snippet) => normalizeSnippetText(snippet))
+      .filter(Boolean)
+      .slice(0, 3);
     const card = document.createElement("article");
     card.className = "evidence-card";
 
@@ -170,9 +207,9 @@ function renderEvidenceSection(container, blocks, emptyMessage) {
 
     const list = document.createElement("ul");
     list.className = "evidence-snippets";
-    snippets.forEach((snippet) => {
+    finalSnippets.forEach((snippet) => {
       const li = document.createElement("li");
-      li.textContent = `"${snippet}"`;
+      li.textContent = formatSnippetForDisplay(snippet);
       list.appendChild(li);
     });
 
