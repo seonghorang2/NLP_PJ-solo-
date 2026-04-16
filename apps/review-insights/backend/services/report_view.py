@@ -142,6 +142,27 @@ PAID_RECOMMENDATIONS = {"buy_now", "buy_on_sale", "wait", "not_recommended"}
 FREE_RECOMMENDATIONS = {"free_play_recommended", "play_now", "try_lightly", "wait", "not_recommended"}
 ALL_RECOMMENDATIONS = PAID_RECOMMENDATIONS | FREE_RECOMMENDATIONS
 
+# Buyer-facing replacement layer (applied right before payload return).
+# Keeps internal taxonomy intact while avoiding category-like labels in rendered text.
+FORBIDDEN_LABEL_REPLACEMENTS: dict[str, str] = {
+    "조작 / 규칙 학습 난이도": "초반 적응은 필요하지만 익숙해지면 손맛이 살아나는 플레이 구조",
+    "전투 손맛 / 액션 호평": "전투가 반복될수록 손에 붙고 몰입이 올라가는 액션 경험",
+    "스토리 / 서사 몰입": "세계관과 연출 덕분에 플레이를 계속하게 되는 몰입 경험",
+    "스토리/서사 몰입": "세계관과 연출 덕분에 플레이를 계속하게 되는 몰입 경험",
+    "최적화 문제": "프레임 저하나 끊김으로 전투/이동 흐름이 깨질 수 있는 리스크",
+    "일반 버그": "예상치 못한 오류가 플레이 리듬을 끊을 수 있는 리스크",
+    "가격/ 과금 불만": "가격 대비 만족도가 갈려 구매 타이밍을 따져봐야 하는 포인트",
+    "가격 / 과금 불만": "가격 대비 만족도가 갈려 구매 타이밍을 따져봐야 하는 포인트",
+    "DLC / 확장팩 언급": "추가 콘텐츠 가치가 확실할 때 만족도가 높아지는 포인트",
+    "반복 / 목적성 부족": "중후반 반복감이 커지면 동기 유지가 떨어질 수 있는 리스크",
+    "매칭 / 서버 문제": "매칭 대기나 서버 상태에 따라 체감 품질이 흔들릴 수 있는 리스크",
+    "밸런스 불만": "특정 구간 불공정 체감이 누적되면 피로도가 높아질 수 있는 리스크",
+    "번역/현지화 품질": "한국어 품질에 따라 몰입과 진입장벽이 크게 달라지는 포인트",
+    "건축 조작 불편": "배치/건설 인터랙션이 익숙해지기 전 불편할 수 있는 구간",
+    "콘텐츠 부족": "플레이 시간이 누적될수록 새로움이 빨리 소진될 수 있는 리스크",
+    "세이브 / 진행 유실": "진행 데이터 안정성이 만족도를 크게 좌우하는 리스크",
+}
+
 
 def is_consumer_report_payload(payload: Any) -> bool:
     """Return True when payload matches the multi-stage report contract."""
@@ -571,12 +592,92 @@ def _apply_final_language_polish(
         "strengths": _fix_blocks(list(evidence_sections.get("strengths", []) or [])),
         "risks": _fix_blocks(list(evidence_sections.get("risks", []) or [])),
     }
+    report_display = _apply_forbidden_label_replacements_to_display(report_display)
+    next_sections = _apply_forbidden_label_replacements_to_sections(next_sections)
 
     merged = dict(payload)
     merged["report_plan"] = report_plan
     merged["report_display"] = report_display
     merged["evidence_sections"] = next_sections
     return merged
+
+
+def _replace_forbidden_labels(text: str) -> str:
+    normalized = " ".join(str(text or "").split()).strip()
+    if not normalized:
+        return ""
+    replaced = normalized
+    for before, after in FORBIDDEN_LABEL_REPLACEMENTS.items():
+        replaced = replaced.replace(before, after)
+    return replaced
+
+
+def _apply_forbidden_label_replacements_to_display(
+    report_display: dict[str, Any],
+) -> dict[str, Any]:
+    next_display = dict(report_display)
+    if isinstance(next_display.get("headline"), str):
+        next_display["headline"] = _replace_forbidden_labels(str(next_display.get("headline", "")))
+    if isinstance(next_display.get("buy_timing_summary"), str):
+        next_display["buy_timing_summary"] = _replace_forbidden_labels(
+            str(next_display.get("buy_timing_summary", ""))
+        )
+
+    strengths: list[dict[str, Any]] = []
+    for item in list(next_display.get("top_strengths", []) or []):
+        if not isinstance(item, dict):
+            continue
+        next_item = dict(item)
+        if isinstance(next_item.get("title"), str):
+            next_item["title"] = _replace_forbidden_labels(str(next_item.get("title", "")))
+        if isinstance(next_item.get("summary"), str):
+            next_item["summary"] = _replace_forbidden_labels(str(next_item.get("summary", "")))
+        strengths.append(next_item)
+    next_display["top_strengths"] = strengths
+
+    risks: list[dict[str, Any]] = []
+    for item in list(next_display.get("top_risks", []) or []):
+        if not isinstance(item, dict):
+            continue
+        next_item = dict(item)
+        if isinstance(next_item.get("title"), str):
+            next_item["title"] = _replace_forbidden_labels(str(next_item.get("title", "")))
+        if isinstance(next_item.get("summary"), str):
+            next_item["summary"] = _replace_forbidden_labels(str(next_item.get("summary", "")))
+        risks.append(next_item)
+    next_display["top_risks"] = risks
+
+    return next_display
+
+
+def _apply_forbidden_label_replacements_to_sections(
+    evidence_sections: dict[str, list[dict[str, Any]]],
+) -> dict[str, list[dict[str, Any]]]:
+    def _replace_blocks(blocks: list[dict[str, Any]]) -> list[dict[str, Any]]:
+        replaced_blocks: list[dict[str, Any]] = []
+        for block in blocks:
+            if not isinstance(block, dict):
+                continue
+            next_block = dict(block)
+            if isinstance(next_block.get("title"), str):
+                next_block["title"] = _replace_forbidden_labels(str(next_block.get("title", "")))
+            if isinstance(next_block.get("theme"), str):
+                next_block["theme"] = _replace_forbidden_labels(str(next_block.get("theme", "")))
+            if isinstance(next_block.get("why_it_matters"), str):
+                next_block["why_it_matters"] = _replace_forbidden_labels(
+                    str(next_block.get("why_it_matters", ""))
+                )
+            if isinstance(next_block.get("explanation"), str):
+                next_block["explanation"] = _replace_forbidden_labels(
+                    str(next_block.get("explanation", ""))
+                )
+            replaced_blocks.append(next_block)
+        return replaced_blocks
+
+    return {
+        "strengths": _replace_blocks(list(evidence_sections.get("strengths", []) or [])),
+        "risks": _replace_blocks(list(evidence_sections.get("risks", []) or [])),
+    }
 
 
 def _build_evidence_sections_from_blocks(blocks: list[dict[str, Any]]) -> dict[str, list[dict[str, Any]]]:
@@ -1546,12 +1647,27 @@ def _ensure_min_stance_blocks_v2(
 
 def _pick_best_item_for_stance_v2(items: list[dict[str, Any]], stance: str) -> dict[str, Any] | None:
     candidates = [item for item in items if _block_stance(item) == stance]
+    if not candidates and stance == "negative":
+        fallback = [
+            item for item in items
+            if float(item.get("negative_ratio", 0.0)) > 0.0
+        ]
+        if fallback:
+            candidates = fallback
+    if not candidates and stance == "positive":
+        fallback = [
+            item for item in items
+            if float(item.get("negative_ratio", 0.0)) < 1.0
+        ]
+        if fallback:
+            candidates = fallback
     if not candidates:
         return None
     return sorted(
         candidates,
         key=lambda item: (
             -_consensus_rank(str(item.get("consensus_level", "low"))),
+            -float(item.get("negative_ratio", 0.0)) if stance == "negative" else float(item.get("negative_ratio", 0.0)),
             -int(item.get("mention_count", 0)),
         ),
     )[0]
@@ -1774,10 +1890,96 @@ def _compress_evidence_sections(
             compressed_blocks.append(next_block)
         return compressed_blocks
 
+    compressed_strengths = _compress_block_list(strengths)[:3]
+    compressed_risks = _compress_block_list(risks)[:3]
+
+    compressed_strengths = _guarantee_min_stance_blocks(
+        compressed_blocks=compressed_strengths,
+        source_blocks=strengths,
+        stance="positive",
+    )[:3]
+    compressed_risks = _guarantee_min_stance_blocks(
+        compressed_blocks=compressed_risks,
+        source_blocks=risks,
+        stance="negative",
+    )[:3]
+
     return {
-        "strengths": _compress_block_list(strengths)[:3],
-        "risks": _compress_block_list(risks)[:3],
+        "strengths": compressed_strengths,
+        "risks": compressed_risks,
     }
+
+
+def _guarantee_min_stance_blocks(
+    *,
+    compressed_blocks: list[dict[str, Any]],
+    source_blocks: list[dict[str, Any]],
+    stance: str,
+) -> list[dict[str, Any]]:
+    if compressed_blocks:
+        return compressed_blocks
+    fallback = _build_guaranteed_fill_block(source_blocks=source_blocks, stance=stance)
+    if fallback is None:
+        return []
+    return [fallback]
+
+
+def _build_guaranteed_fill_block(
+    *,
+    source_blocks: list[dict[str, Any]],
+    stance: str,
+) -> dict[str, Any] | None:
+    for block in source_blocks:
+        if not isinstance(block, dict):
+            continue
+        if str(block.get("stance", "")).strip().lower() != stance:
+            continue
+
+        merged_candidates: list[str] = []
+        for raw in list(block.get("evidence_candidate_snippets", []) or []):
+            merged_candidates.append(str(raw))
+        for raw in list(block.get("evidence_snippets", []) or []):
+            merged_candidates.append(str(raw))
+        if not merged_candidates:
+            continue
+
+        snippets: list[str] = []
+        seen: set[str] = set()
+        for raw in merged_candidates[:12]:
+            normalized = _prepare_evidence_source_text(str(raw), limit=1200)
+            if not normalized or normalized in seen:
+                continue
+            if _is_noisy_evidence_text(normalized):
+                continue
+            if not _snippet_matches_stance(normalized, stance):
+                continue
+            seen.add(normalized)
+            snippets.append(normalized)
+            if len(snippets) >= 3:
+                break
+
+        if len(snippets) < 2:
+            for raw in merged_candidates[:12]:
+                normalized = _prepare_evidence_source_text(str(raw), limit=1200)
+                if not normalized or normalized in seen:
+                    continue
+                if _is_noisy_evidence_text(normalized):
+                    continue
+                seen.add(normalized)
+                snippets.append(normalized)
+                if len(snippets) >= 3:
+                    break
+
+        if len(snippets) < 2:
+            continue
+
+        next_block = dict(block)
+        next_block["evidence_quality_level"] = "guaranteed_fill"
+        next_block["evidence_candidate_snippets"] = merged_candidates[:8]
+        next_block["evidence_snippets"] = snippets[:3]
+        return next_block
+
+    return None
 
 
 def _select_evidence_snippets_for_block(
