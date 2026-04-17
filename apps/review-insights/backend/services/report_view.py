@@ -551,6 +551,11 @@ def _apply_final_language_polish(
     report_display = dict(payload.get("report_display", {}) or {})
     evidence_sections = payload.get("evidence_sections", {}) or {}
 
+    # Apply forbidden-label replacement first (title/theme only),
+    # then run proofreading on the final wording.
+    report_display = _apply_forbidden_label_replacements_to_display(report_display)
+    evidence_sections = _apply_forbidden_label_replacements_to_sections(evidence_sections)
+
     proofreader = KoreanReportProofreader()
     llm_enabled = bool(allow_llm and _is_llm_report_proofread_enabled() and proofreader.available)
 
@@ -630,8 +635,6 @@ def _apply_final_language_polish(
         "strengths": _fix_blocks(list(evidence_sections.get("strengths", []) or [])),
         "risks": _fix_blocks(list(evidence_sections.get("risks", []) or [])),
     }
-    report_display = _apply_forbidden_label_replacements_to_display(report_display)
-    next_sections = _apply_forbidden_label_replacements_to_sections(next_sections)
 
     merged = dict(payload)
     merged["report_plan"] = report_plan
@@ -654,12 +657,6 @@ def _apply_forbidden_label_replacements_to_display(
     report_display: dict[str, Any],
 ) -> dict[str, Any]:
     next_display = dict(report_display)
-    if isinstance(next_display.get("headline"), str):
-        next_display["headline"] = _replace_forbidden_labels(str(next_display.get("headline", "")))
-    if isinstance(next_display.get("buy_timing_summary"), str):
-        next_display["buy_timing_summary"] = _replace_forbidden_labels(
-            str(next_display.get("buy_timing_summary", ""))
-        )
 
     strengths: list[dict[str, Any]] = []
     for item in list(next_display.get("top_strengths", []) or []):
@@ -668,8 +665,6 @@ def _apply_forbidden_label_replacements_to_display(
         next_item = dict(item)
         if isinstance(next_item.get("title"), str):
             next_item["title"] = _replace_forbidden_labels(str(next_item.get("title", "")))
-        if isinstance(next_item.get("summary"), str):
-            next_item["summary"] = _replace_forbidden_labels(str(next_item.get("summary", "")))
         strengths.append(next_item)
     next_display["top_strengths"] = strengths
 
@@ -680,8 +675,6 @@ def _apply_forbidden_label_replacements_to_display(
         next_item = dict(item)
         if isinstance(next_item.get("title"), str):
             next_item["title"] = _replace_forbidden_labels(str(next_item.get("title", "")))
-        if isinstance(next_item.get("summary"), str):
-            next_item["summary"] = _replace_forbidden_labels(str(next_item.get("summary", "")))
         risks.append(next_item)
     next_display["top_risks"] = risks
 
@@ -701,14 +694,6 @@ def _apply_forbidden_label_replacements_to_sections(
                 next_block["title"] = _replace_forbidden_labels(str(next_block.get("title", "")))
             if isinstance(next_block.get("theme"), str):
                 next_block["theme"] = _replace_forbidden_labels(str(next_block.get("theme", "")))
-            if isinstance(next_block.get("why_it_matters"), str):
-                next_block["why_it_matters"] = _replace_forbidden_labels(
-                    str(next_block.get("why_it_matters", ""))
-                )
-            if isinstance(next_block.get("explanation"), str):
-                next_block["explanation"] = _replace_forbidden_labels(
-                    str(next_block.get("explanation", ""))
-                )
             replaced_blocks.append(next_block)
         return replaced_blocks
 
@@ -1036,6 +1021,21 @@ def _build_report_deterministic(consensus_payload: dict[str, Any]) -> dict[str, 
         is_free_game=_is_free_game(consensus_payload),
     )
     headline = _build_headline(recommendation, selected_strengths, selected_risks)
+    if recommendation == "buy_on_sale":
+        strength_theme = (
+            _experience_theme(selected_strengths[0], positive=True)
+            if selected_strengths
+            else "핵심 플레이 경험"
+        )
+        risk_theme = (
+            _experience_theme(selected_risks[0], positive=False)
+            if selected_risks
+            else "기술 안정성 이슈"
+        )
+        headline = (
+            f"{strength_theme} 경험은 분명한 강점입니다. "
+            f"다만 {risk_theme} 때문에 할인 시점에 시작하는 편이 더 안전합니다."
+        )
     buy_timing_summary = _build_timing_summary(recommendation, recent_state, selected_risks)
     evidence_blocks = _build_evidence_blocks(consensus_payload)
 
