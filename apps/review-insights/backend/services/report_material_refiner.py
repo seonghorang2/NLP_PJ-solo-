@@ -6,6 +6,7 @@ import json
 import os
 import re
 from dataclasses import dataclass
+from math import log1p
 from typing import Any
 
 try:  # pragma: no cover - optional dependency
@@ -14,6 +15,15 @@ except Exception:  # pragma: no cover - optional dependency
     OpenAI = None
 
 from models.schemas import AnalysisResult, ProcessedReview
+
+_CANDIDATE_SCORE_WEIGHTS = {
+    "has_tags": 0.33,
+    "has_theme": 0.18,
+    "playtime": 0.24,
+    "author_reviews": 0.10,
+    "length": 0.10,
+    "recency": 0.05,
+}
 
 
 @dataclass(slots=True)
@@ -288,10 +298,11 @@ def _select_candidates(processed_reviews: list[ProcessedReview], *, max_count: i
     if not included or max_count <= 0:
         return []
 
+    score_map = _build_candidate_score_map(included)
     positives = [review for review in included if review.voted_up]
     negatives = [review for review in included if not review.voted_up]
-    positives.sort(key=_candidate_sort_key, reverse=True)
-    negatives.sort(key=_candidate_sort_key, reverse=True)
+    positives.sort(key=lambda review: _candidate_sort_key(review, score_map), reverse=True)
+    negatives.sort(key=lambda review: _candidate_sort_key(review, score_map), reverse=True)
 
     target_half = max_count // 2
     selected: list[ProcessedReview] = []
@@ -310,7 +321,11 @@ def _select_candidates(processed_reviews: list[ProcessedReview], *, max_count: i
         selected_ids.add(review.review_id)
 
     if len(selected) < max_count:
-        remaining = sorted(included, key=_candidate_sort_key, reverse=True)
+        remaining = sorted(
+            included,
+            key=lambda review: _candidate_sort_key(review, score_map),
+            reverse=True,
+        )
         for review in remaining:
             if review.review_id in selected_ids:
                 continue
@@ -322,15 +337,59 @@ def _select_candidates(processed_reviews: list[ProcessedReview], *, max_count: i
     return selected[:max_count]
 
 
-def _candidate_sort_key(review: ProcessedReview) -> tuple[int, int, float, int, int, int]:
+def _candidate_sort_key(
+    review: ProcessedReview,
+    score_map: dict[str, float],
+) -> tuple[float, int]:
+    return (
+        score_map.get(review.review_id, 0.0),
+        int(review.timestamp_created or 0),
+    )
+
+
+def _build_candidate_score_map(processed_reviews: list[ProcessedReview]) -> dict[str, float]:
+    if not processed_reviews:
+        return {}
+
+    created_values = [int(review.timestamp_created or 0) for review in processed_reviews]
+    min_created = min(created_values)
+    max_created = max(created_values)
+    created_range = max(max_created - min_created, 1)
+
+    score_map: dict[str, float] = {}
+    for review in processed_reviews:
+        score_map[review.review_id] = _candidate_score(
+            review,
+            min_created=min_created,
+            created_range=created_range,
+        )
+    return score_map
+
+
+def _candidate_score(
+    review: ProcessedReview,
+    *,
+    min_created: int,
+    created_range: int,
+) -> float:
     text = review.normalized_text.strip()
-    readable_len = max(min(len(text), 800), 0)
-    has_tags = 1 if review.category_tags else 0
-    has_theme = 1 if review.canonical_theme else 0
-    playtime = float(review.playtime_at_review_hours or 0.0)
-    author_reviews = int(review.num_reviews or 0)
+    has_tags = 1.0 if review.category_tags else 0.0
+    has_theme = 1.0 if review.canonical_theme else 0.0
+    playtime = min(log1p(max(float(review.playtime_at_review_hours or 0.0), 0.0)) / log1p(100.0), 1.0)
+    author_reviews = min(log1p(max(float(review.num_reviews or 0), 0.0)) / log1p(50.0), 1.0)
+    length = min(len(text) / 300.0, 1.0)
     created = int(review.timestamp_created or 0)
-    return (has_tags, has_theme, playtime, author_reviews, readable_len, created)
+    recency = min(max((created - min_created) / float(created_range), 0.0), 1.0)
+
+    weights = _CANDIDATE_SCORE_WEIGHTS
+    return (
+        weights["has_tags"] * has_tags
+        + weights["has_theme"] * has_theme
+        + weights["playtime"] * playtime
+        + weights["author_reviews"] * author_reviews
+        + weights["length"] * length
+        + weights["recency"] * recency
+    )
 
 
 def _fallback_stance(review: ProcessedReview) -> str:
@@ -396,4 +455,3 @@ def _split_sentences(text: str) -> list[str]:
 
 def _sentence_count(text: str) -> int:
     return len(_split_sentences(text))
-

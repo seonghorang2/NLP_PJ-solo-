@@ -78,6 +78,30 @@
         "output": {
           "refined_material_count": 50
         },
+        "scoring": {
+          "formula": "score = 0.33*has_tags + 0.18*has_theme + 0.24*playtime_norm + 0.10*author_norm + 0.10*length_norm + 0.05*recency_norm",
+          "weights": {
+            "has_tags": 0.33,
+            "has_theme": 0.18,
+            "playtime_norm": 0.24,
+            "author_norm": 0.1,
+            "length_norm": 0.1,
+            "recency_norm": 0.05
+          },
+          "normalization": {
+            "has_tags": "1.0 if category_tags exists else 0.0",
+            "has_theme": "1.0 if canonical_theme exists else 0.0",
+            "playtime_norm": "min(log1p(max(playtime_hours, 0)) / log1p(100), 1.0)",
+            "author_norm": "min(log1p(max(num_reviews, 0)) / log1p(50), 1.0)",
+            "length_norm": "min(len(normalized_text) / 300, 1.0)",
+            "recency_norm": "clamp((timestamp_created - min_created) / max(max_created - min_created, 1), 0.0, 1.0)"
+          },
+          "selection_policy": {
+            "half_split_by_stance": true,
+            "positive_negative_half": "max_llm_reviews / 2 each",
+            "fill_remaining_by_score_desc": true
+          }
+        },
         "metrics": {
           "LLM 호출 수": 50,
           "규칙 대체 사용 수": 7

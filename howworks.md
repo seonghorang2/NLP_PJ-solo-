@@ -109,6 +109,22 @@
 - LLM 성공 시 1~4문장 근거 재료를 생성하고,
 - 실패/스키마오류/신뢰도 낮음은 규칙 fallback 텍스트로 대체합니다.
 
+#### 4-1) 핵심 수식(코드 기준, 2026-04-17 동기화)
+- 후보 점수(가중합):
+  - `score = 0.33*has_tags + 0.18*has_theme + 0.24*playtime_norm + 0.10*author_norm + 0.10*length_norm + 0.05*recency_norm`
+- 가중치:
+- `has_tags=0.33`, `has_theme=0.18`, `playtime_norm=0.24`, `author_norm=0.10`, `length_norm=0.10`, `recency_norm=0.05`
+- 정규화:
+  - `has_tags = 1.0 if category_tags exists else 0.0`
+  - `has_theme = 1.0 if canonical_theme exists else 0.0`
+  - `playtime_norm = min(log1p(max(playtime_hours, 0)) / log1p(100), 1.0)`
+  - `author_norm = min(log1p(max(num_reviews, 0)) / log1p(50), 1.0)`
+  - `length_norm = min(len(normalized_text) / 300, 1.0)`
+  - `recency_norm = clamp((timestamp_created - min_created) / max(max_created - min_created, 1), 0.0, 1.0)`
+- 선발 방식:
+  - 먼저 긍정/부정을 `max_llm_reviews` 절반씩 우선 선발
+  - 남는 슬롯은 전체 포함 리뷰에서 `score` 높은 순으로 채움
+
 ### 5) 리포트 생성(Multi-stage Report Writer)
 - 단일 패스가 아니라 3단계로 생성합니다.
 1. report_plan 생성

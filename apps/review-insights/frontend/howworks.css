@@ -362,6 +362,24 @@ pre {
   font-size: 0.88rem;
 }
 
+.formula-list li {
+  font-family: "Consolas", "SFMono-Regular", "Menlo", "Monaco", monospace;
+  line-height: 1.5;
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+.formula-example {
+  margin: 8px 0 0;
+  padding: 10px 12px;
+  border: 1px solid var(--hw-line);
+  border-radius: 10px;
+  background: #151f2b;
+  color: #dbe9ff;
+  font-size: 0.84rem;
+  line-height: 1.55;
+}
+
 .metric-list li.has-inline-tooltip {
   cursor: help;
 }

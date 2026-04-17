@@ -9,6 +9,8 @@ const mainDetailInput = document.getElementById("main-detail-input");
 const mainDetailOutput = document.getElementById("main-detail-output");
 const mainDetailMetrics = document.getElementById("main-detail-metrics");
 const mainDetailCoreRules = document.getElementById("main-detail-core-rules");
+const mainDetailFormulas = document.getElementById("main-detail-formulas");
+const mainDetailFormulaExample = document.getElementById("main-detail-formula-example");
 
 let selectedStageNo = null;
 
@@ -69,6 +71,96 @@ const CORE_RULE_TOOLTIP_RULES = [
   {
     textIncludes: "rule_decision/rule_confidence/final_decision_source",
     tooltip: DECISION_TRACE_TOOLTIP,
+  },
+];
+
+const DEFAULT_STAGE_FORMULAS = {
+  1: [
+    "raw_review_count = len(dedup_by_review_id(raw_reviews))",
+  ],
+  2: [
+    "hangul_ratio = hangul_char_count / visible_char_count",
+    "included_in_analysis = not(is_low_quality or is_profanity_only or hangul_ratio < 0.20)",
+    "analysis_eligible = (included_review_count >= 100)",
+    "rule_confidence = clamp(0.45 + min(hangul_ratio,0.90)*0.25 + min(visible_len/120,1.0)*0.20 + (has_tags?0.10:-0.05) - min(0.05*ambiguity_flag_count,0.25), 0, 1)",
+  ],
+  3: [
+    "N = included_review_count",
+    "high_min_mentions = max(12, round(N * 0.06))",
+    "medium_min_mentions = max(6, round(N * 0.03))",
+    "mention_count(category) = number_of_included_reviews_with_category",
+    "negative_ratio(category) = negative_count / mention_count",
+  ],
+  4: [
+    "selected_candidates = top_k(included_reviews, max_llm_reviews)",
+    "llm_applied = (decision != null and confidence >= min_confidence)",
+    "fallback_used = (decision == null) or (confidence < min_confidence)",
+  ],
+  5: [
+    "severe = count(selected_risks where negative_ratio >= 0.65)",
+    "medium = count(selected_risks where negative_ratio >= 0.52)",
+    "if severe>=2 -> not_recommended; elif declining and (severe>=1 or medium>=2) -> wait; elif severe==0 and medium<=1 and recent in {stable,improving} -> buy_now; else -> buy_on_sale",
+  ],
+  6: [
+    "quick_decision_score_4 = I(decision_core_ready) + I(fit_ready) + I(evidence_ready) + I(forbidden_label_exposure_count==0)",
+    "evidence_mismatch_rate = mismatch_count / checked_count",
+    "evidence_unknown_snippet_rate = unknown_count / (checked_count + unknown_count)",
+    "gate_pass = (quick_decision_score_4 >= min_score) and (evidence_unknown_snippet_rate <= max_unknown_snippet_rate)",
+  ],
+  7: [
+    "snapshot_version = v + timestamp",
+    "stored_artifacts = {raw, processed, analysis, metadata, report}",
+  ],
+  8: [
+    "snapshot_found = exists(report_snapshot_for_selected_appid)",
+  ],
+  9: [
+    "http_status = 200 if (snapshot_found and analysis_eligible) else non-200",
+    "response_time_ms = t_response - t_request",
+  ],
+  10: [
+    "delta_review_count = current_review_count - last_review_count",
+  ],
+  11: [
+    "needs_refresh = (delta_review_count >= threshold_n)",
+  ],
+  12: [
+    "if needs_refresh: run_offline_pipeline(); replace_latest_snapshot()",
+  ],
+};
+
+const FORMULA_TOOLTIP_RULES = [
+  {
+    includes: "N",
+    tooltip: "N은 분석 포함 리뷰 수(included_review_count)입니다.",
+  },
+  {
+    includes: "high_min_mentions",
+    tooltip: "high_min_mentions는 고합의 기준 최소 언급 수입니다. max(12, round(N*0.06))으로 계산합니다.",
+  },
+  {
+    includes: "medium_min_mentions",
+    tooltip: "medium_min_mentions는 중간 합의 기준 최소 언급 수입니다. max(6, round(N*0.03))으로 계산합니다.",
+  },
+  {
+    includes: "negative_ratio",
+    tooltip: "negative_ratio는 해당 카테고리에서 부정 리뷰 비율입니다. negative_count / mention_count 입니다.",
+  },
+  {
+    includes: "hangul_ratio",
+    tooltip: "hangul_ratio는 보이는 문자 중 한글(가-힣) 비율입니다.",
+  },
+  {
+    includes: "rule_confidence",
+    tooltip: "rule_confidence는 규칙 판정의 확신도(0~1)입니다. 높을수록 규칙 판정이 안정적입니다.",
+  },
+  {
+    includes: "quick_decision_score_4",
+    tooltip: "quick_decision_score_4는 핵심 4조건 충족 개수입니다. 0~4 점수로 계산합니다.",
+  },
+  {
+    includes: "evidence_unknown_snippet_rate",
+    tooltip: "근거 스니펫 중 긍/부정을 판정하지 못한 비율입니다. 높으면 근거 품질 경고 신호입니다.",
   },
 ];
 
@@ -149,6 +241,105 @@ function findCoreRuleTooltip(ruleText) {
   return matched ? matched.tooltip : "";
 }
 
+function findFormulaTooltip(formulaText) {
+  const safeText = String(formulaText || "");
+  const matched = FORMULA_TOOLTIP_RULES.find((item) =>
+    safeText.includes(item.includes)
+  );
+  return matched ? matched.tooltip : "";
+}
+
+function parseNumberLike(value) {
+  if (typeof value === "number" && Number.isFinite(value)) {
+    return value;
+  }
+  const text = String(value ?? "").trim();
+  if (!text) {
+    return null;
+  }
+  const normalized = text.replace(/,/g, "");
+  const parsed = Number(normalized);
+  return Number.isFinite(parsed) ? parsed : null;
+}
+
+function pickStageNumber(stage, keys) {
+  const input = toObject(stage && stage.input);
+  const output = toObject(stage && stage.output);
+  const metrics = toObject(stage && stage.metrics);
+  for (const key of keys) {
+    const fromInput = parseNumberLike(input[key]);
+    if (fromInput !== null) {
+      return fromInput;
+    }
+    const fromOutput = parseNumberLike(output[key]);
+    if (fromOutput !== null) {
+      return fromOutput;
+    }
+    const fromMetrics = parseNumberLike(metrics[key]);
+    if (fromMetrics !== null) {
+      return fromMetrics;
+    }
+  }
+  return null;
+}
+
+function formatExampleNumber(value, digits = 0) {
+  if (typeof value !== "number" || !Number.isFinite(value)) {
+    return "-";
+  }
+  if (digits > 0) {
+    return value.toFixed(digits);
+  }
+  return String(Math.round(value));
+}
+
+function buildFormulaExample(stage) {
+  const stageNo = Number(stage && stage.stage_no);
+
+  if (stageNo === 3) {
+    const n = pickStageNumber(stage, ["included_review_count", "분석 포함 리뷰 수"]);
+    if (n !== null) {
+      const high = Math.max(12, Math.round(n * 0.06));
+      const medium = Math.max(6, Math.round(n * 0.03));
+      return `실제 값 대입 예시: N=${formatExampleNumber(n)} -> high_min_mentions=max(12, round(N*0.06))=${high}, medium_min_mentions=max(6, round(N*0.03))=${medium}`;
+    }
+  }
+
+  if (stageNo === 2) {
+    const included = pickStageNumber(stage, ["included_review_count", "분석 포함 리뷰 수"]);
+    if (included !== null) {
+      return `실제 값 대입 예시: included_review_count=${formatExampleNumber(included)} -> analysis_eligible = (${formatExampleNumber(included)} >= 100) = ${included >= 100}`;
+    }
+  }
+
+  if (stageNo === 6) {
+    const mismatch = pickStageNumber(stage, ["근거 불일치율", "evidence_mismatch_rate"]);
+    const unknown = pickStageNumber(stage, ["근거 판정불가율", "evidence_unknown_snippet_rate"]);
+    if (mismatch !== null || unknown !== null) {
+      return `실제 값 대입 예시: evidence_mismatch_rate=${mismatch !== null ? formatExampleNumber(mismatch, 4) : "-"}, evidence_unknown_snippet_rate=${unknown !== null ? formatExampleNumber(unknown, 4) : "-"}`;
+    }
+  }
+
+  if (stageNo === 10) {
+    const last = pickStageNumber(stage, ["last_review_count"]);
+    const current = pickStageNumber(stage, ["current_review_count"]);
+    if (last !== null && current !== null) {
+      const delta = current - last;
+      return `실제 값 대입 예시: delta_review_count = ${formatExampleNumber(current)} - ${formatExampleNumber(last)} = ${formatExampleNumber(delta)}`;
+    }
+  }
+
+  if (stageNo === 11) {
+    const delta = pickStageNumber(stage, ["delta_review_count", "신규 리뷰 수"]);
+    const threshold = pickStageNumber(stage, ["threshold_n", "임계치 n"]);
+    if (delta !== null && threshold !== null) {
+      return `실제 값 대입 예시: needs_refresh = (${formatExampleNumber(delta)} >= ${formatExampleNumber(threshold)}) = ${delta >= threshold}`;
+    }
+  }
+
+  return "실제 값 대입 예시: 현재 단계에서 공개 가능한 샘플 값이 없습니다.";
+}
+
 function appendInlineTooltip(li, tooltipText) {
   const safeTooltip = String(tooltipText || "").trim();
   if (!safeTooltip) {
@@ -227,6 +418,55 @@ function renderCoreRules(container, coreRules) {
   });
 }
 
+function formulaEntries(stage) {
+  const scoring = toObject(stage && stage.scoring);
+  const scoringFormula = String(scoring.formula || "").trim();
+  const scoringWeights = Object.entries(toObject(scoring.weights));
+  const scoringEntries = [];
+
+  if (scoringFormula) {
+    scoringEntries.push(`scoring.formula: ${scoringFormula}`);
+  }
+  if (scoringWeights.length) {
+    const weightText = scoringWeights
+      .map(([key, value]) => `${key}=${value}`)
+      .join(", ");
+    scoringEntries.push(`scoring.weights: ${weightText}`);
+  }
+
+  const explicit = toArray(stage && stage.core_formulas)
+    .map((item) => String(item || "").trim())
+    .filter(Boolean);
+  if (explicit.length) {
+    return [...scoringEntries, ...explicit];
+  }
+  const stageNo = Number(stage && stage.stage_no);
+  return [...scoringEntries, ...toArray(DEFAULT_STAGE_FORMULAS[stageNo])];
+}
+
+function renderFormulaList(container, stage) {
+  container.innerHTML = "";
+  const formulas = formulaEntries(stage);
+  if (!formulas.length) {
+    const li = document.createElement("li");
+    li.textContent = "표시할 핵심 수식이 없습니다.";
+    container.appendChild(li);
+    if (mainDetailFormulaExample) {
+      mainDetailFormulaExample.textContent = "실제 값 대입 예시: -";
+    }
+    return;
+  }
+  formulas.forEach((formula) => {
+    const li = document.createElement("li");
+    li.textContent = formula;
+    appendInlineTooltip(li, findFormulaTooltip(formula));
+    container.appendChild(li);
+  });
+  if (mainDetailFormulaExample) {
+    mainDetailFormulaExample.textContent = buildFormulaExample(stage);
+  }
+}
+
 function resolveTrackType(stage) {
   const explicit = String(stage.track_type || "").trim().toLowerCase();
   if (explicit === "offline" || explicit === "online" || explicit === "update") {
@@ -275,6 +515,7 @@ function setMainDetail(stage) {
   mainDetailOutput.textContent = prettyObject(stage.output);
   renderMetricList(mainDetailMetrics, stage.metrics);
   renderCoreRules(mainDetailCoreRules, stage.core_rules);
+  renderFormulaList(mainDetailFormulas, stage);
 }
 
 function renderMainFlow(stages) {
