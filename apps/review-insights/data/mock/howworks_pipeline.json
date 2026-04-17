@@ -1,0 +1,176 @@
+{
+  "pipeline_overview_mock": {
+    "main_flow": [
+      {
+        "stage_no": 1,
+        "stage_name": "게임 전체 리뷰 수집 시작",
+        "input": {
+          "appid": 1245620
+        },
+        "output": {
+          "raw_review_count": 18432
+        },
+        "metrics": {
+          "수집 리뷰 수": 18432,
+          "수집 시간(초)": 92
+        }
+      },
+      {
+        "stage_no": 2,
+        "stage_name": "규칙기반 전처리",
+        "input": {
+          "raw_review_count": 18432
+        },
+        "output": {
+          "included_review_count": 13210
+        },
+        "metrics": {
+          "분석 포함 리뷰 수": 13210,
+          "제외 비율": 0.2834
+        }
+      },
+      {
+        "stage_no": 3,
+        "stage_name": "규칙 기반 분석 집계",
+        "input": {
+          "included_review_count": 13210
+        },
+        "output": {
+          "issue_signal_count": 16
+        },
+        "metrics": {
+          "태그 없음 비율": 0.0742,
+          "대표 테마 없음 비율": 0.1121
+        }
+      },
+      {
+        "stage_no": 4,
+        "stage_name": "LLM 활용 리포트 재료 정제",
+        "input": {
+          "candidate_review_count": 50
+        },
+        "output": {
+          "refined_material_count": 50
+        },
+        "metrics": {
+          "LLM 호출 수": 50,
+          "규칙 대체 사용 수": 7
+        }
+      },
+      {
+        "stage_no": 5,
+        "stage_name": "리포트 생성",
+        "input": {
+          "analysis_snapshot_id": "2026-04-16T15:30:00Z"
+        },
+        "output": {
+          "report_sections": 9
+        },
+        "metrics": {
+          "생성 성공 여부": 1,
+          "생성 시간(초)": 4.2
+        }
+      },
+      {
+        "stage_no": 6,
+        "stage_name": "품질 게이트",
+        "input": {
+          "report_id": "1245620-20260416"
+        },
+        "output": {
+          "gate_passed": true
+        },
+        "metrics": {
+          "근거 불일치율": 0.0,
+          "근거 판정불가율": 0.1111
+        }
+      },
+      {
+        "stage_no": 7,
+        "stage_name": "스냅샷 저장",
+        "input": {
+          "gate_passed": true
+        },
+        "output": {
+          "snapshot_version": "v2026-04-16-1532"
+        },
+        "metrics": {
+          "저장 성공 여부": 1,
+          "저장 파일 수": 4
+        }
+      },
+      {
+        "stage_no": 8,
+        "stage_name": "사용자 게임 선택",
+        "input": {
+          "selected_appid": 1245620
+        },
+        "output": {
+          "snapshot_found": true
+        },
+        "metrics": {
+          "조회 준비 시간(ms)": 12,
+          "캐시 히트": 1
+        }
+      },
+      {
+        "stage_no": 9,
+        "stage_name": "리포트 반환",
+        "input": {
+          "snapshot_version": "v2026-04-16-1532"
+        },
+        "output": {
+          "http_status": 200
+        },
+        "metrics": {
+          "응답 시간(ms)": 38,
+          "리포트 크기(KB)": 146
+        }
+      }
+    ],
+    "update_loop": [
+      {
+        "step_no": 1,
+        "step_name": "신규 리뷰 추가",
+        "input": {
+          "last_review_count": 18432,
+          "current_review_count": 18444
+        },
+        "output": {
+          "delta_review_count": 12
+        },
+        "metrics": {
+          "신규 리뷰 수": 12
+        }
+      },
+      {
+        "step_no": 2,
+        "step_name": "자동 재분석 필요 판정",
+        "input": {
+          "delta_review_count": 12,
+          "threshold_n": 10
+        },
+        "output": {
+          "needs_refresh": true
+        },
+        "metrics": {
+          "임계치 n": 10
+        }
+      },
+      {
+        "step_no": 3,
+        "step_name": "재수집/재분석/리포트 재생성",
+        "input": {
+          "needs_refresh": true
+        },
+        "output": {
+          "new_report_version": "v2026-04-18-0900"
+        },
+        "metrics": {
+          "재생성 시간(초)": 96
+        }
+      }
+    ],
+    "note": "업데이트 루프 자동 실행은 실서비스 목표이며, 현재 데모에서는 설명용 시각화만 제공"
+  }
+}

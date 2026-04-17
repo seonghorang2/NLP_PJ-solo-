@@ -15,6 +15,7 @@ from api.routes import router
 
 APP_ROOT = Path(__file__).resolve().parents[1]
 FRONTEND_DIR = APP_ROOT / "frontend"
+MOCK_DATA_DIR = APP_ROOT / "data" / "mock"
 NO_CACHE_HEADERS = {
     "Cache-Control": "no-store, no-cache, must-revalidate, max-age=0",
     "Pragma": "no-cache",
@@ -54,6 +55,38 @@ def create_app():
             return FileResponse(
                 FRONTEND_DIR / "styles.css",
                 media_type="text/css",
+                headers=NO_CACHE_HEADERS,
+            )
+
+        @app.get("/howworks")
+        def howworks_page():
+            """Serve the presentation-only pipeline walkthrough page."""
+            return FileResponse(FRONTEND_DIR / "howworks.html", headers=NO_CACHE_HEADERS)
+
+        @app.get("/howworks.js")
+        def howworks_js():
+            """Serve the presentation-only pipeline walkthrough script."""
+            return FileResponse(
+                FRONTEND_DIR / "howworks.js",
+                media_type="text/javascript",
+                headers=NO_CACHE_HEADERS,
+            )
+
+        @app.get("/howworks.css")
+        def howworks_css():
+            """Serve the presentation-only pipeline walkthrough stylesheet."""
+            return FileResponse(
+                FRONTEND_DIR / "howworks.css",
+                media_type="text/css",
+                headers=NO_CACHE_HEADERS,
+            )
+
+        @app.get("/mock/howworks_pipeline.json")
+        def howworks_mock_data():
+            """Serve mock pipeline data for the presentation page."""
+            return FileResponse(
+                MOCK_DATA_DIR / "howworks_pipeline.json",
+                media_type="application/json",
                 headers=NO_CACHE_HEADERS,
             )
 

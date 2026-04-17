@@ -10,13 +10,16 @@
     <main class="report-shell">
       <header class="report-topbar">
         <p class="brand">Steam 구매 판단 리포트</p>
-        <form id="report-form" class="picker">
-          <label for="game-select" class="sr-only">게임 선택</label>
-          <select id="game-select" required>
-            <option value="">리포트를 불러오는 중...</option>
-          </select>
-          <button id="load-button" type="submit">리포트 보기</button>
-        </form>
+        <div class="topbar-actions">
+          <form id="report-form" class="picker">
+            <label for="game-select" class="sr-only">게임 선택</label>
+            <select id="game-select" required>
+              <option value="">리포트를 불러오는 중...</option>
+            </select>
+            <button id="load-button" type="submit">리포트 보기</button>
+          </form>
+          <a href="/howworks" class="howworks-link">동작 원리 보기</a>
+        </div>
       </header>
 
       <section class="hero-card">

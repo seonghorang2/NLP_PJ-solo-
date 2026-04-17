@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="ko">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>파이프라인 설명용 대시보드</title>
+    <link rel="stylesheet" href="/howworks.css?v=20260416-1" />
+  </head>
+  <body class="howworks-body">
+    <div class="fixed-badge">설명용(운영 분리)</div>
+
+    <main class="howworks-shell">
+      <header class="hero-card">
+        <p class="eyebrow">Steam 리뷰 구매판단 리포트</p>
+        <h1>단계별 파이프라인 설명 대시보드</h1>
+        <p class="hero-summary">
+          이 화면은 발표/설명용 참고 모델입니다. 실제 운영 대시보드와 분리되어 있으며, mock 데이터로 동작합니다.
+        </p>
+        <div class="hero-actions">
+          <a class="ghost-link" href="/">운영 리포트 화면 보기</a>
+          <span id="loaded-at" class="loaded-at">데이터 로딩 중...</span>
+        </div>
+      </header>
+
+      <section class="track-card">
+        <h2>전체 흐름</h2>
+        <div class="track-lanes">
+          <article class="track-lane offline">
+            <h3>오프라인 생성 트랙</h3>
+            <p>수집 → 전처리 → 집계 → 재료정제 → 리포트생성 → 게이트 → 스냅샷저장</p>
+          </article>
+          <article class="track-lane online">
+            <h3>온라인 조회 트랙</h3>
+            <p>사용자 선택 → 저장된 리포트 즉시 반환</p>
+          </article>
+        </div>
+      </section>
+
+      <section class="flow-card">
+        <h2>메인 플로우 (9단계)</h2>
+        <div id="main-flow-grid" class="stage-grid"></div>
+      </section>
+
+      <section class="detail-grid">
+        <article class="detail-card">
+          <h2>선택된 메인 단계 상세</h2>
+          <div class="detail-top">
+            <span id="main-detail-track" class="track-chip">-</span>
+            <strong id="main-detail-title">-</strong>
+          </div>
+          <div class="kv-grid">
+            <div>
+              <p class="kv-label">입력</p>
+              <pre id="main-detail-input">-</pre>
+            </div>
+            <div>
+              <p class="kv-label">출력</p>
+              <pre id="main-detail-output">-</pre>
+            </div>
+          </div>
+          <p class="kv-label">핵심 지표</p>
+          <ul id="main-detail-metrics" class="metric-list"></ul>
+        </article>
+
+        <article class="detail-card">
+          <h2>별도과정: 업데이트 루프</h2>
+          <div id="update-loop-grid" class="loop-grid"></div>
+          <hr />
+          <div class="detail-top">
+            <span class="track-chip update">Update Loop</span>
+            <strong id="loop-detail-title">-</strong>
+          </div>
+          <div class="kv-grid">
+            <div>
+              <p class="kv-label">입력</p>
+              <pre id="loop-detail-input">-</pre>
+            </div>
+            <div>
+              <p class="kv-label">출력</p>
+              <pre id="loop-detail-output">-</pre>
+            </div>
+          </div>
+          <p class="kv-label">핵심 지표</p>
+          <ul id="loop-detail-metrics" class="metric-list"></ul>
+        </article>
+      </section>
+
+      <footer class="note-card">
+        <h2>참고 메모</h2>
+        <p id="mock-note">-</p>
+      </footer>
+    </main>
+
+    <script src="/howworks.js?v=20260416-1"></script>
+  </body>
+</html>
