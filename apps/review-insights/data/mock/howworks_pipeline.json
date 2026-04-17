@@ -1,9 +1,11 @@
 {
   "pipeline_overview_mock": {
+    "flow_order": [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12],
     "main_flow": [
       {
         "stage_no": 1,
         "stage_name": "게임 전체 리뷰 수집 시작",
+        "implementation_status": "implemented",
         "input": {
           "appid": 1245620
         },
@@ -13,11 +15,18 @@
         "metrics": {
           "수집 리뷰 수": 18432,
           "수집 시간(초)": 92
-        }
+        },
+        "core_rules": [
+          "Steam appreviews를 페이지 단위로 수집한다",
+          "기본 language는 koreana를 사용한다",
+          "review_pages=all일 때 내부 상한 200페이지를 적용한다",
+          "리뷰 ID 기준으로 중복을 제거한다"
+        ]
       },
       {
         "stage_no": 2,
         "stage_name": "규칙기반 전처리",
+        "implementation_status": "implemented",
         "input": {
           "raw_review_count": 18432
         },
@@ -27,11 +36,18 @@
         "metrics": {
           "분석 포함 리뷰 수": 13210,
           "제외 비율": 0.2834
-        }
+        },
+        "core_rules": [
+          "HTML/BBCode/script/style 마크업을 제거한다",
+          "텍스트 정규화(공백/반복문자/표현 치환)를 수행한다",
+          "저품질/욕설-only/비한국어 리뷰를 분석에서 제외한다",
+          "rule_decision/rule_confidence/final_decision_source를 기록한다"
+        ]
       },
       {
         "stage_no": 3,
         "stage_name": "규칙 기반 분석 집계",
+        "implementation_status": "implemented",
         "input": {
           "included_review_count": 13210
         },
@@ -41,11 +57,18 @@
         "metrics": {
           "태그 없음 비율": 0.0742,
           "대표 테마 없음 비율": 0.1121
-        }
+        },
+        "core_rules": [
+          "카테고리별 mention_count/negative_ratio를 계산한다",
+          "주차 버킷 기반 최근 추세(up/down/flat/limited)를 계산한다",
+          "샘플 규모에 따라 sample_size_tier를 부여한다",
+          "대표 테마(top themes)를 집계한다"
+        ]
       },
       {
         "stage_no": 4,
         "stage_name": "LLM 활용 리포트 재료 정제",
+        "implementation_status": "implemented",
         "input": {
           "candidate_review_count": 50
         },
@@ -55,11 +78,18 @@
         "metrics": {
           "LLM 호출 수": 50,
           "규칙 대체 사용 수": 7
-        }
+        },
+        "core_rules": [
+          "포함 리뷰 중 쓰임새 높은 후보를 최대 max_llm_reviews만 선택한다",
+          "후보 우선순위는 태그/테마 유무, 플레이타임, 작성자 리뷰수, 길이, 최신성이다",
+          "LLM 출력은 1~4문장 JSON 스키마를 강제한다",
+          "스키마 실패/저신뢰도는 fallback 텍스트로 대체한다"
+        ]
       },
       {
         "stage_no": 5,
         "stage_name": "리포트 생성",
+        "implementation_status": "implemented",
         "input": {
           "analysis_snapshot_id": "2026-04-16T15:30:00Z"
         },
@@ -69,11 +99,18 @@
         "metrics": {
           "생성 성공 여부": 1,
           "생성 시간(초)": 4.2
-        }
+        },
+        "core_rules": [
+          "report_plan -> report_display -> evidence_sections 순서로 생성한다",
+          "고합의(반복 언급) 신호를 우선 반영한다",
+          "강점/리스크 근거를 분리해 구성한다",
+          "JSON 스키마 검증 실패 시 결정론 fallback을 사용한다"
+        ]
       },
       {
         "stage_no": 6,
         "stage_name": "품질 게이트",
+        "implementation_status": "implemented",
         "input": {
           "report_id": "1245620-20260416"
         },
@@ -83,11 +120,18 @@
         "metrics": {
           "근거 불일치율": 0.0,
           "근거 판정불가율": 0.1111
-        }
+        },
+        "core_rules": [
+          "핵심 섹션 존재 여부를 점검한다",
+          "근거 불일치율과 판정불가율을 점검한다",
+          "금지 라벨 노출 여부를 점검한다",
+          "기준 미달 시 재튜닝 대상으로 분리한다"
+        ]
       },
       {
         "stage_no": 7,
         "stage_name": "스냅샷 저장",
+        "implementation_status": "implemented",
         "input": {
           "gate_passed": true
         },
@@ -97,11 +141,17 @@
         "metrics": {
           "저장 성공 여부": 1,
           "저장 파일 수": 4
-        }
+        },
+        "core_rules": [
+          "raw/processed/analysis/metadata/report 산출물을 저장한다",
+          "파일명은 appid(게임명).json 규칙을 사용한다",
+          "최신 스냅샷만 사용자 조회 경로에 노출한다"
+        ]
       },
       {
         "stage_no": 8,
         "stage_name": "사용자 게임 선택",
+        "implementation_status": "implemented",
         "input": {
           "selected_appid": 1245620
         },
@@ -111,11 +161,17 @@
         "metrics": {
           "조회 준비 시간(ms)": 12,
           "캐시 히트": 1
-        }
+        },
+        "core_rules": [
+          "데모 카탈로그 allow-list 게임만 조회 가능하다",
+          "사용자 경로에서는 Steam API/LLM/재분석을 실행하지 않는다",
+          "저장된 스냅샷 존재 여부만 확인한다"
+        ]
       },
       {
         "stage_no": 9,
         "stage_name": "리포트 반환",
+        "implementation_status": "implemented",
         "input": {
           "snapshot_version": "v2026-04-16-1532"
         },
@@ -125,13 +181,18 @@
         "metrics": {
           "응답 시간(ms)": 38,
           "리포트 크기(KB)": 146
-        }
+        },
+        "core_rules": [
+          "저장된 report JSON을 read-only로 즉시 반환한다",
+          "온라인 경로에서 분석 파이프라인을 재실행하지 않는다"
+        ]
       }
     ],
     "update_loop": [
       {
         "step_no": 1,
         "step_name": "신규 리뷰 추가",
+        "implementation_status": "planned",
         "input": {
           "last_review_count": 18432,
           "current_review_count": 18444
@@ -141,11 +202,16 @@
         },
         "metrics": {
           "신규 리뷰 수": 12
-        }
+        },
+        "core_rules": [
+          "현재 리뷰 수와 마지막 분석 시 리뷰 수를 비교한다",
+          "delta_review_count를 계산한다"
+        ]
       },
       {
         "step_no": 2,
         "step_name": "자동 재분석 필요 판정",
+        "implementation_status": "planned",
         "input": {
           "delta_review_count": 12,
           "threshold_n": 10
@@ -155,11 +221,16 @@
         },
         "metrics": {
           "임계치 n": 10
-        }
+        },
+        "core_rules": [
+          "delta_review_count >= threshold_n 이면 업데이트 필요로 판정한다",
+          "데모 단계에서는 자동 실행 대신 상태 표시만 수행한다"
+        ]
       },
       {
         "step_no": 3,
         "step_name": "재수집/재분석/리포트 재생성",
+        "implementation_status": "planned",
         "input": {
           "needs_refresh": true
         },
@@ -168,7 +239,11 @@
         },
         "metrics": {
           "재생성 시간(초)": 96
-        }
+        },
+        "core_rules": [
+          "조건 충족 시 오프라인 파이프라인을 자동 트리거로 실행한다",
+          "완료 후 최신 스냅샷을 교체한다"
+        ]
       }
     ],
     "note": "업데이트 루프 자동 실행은 실서비스 목표이며, 현재 데모에서는 설명용 시각화만 제공"
