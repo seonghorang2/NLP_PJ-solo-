@@ -270,16 +270,8 @@ button:disabled {
 
 .evidence-sections {
   display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 12px;
-}
-
-.evidence-sections.sparse-layout {
   grid-template-columns: 1fr;
-}
-
-.evidence-sections.single-side-layout .evidence-section.is-empty {
-  display: none;
+  gap: 12px;
 }
 
 .evidence-section {

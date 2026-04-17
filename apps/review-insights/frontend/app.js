@@ -16,7 +16,6 @@ const strengths = document.getElementById("strengths");
 const risks = document.getElementById("risks");
 const evidencePositiveList = document.getElementById("evidence-positive-list");
 const evidenceNegativeList = document.getElementById("evidence-negative-list");
-const evidenceSections = document.querySelector(".evidence-sections");
 const evidencePositiveSection = evidencePositiveList?.closest(".evidence-section");
 const evidenceNegativeSection = evidenceNegativeList?.closest(".evidence-section");
 const disclaimer = document.getElementById("disclaimer");
@@ -220,17 +219,38 @@ function renderEvidenceSection(container, blocks, emptyMessage) {
   });
 }
 
+function renderCardsSafe(container, values) {
+  container.innerHTML = "";
+  const list = toList(values);
+  if (list.length === 0) {
+    const placeholder = document.createElement("p");
+    placeholder.className = "placeholder";
+    placeholder.textContent = "합의 신호가 부족합니다.";
+    container.appendChild(placeholder);
+    return;
+  }
+
+  list.slice(0, 3).forEach((value) => {
+    const card = document.createElement("article");
+    card.className = "mini-card";
+
+    const title = document.createElement("h3");
+    title.textContent = String(value?.title || "-");
+
+    const summary = document.createElement("p");
+    summary.textContent = String(value?.summary || "-");
+
+    card.appendChild(title);
+    card.appendChild(summary);
+    container.appendChild(card);
+  });
+}
+
 function renderEvidence(report) {
   const sections = normalizeEvidenceSections(report);
   const positiveCount = sections.loved.length;
   const negativeCount = sections.complained.length;
 
-  if (evidenceSections) {
-    const isSparse = positiveCount <= 1 || negativeCount <= 1;
-    const hasOnlyOneSide = (positiveCount === 0) !== (negativeCount === 0);
-    evidenceSections.classList.toggle("sparse-layout", isSparse);
-    evidenceSections.classList.toggle("single-side-layout", hasOnlyOneSide);
-  }
   if (evidencePositiveSection) {
     evidencePositiveSection.classList.toggle("is-empty", positiveCount === 0);
     evidencePositiveSection.classList.toggle("is-single", positiveCount === 1);
@@ -286,8 +306,8 @@ function renderReport(report) {
 
   renderBullets(goodForList, display.good_for);
   renderBullets(notGoodForList, display.not_good_for);
-  renderCards(strengths, display.top_strengths);
-  renderCards(risks, display.top_risks);
+  renderCardsSafe(strengths, display.top_strengths);
+  renderCardsSafe(risks, display.top_risks);
 
   renderEvidence(report);
   disclaimer.textContent = report.disclaimer || "";

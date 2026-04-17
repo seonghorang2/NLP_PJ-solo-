@@ -1487,17 +1487,28 @@ def _build_evidence_blocks_v2(consensus_payload: dict[str, Any]) -> list[dict[st
         evidence_group = item.get("evidence_group", {}) or {}
         stance_snippets = list(evidence_group.get(stance, []) or [])
         match_tokens = _build_theme_match_tokens(bucket["theme"], bucket["aspects"])
-        for snippet in stance_snippets:
-            text = _prepare_evidence_source_text(str(snippet.get("snippet", "")), limit=1200)
-            if not text:
+        for index, snippet in enumerate(stance_snippets):
+            evidence_item = _build_evidence_item(
+                review_id=str((snippet or {}).get("review_id", "")),
+                text=str((snippet or {}).get("snippet", "")),
+                synthetic_prefix=f"group-{aspect}-{index + 1}",
+            )
+            if evidence_item is None:
                 continue
+            text = str(evidence_item["text"])
             if not _snippet_matches_stance(text, stance):
                 continue
             if match_tokens and _snippet_matches_theme(text, match_tokens):
-                if text not in bucket["strict_candidates"]:
-                    bucket["strict_candidates"].append(text)
-            if text not in bucket["relaxed_candidates"]:
-                bucket["relaxed_candidates"].append(text)
+                bucket["strict_candidates"] = _append_unique_snippets_v2(
+                    list(bucket["strict_candidates"]),
+                    [evidence_item],
+                    limit=32,
+                )
+            bucket["relaxed_candidates"] = _append_unique_snippets_v2(
+                list(bucket["relaxed_candidates"]),
+                [evidence_item],
+                limit=32,
+            )
 
     blocks: list[dict[str, Any]] = []
     for bucket in sorted(grouped.values(), key=lambda b: (-int(b["mention_count"]), b["theme"])):
@@ -1505,7 +1516,7 @@ def _build_evidence_blocks_v2(consensus_payload: dict[str, Any]) -> list[dict[st
             continue
 
         stage = "strict"
-        snippets: list[str] = []
+        snippets: list[dict[str, str]] = []
         snippets = _append_unique_snippets_v2(
             snippets,
             list(bucket.get("strict_candidates", [])),
@@ -1563,8 +1574,9 @@ def _build_evidence_blocks_v2(consensus_payload: dict[str, Any]) -> list[dict[st
                 "consensus_level": str(bucket.get("consensus_level", "high")),
                 "mention_count": int(bucket["mention_count"]),
                 "evidence_quality_level": stage,
-                "evidence_candidate_snippets": snippets[:8],
-                "evidence_snippets": snippets[:3],
+                "evidence_candidate_items": snippets[:8],
+                "evidence_candidate_snippets": [str(item["text"]) for item in snippets[:8]],
+                "evidence_snippets": [str(item["text"]) for item in snippets[:3]],
             }
         )
         if len(blocks) >= 4:
@@ -1579,55 +1591,125 @@ def _build_evidence_blocks_v2(consensus_payload: dict[str, Any]) -> list[dict[st
     return blocks
 
 
-def _append_unique_snippets_v2(base: list[str], incoming: list[str], *, limit: int) -> list[str]:
+def _build_evidence_item(
+    *,
+    review_id: str,
+    text: str,
+    synthetic_prefix: str,
+) -> dict[str, str] | None:
+    normalized = _prepare_evidence_source_text(clean_markup_text(str(text or "")), limit=1200)
+    if not normalized:
+        return None
+    if _is_noisy_evidence_text(normalized):
+        return None
+    resolved_review_id = str(review_id or "").strip()
+    if not resolved_review_id:
+        # Keep deterministic synthetic id for snippets that lost source ids in fallback paths.
+        resolved_review_id = f"{synthetic_prefix}-{abs(hash(normalized))}"
+    return {"review_id": resolved_review_id, "text": normalized}
+
+
+def _coerce_evidence_items(raw_values: list[Any], *, synthetic_prefix: str) -> list[dict[str, str]]:
+    result: list[dict[str, str]] = []
+    for index, raw in enumerate(raw_values):
+        if isinstance(raw, dict):
+            review_id = str(raw.get("review_id", ""))
+            text = str(raw.get("text", raw.get("snippet", "")))
+        else:
+            review_id = ""
+            text = str(raw)
+        evidence_item = _build_evidence_item(
+            review_id=review_id,
+            text=text,
+            synthetic_prefix=f"{synthetic_prefix}-{index + 1}",
+        )
+        if evidence_item is not None:
+            result.append(evidence_item)
+    return result
+
+
+def _append_unique_snippets_v2(
+    base: list[dict[str, str]],
+    incoming: list[dict[str, str]],
+    *,
+    limit: int,
+    used_review_ids: set[str] | None = None,
+    used_texts: set[str] | None = None,
+) -> list[dict[str, str]]:
     result = list(base)
-    seen = set(result)
-    for text in incoming:
-        normalized = _prepare_evidence_source_text(str(text), limit=1200)
-        if not normalized or normalized in seen:
+    seen_review_ids = {str(item.get("review_id", "")).strip() for item in result}
+    seen_texts = {str(item.get("text", "")).strip() for item in result}
+    blocked_review_ids = used_review_ids if used_review_ids is not None else set()
+    blocked_texts = used_texts if used_texts is not None else set()
+
+    for item in incoming:
+        review_id = str(item.get("review_id", "")).strip()
+        text = str(item.get("text", "")).strip()
+        if not review_id or not text:
             continue
-        if _is_noisy_evidence_text(normalized):
+        if review_id in blocked_review_ids or review_id in seen_review_ids:
             continue
-        seen.add(normalized)
-        result.append(normalized)
+        if text in blocked_texts or text in seen_texts:
+            continue
+        seen_review_ids.add(review_id)
+        seen_texts.add(text)
+        result.append({"review_id": review_id, "text": text})
         if len(result) >= limit:
             break
     return result
 
 
-def _collect_global_stance_snippets_v2(items: list[dict[str, Any]]) -> dict[str, list[str]]:
-    collected = {"positive": [], "negative": []}
+def _collect_global_stance_snippets_v2(items: list[dict[str, Any]]) -> dict[str, list[dict[str, str]]]:
+    collected: dict[str, list[dict[str, str]]] = {"positive": [], "negative": []}
     for item in items:
         for stance in ("positive", "negative"):
             evidence_group = item.get("evidence_group", {}) or {}
-            for snippet in list(evidence_group.get(stance, []) or []):
-                text = _prepare_evidence_source_text(str(snippet.get("snippet", "")), limit=1200)
-                if not text:
+            for index, snippet in enumerate(list(evidence_group.get(stance, []) or [])):
+                evidence_item = _build_evidence_item(
+                    review_id=str((snippet or {}).get("review_id", "")),
+                    text=str((snippet or {}).get("snippet", "")),
+                    synthetic_prefix=f"global-{stance}-{index + 1}",
+                )
+                if evidence_item is None:
                     continue
+                text = str(evidence_item["text"])
                 if not _snippet_matches_stance(text, stance):
                     continue
-                if text not in collected[stance]:
-                    collected[stance].append(text)
+                collected[stance] = _append_unique_snippets_v2(
+                    list(collected[stance]),
+                    [evidence_item],
+                    limit=128,
+                )
     return collected
 
 
-def _collect_global_material_snippets_v2(consensus_payload: dict[str, Any]) -> dict[str, list[str]]:
-    collected = {"positive": [], "negative": []}
+def _collect_global_material_snippets_v2(
+    consensus_payload: dict[str, Any]
+) -> dict[str, list[dict[str, str]]]:
+    collected: dict[str, list[dict[str, str]]] = {"positive": [], "negative": []}
     use_rewrite = _should_use_llm_material_rewrite()
-    for material in list(consensus_payload.get("report_materials", []) or []):
+    for index, material in enumerate(list(consensus_payload.get("report_materials", []) or [])):
         if not isinstance(material, dict):
             continue
         stance = str(material.get("stance", "")).strip().lower()
         if stance not in {"positive", "negative"}:
             continue
+        review_id = str(material.get("review_id", "")).strip()
         source_text = str(material.get("source_text", ""))
         refined_text = str(material.get("refined_text", ""))
         raw_text = refined_text if use_rewrite and refined_text else source_text
-        text = _prepare_evidence_source_text(raw_text, limit=1200)
-        if not text:
+        evidence_item = _build_evidence_item(
+            review_id=review_id,
+            text=raw_text,
+            synthetic_prefix=f"material-{stance}-{index + 1}",
+        )
+        if evidence_item is None:
             continue
-        if text not in collected[stance]:
-            collected[stance].append(text)
+        collected[stance] = _append_unique_snippets_v2(
+            list(collected[stance]),
+            [evidence_item],
+            limit=128,
+        )
     return collected
 
 
@@ -1636,19 +1718,20 @@ def _collect_aspect_material_snippets_v2(
     consensus_payload: dict[str, Any],
     stance: str,
     aspects: list[str],
-) -> list[str]:
+) -> list[dict[str, str]]:
     aspect_set = {str(aspect).strip().lower() for aspect in aspects if str(aspect).strip()}
     if not aspect_set:
         return []
 
-    result: list[str] = []
+    result: list[dict[str, str]] = []
     use_rewrite = _should_use_llm_material_rewrite()
-    for material in list(consensus_payload.get("report_materials", []) or []):
+    for index, material in enumerate(list(consensus_payload.get("report_materials", []) or [])):
         if not isinstance(material, dict):
             continue
         material_stance = str(material.get("stance", "")).strip().lower()
         if material_stance != stance:
             continue
+        review_id = str(material.get("review_id", "")).strip()
         material_tags = {
             str(tag).strip().lower()
             for tag in list(material.get("category_tags", []) or [])
@@ -1659,9 +1742,13 @@ def _collect_aspect_material_snippets_v2(
         source_text = str(material.get("source_text", ""))
         refined_text = str(material.get("refined_text", ""))
         raw_text = refined_text if use_rewrite and refined_text else source_text
-        text = _prepare_evidence_source_text(raw_text, limit=1200)
-        if text:
-            result.append(text)
+        evidence_item = _build_evidence_item(
+            review_id=review_id,
+            text=raw_text,
+            synthetic_prefix=f"aspect-{stance}-{index + 1}",
+        )
+        if evidence_item is not None:
+            result = _append_unique_snippets_v2(result, [evidence_item], limit=128)
     return result
 
 
@@ -1669,8 +1756,8 @@ def _ensure_min_stance_blocks_v2(
     *,
     blocks: list[dict[str, Any]],
     source_items: list[dict[str, Any]],
-    global_stance_snippets: dict[str, list[str]],
-    global_material_snippets: dict[str, list[str]],
+    global_stance_snippets: dict[str, list[dict[str, str]]],
+    global_material_snippets: dict[str, list[dict[str, str]]],
 ) -> list[dict[str, Any]]:
     result = list(blocks)
     existing = {str(block.get("stance", "")) for block in result}
@@ -1680,7 +1767,7 @@ def _ensure_min_stance_blocks_v2(
         candidate = _pick_best_item_for_stance_v2(source_items, stance)
         if not candidate:
             continue
-        snippets: list[str] = []
+        snippets: list[dict[str, str]] = []
         snippets = _append_unique_snippets_v2(snippets, list(global_stance_snippets.get(stance, [])), limit=8)
         snippets = _append_unique_snippets_v2(snippets, list(global_material_snippets.get(stance, [])), limit=8)
         if len(snippets) < 2:
@@ -1704,8 +1791,9 @@ def _ensure_min_stance_blocks_v2(
                 "consensus_level": str(candidate.get("consensus_level", "medium")),
                 "mention_count": int(candidate.get("mention_count", 0)),
                 "evidence_quality_level": "guaranteed_fill",
-                "evidence_candidate_snippets": snippets[:8],
-                "evidence_snippets": snippets[:3],
+                "evidence_candidate_items": snippets[:8],
+                "evidence_candidate_snippets": [str(item["text"]) for item in snippets[:8]],
+                "evidence_snippets": [str(item["text"]) for item in snippets[:3]],
             }
         )
     return result
@@ -2191,6 +2279,371 @@ def _rank_evidence_candidates(
 
     scored.sort(key=lambda item: (-item[0], item[1]))
     return [item[2] for item in scored]
+
+
+def _items_to_texts(items: list[dict[str, str]], *, limit: int = 3) -> list[str]:
+    return [str(item.get("text", "")) for item in items[:limit] if str(item.get("text", "")).strip()]
+
+
+def _rank_evidence_candidates_v3(
+    *,
+    candidates: list[dict[str, str]],
+    stance: str,
+    match_tokens: list[str],
+    block_title: str = "",
+    block_why_it_matters: str = "",
+) -> list[dict[str, str]]:
+    query_text = f"{block_title} {block_why_it_matters}".strip()
+    use_similarity = _should_use_title_why_similarity_ranking()
+    scored: list[tuple[float, int, dict[str, str]]] = []
+    for index, item in enumerate(candidates):
+        normalized = str(item.get("text", "")).strip()
+        if not normalized:
+            continue
+        score = 0.0
+        if _snippet_matches_stance(normalized, stance):
+            score += 4.0
+        detected_stance = _snippet_detected_stance(normalized)
+        if detected_stance == stance:
+            score += 1.5
+        elif detected_stance is None:
+            score -= 1.2
+        else:
+            score -= 2.0
+        if match_tokens and _snippet_matches_theme(normalized, match_tokens):
+            score += 2.0
+        if use_similarity and query_text:
+            score += 3.0 * _title_query_similarity(query_text, normalized)
+        if 20 <= len(normalized) <= 320:
+            score += 1.0
+        elif len(normalized) > 550:
+            score -= 1.5
+        scored.append((score, index, {"review_id": str(item.get("review_id", "")).strip(), "text": normalized}))
+
+    scored.sort(key=lambda item: (-item[0], item[1]))
+    return [item[2] for item in scored]
+
+
+def _select_evidence_snippets_for_block_v3(
+    *,
+    block: dict[str, Any],
+    candidates: list[dict[str, str]],
+    judge: OpenAIEvidenceJudge | None,
+) -> list[dict[str, str]]:
+    stance = str(block.get("stance", "mixed"))
+    block_title = str(block.get("title", "evidence"))
+    block_why = str(block.get("why_it_matters", ""))
+    match_tokens = _build_theme_match_tokens(
+        str(block.get("theme", "")),
+        [str(item) for item in list(block.get("aspect_keys", []) or [])],
+    )
+
+    hard_theme_filtered = [
+        item
+        for item in candidates
+        if _snippet_matches_stance(str(item.get("text", "")), stance)
+        and (
+            not match_tokens
+            or _snippet_matches_theme(str(item.get("text", "")), match_tokens)
+        )
+    ]
+    hard_stance_filtered = [
+        item
+        for item in candidates
+        if _snippet_matches_stance(str(item.get("text", "")), stance)
+    ]
+    ranked_source = hard_theme_filtered if len(hard_theme_filtered) >= 2 else hard_stance_filtered
+    ranked = _rank_evidence_candidates_v3(
+        candidates=ranked_source,
+        stance=stance,
+        match_tokens=match_tokens,
+        block_title=block_title,
+        block_why_it_matters=block_why,
+    )
+    if len(ranked) < 2:
+        return ranked
+
+    preferred: list[dict[str, str]] = []
+    if judge is not None and len(ranked) >= 2:
+        selected_indices = judge.judge(
+            title=block_title,
+            theme=str(block.get("theme", "")),
+            why_it_matters=block_why,
+            stance=stance,
+            candidates=[str(item.get("text", "")) for item in ranked[:8]],
+            timeout_seconds=20,
+            retry_limit=1,
+        )
+        if selected_indices:
+            for index in selected_indices:
+                zero_based = index - 1
+                if 0 <= zero_based < len(ranked):
+                    preferred.append(ranked[zero_based])
+
+    ordered: list[dict[str, str]] = []
+    seen: set[str] = set()
+    for item in preferred + ranked:
+        key = f"{str(item.get('review_id', '')).strip()}::{str(item.get('text', '')).strip()}"
+        if key in seen:
+            continue
+        seen.add(key)
+        ordered.append(item)
+
+    strict: list[dict[str, str]] = []
+    strict_known: list[dict[str, str]] = []
+    for item in ordered:
+        text = str(item.get("text", ""))
+        if not _snippet_matches_stance(text, stance):
+            continue
+        if match_tokens and not _snippet_matches_theme(text, match_tokens):
+            continue
+        strict.append(item)
+        if _snippet_detected_stance(text) == stance:
+            strict_known.append(item)
+        if len(strict) >= 6 and len(strict_known) >= 3:
+            break
+    if len(strict_known) >= 2:
+        return strict_known[:3]
+    if len(strict) >= 2:
+        return strict[:3]
+
+    relaxed = list(strict)
+    relaxed_known = list(strict_known)
+    for item in ordered:
+        if item in relaxed:
+            continue
+        text = str(item.get("text", ""))
+        if not _snippet_matches_stance(text, stance):
+            continue
+        relaxed.append(item)
+        if _snippet_detected_stance(text) == stance:
+            relaxed_known.append(item)
+        if len(relaxed) >= 6 and len(relaxed_known) >= 3:
+            break
+    if len(relaxed_known) >= 2:
+        return relaxed_known[:3]
+    if len(relaxed) >= 2:
+        return relaxed[:3]
+    return []
+
+
+def _build_guaranteed_fill_block_v3(
+    *,
+    source_blocks: list[dict[str, Any]],
+    stance: str,
+    used_review_ids: set[str],
+    used_texts: set[str],
+) -> dict[str, Any] | None:
+    for block_index, block in enumerate(source_blocks):
+        if not isinstance(block, dict):
+            continue
+        if str(block.get("stance", "")).strip().lower() != stance:
+            continue
+
+        merged_candidates: list[Any] = []
+        merged_candidates.extend(list(block.get("evidence_candidate_items", []) or []))
+        merged_candidates.extend(list(block.get("evidence_candidate_snippets", []) or []))
+        merged_candidates.extend(list(block.get("evidence_snippets", []) or []))
+        candidate_items = _coerce_evidence_items(
+            merged_candidates[:12],
+            synthetic_prefix=f"guaranteed-v3-{stance}-{block_index + 1}",
+        )
+        if not candidate_items:
+            continue
+
+        snippets: list[dict[str, str]] = []
+        signal_matched: list[dict[str, str]] = []
+        signal_seen: set[str] = set()
+        seen: set[str] = set()
+        for item in candidate_items:
+            review_id = str(item.get("review_id", "")).strip()
+            normalized = _prepare_evidence_source_text(
+                clean_markup_text(str(item.get("text", ""))),
+                limit=1200,
+            )
+            if not review_id or not normalized or normalized in seen:
+                continue
+            if review_id in used_review_ids or normalized in used_texts:
+                continue
+            if _is_noisy_evidence_text(normalized):
+                continue
+            if not _snippet_matches_stance(normalized, stance):
+                continue
+            seen.add(normalized)
+            evidence_item = {"review_id": review_id, "text": normalized}
+            snippets.append(evidence_item)
+            if _snippet_detected_stance(normalized) == stance and normalized not in signal_seen:
+                signal_seen.add(normalized)
+                signal_matched.append(evidence_item)
+            if len(snippets) >= 3:
+                break
+
+        if len(signal_matched) >= 2:
+            snippets = signal_matched[:3]
+        if len(snippets) < 2:
+            continue
+
+        for item in snippets:
+            used_review_ids.add(str(item.get("review_id", "")).strip())
+            used_texts.add(str(item.get("text", "")).strip())
+
+        next_block = dict(block)
+        next_block["evidence_quality_level"] = "guaranteed_fill"
+        next_block["evidence_candidate_items"] = snippets[:8]
+        next_block["evidence_candidate_snippets"] = _items_to_texts(snippets, limit=8)
+        next_block["evidence_snippets"] = _items_to_texts(snippets, limit=3)
+        return next_block
+    return None
+
+
+def _guarantee_min_stance_blocks_v3(
+    *,
+    compressed_blocks: list[dict[str, Any]],
+    source_blocks: list[dict[str, Any]],
+    stance: str,
+    used_review_ids: set[str],
+    used_texts: set[str],
+) -> list[dict[str, Any]]:
+    if compressed_blocks:
+        return compressed_blocks
+    fallback = _build_guaranteed_fill_block_v3(
+        source_blocks=source_blocks,
+        stance=stance,
+        used_review_ids=used_review_ids,
+        used_texts=used_texts,
+    )
+    if fallback is None:
+        return []
+    return [fallback]
+
+
+def _compress_evidence_sections_v3(
+    evidence_sections: dict[str, list[dict[str, Any]]],
+    *,
+    use_llm: bool,
+) -> dict[str, list[dict[str, Any]]]:
+    strengths = list(evidence_sections.get("strengths", []) or [])
+    risks = list(evidence_sections.get("risks", []) or [])
+    if not strengths and not risks:
+        return {"strengths": [], "risks": []}
+
+    judge = (
+        OpenAIEvidenceJudge()
+        if use_llm and _should_use_llm_evidence_judge()
+        else None
+    )
+    llm_judge_enabled = bool(judge and judge.available)
+    used_review_ids: set[str] = set()
+    used_texts: set[str] = set()
+
+    def _compress_block_list(blocks: list[dict[str, Any]], *, stance: str) -> list[dict[str, Any]]:
+        compressed_blocks: list[dict[str, Any]] = []
+        for block_index, block in enumerate(blocks):
+            if not isinstance(block, dict):
+                continue
+            source_values = (
+                list(block.get("evidence_candidate_items", []) or [])
+                or list(block.get("evidence_candidate_snippets", []) or [])
+                or list(block.get("evidence_snippets", []) or [])
+            )
+            source_items = _coerce_evidence_items(
+                source_values[:12],
+                synthetic_prefix=f"compress-v3-{stance}-{block_index + 1}",
+            )
+            if not source_items:
+                continue
+
+            block_stance = str(block.get("stance", "mixed"))
+            match_tokens = _build_theme_match_tokens(
+                str(block.get("theme", "")),
+                [str(item) for item in list(block.get("aspect_keys", []) or [])],
+            )
+
+            rewritten = _append_unique_snippets_v2(
+                [],
+                [
+                    item
+                    for item in source_items
+                    if _snippet_matches_stance(str(item.get("text", "")), block_stance)
+                    and (
+                        not match_tokens
+                        or _snippet_matches_theme(str(item.get("text", "")), match_tokens)
+                    )
+                ],
+                limit=8,
+                used_review_ids=used_review_ids,
+                used_texts=used_texts,
+            )
+            if len(rewritten) < 2:
+                rewritten = _append_unique_snippets_v2(
+                    [],
+                    [
+                        item
+                        for item in source_items
+                        if _snippet_matches_stance(str(item.get("text", "")), block_stance)
+                    ],
+                    limit=8,
+                    used_review_ids=used_review_ids,
+                    used_texts=used_texts,
+                )
+            if len(rewritten) < 2:
+                continue
+
+            finalized = _select_evidence_snippets_for_block_v3(
+                block=block,
+                candidates=rewritten[:8],
+                judge=(judge if llm_judge_enabled else None),
+            )
+            if len(finalized) < 2:
+                finalized = _rank_evidence_candidates_v3(
+                    candidates=rewritten[:8],
+                    stance=block_stance,
+                    match_tokens=match_tokens,
+                )[:3]
+            finalized = _append_unique_snippets_v2(
+                [],
+                finalized,
+                limit=3,
+                used_review_ids=used_review_ids,
+                used_texts=used_texts,
+            )
+            if len(finalized) < 2:
+                continue
+
+            for item in finalized:
+                used_review_ids.add(str(item.get("review_id", "")).strip())
+                used_texts.add(str(item.get("text", "")).strip())
+
+            next_block = dict(block)
+            next_block["evidence_candidate_items"] = rewritten[:8]
+            next_block["evidence_candidate_snippets"] = _items_to_texts(rewritten, limit=8)
+            next_block["evidence_snippets"] = _items_to_texts(finalized, limit=3)
+            compressed_blocks.append(next_block)
+        return compressed_blocks
+
+    compressed_strengths = _compress_block_list(strengths, stance="positive")[:3]
+    compressed_risks = _compress_block_list(risks, stance="negative")[:3]
+
+    compressed_strengths = _guarantee_min_stance_blocks_v3(
+        compressed_blocks=compressed_strengths,
+        source_blocks=strengths,
+        stance="positive",
+        used_review_ids=used_review_ids,
+        used_texts=used_texts,
+    )[:3]
+    compressed_risks = _guarantee_min_stance_blocks_v3(
+        compressed_blocks=compressed_risks,
+        source_blocks=risks,
+        stance="negative",
+        used_review_ids=used_review_ids,
+        used_texts=used_texts,
+    )[:3]
+
+    return {"strengths": compressed_strengths, "risks": compressed_risks}
+
+
+# Activate v3 compressor: global dedup by review_id/text + markup clean enforcement.
+_compress_evidence_sections = _compress_evidence_sections_v3
 
 
 def _title_query_similarity(query_text: str, candidate_text: str) -> float:
