@@ -242,19 +242,19 @@
     "fit_for": "초반 진입 장벽이나 조작 적응 여부를 중요하게 보는 플레이어는 사전 확인이 필요합니다.",
     "risks": "content_depth 관련 이슈는 반복적으로 언급되지만 최근 급격한 악화 신호는 제한적입니다."
   },
-  "pipeline_run_id": "2456740-rebuild-20260417T051058Z",
-  "generated_at": "2026-04-17T05:10:58.995594+00:00",
+  "pipeline_run_id": "2456740-20260417T055957Z",
+  "generated_at": "2026-04-17T05:59:57.660581+00:00",
   "source_review_count": 1526,
-  "review_pages": "from_raw_snapshot",
+  "review_pages": "raw_rebuild",
   "llm_stats": {
     "considered": 1306,
     "selected": 50,
-    "invoked": 0,
-    "success": 0,
+    "invoked": 50,
+    "success": 50,
     "schema_invalid": 0,
     "low_confidence": 0,
     "cache_hits": 0,
-    "fallback_used": 50
+    "fallback_used": 0
   },
   "report_material_refiner": {
     "enabled": true,
@@ -264,12 +264,12 @@
     "stats": {
       "considered": 1306,
       "selected": 50,
-      "invoked": 0,
-      "success": 0,
+      "invoked": 50,
+      "success": 50,
       "schema_invalid": 0,
       "low_confidence": 0,
       "cache_hits": 0,
-      "fallback_used": 50
+      "fallback_used": 0
     }
   }
 }

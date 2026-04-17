@@ -303,6 +303,15 @@ def _should_use_llm_report_writer() -> bool:
     return os.getenv("USE_LLM_REPORT_WRITER", "true").strip().lower() in {"1", "true", "yes", "on"}
 
 
+def _should_use_llm_material_rewrite() -> bool:
+    return os.getenv("USE_LLM_MATERIAL_REWRITE", "false").strip().lower() in {
+        "1",
+        "true",
+        "yes",
+        "on",
+    }
+
+
 def _should_use_llm_evidence_judge() -> bool:
     return os.getenv("USE_LLM_EVIDENCE_JUDGE", "false").strip().lower() in {
         "1",
@@ -450,8 +459,13 @@ def _build_report_plan_deterministic(
     }
 
 
-def _is_llm_report_proofread_enabled() -> bool:
-    return os.getenv("USE_LLM_REPORT_PROOFREAD", "true").strip().lower() in {"1", "true", "yes", "on"}
+def _is_llm_proofread_enabled() -> bool:
+    primary = os.getenv("USE_LLM_PROOFREAD")
+    if primary is not None:
+        return primary.strip().lower() in {"1", "true", "yes", "on"}
+    # Backward compatibility for previous env key.
+    legacy = os.getenv("USE_LLM_REPORT_PROOFREAD", "true")
+    return legacy.strip().lower() in {"1", "true", "yes", "on"}
 
 
 def _is_free_game(consensus_payload: dict[str, Any]) -> bool:
@@ -557,11 +571,12 @@ def _apply_final_language_polish(
     evidence_sections = _apply_forbidden_label_replacements_to_sections(evidence_sections)
 
     proofreader = KoreanReportProofreader()
-    llm_enabled = bool(allow_llm and _is_llm_report_proofread_enabled() and proofreader.available)
+    llm_enabled = bool(allow_llm and _is_llm_proofread_enabled() and proofreader.available)
 
-    def _fix(text: str) -> str:
+    def _fix(text: str, *, allow_llm_override: bool | None = None) -> str:
         source = _rewrite_free_game_text(text) if is_free_game else str(text or "")
-        return proofreader.proofread_text(source, allow_llm=llm_enabled)
+        use_llm = llm_enabled if allow_llm_override is None else bool(allow_llm_override)
+        return proofreader.proofread_text(source, allow_llm=use_llm)
 
     decision_anchor = dict(report_plan.get("decision_anchor", {}) or {})
     if isinstance(decision_anchor.get("rationale_short"), str):
@@ -626,7 +641,8 @@ def _apply_final_language_polish(
                 next_block["explanation"] = _fix(str(next_block.get("explanation", "")))
             snippets: list[str] = []
             for snippet in list(next_block.get("evidence_snippets", []) or []):
-                snippets.append(_fix(str(snippet)))
+                # Evidence snippet is kept as rule-only polish to preserve original user wording.
+                snippets.append(_fix(str(snippet), allow_llm_override=False))
             next_block["evidence_snippets"] = snippets
             fixed.append(next_block)
         return fixed
@@ -952,8 +968,9 @@ def _collect_grouped_evidence(
 
         review_id = str(review.get("review_id", ""))
         material = refined_material_map.get(review_id, {})
-        refined_text = str(material.get("refined_text", ""))
-        snippet_source = refined_text if refined_text else str(review.get("review_text", ""))
+        snippet_source = str(material.get("evidence_text", ""))
+        if not snippet_source:
+            snippet_source = str(review.get("review_text", ""))
         snippet = _prepare_evidence_source_text(clean_markup_text(snippet_source), limit=1200)
         if not snippet or snippet in seen:
             continue
@@ -993,15 +1010,18 @@ def _collect_grouped_evidence(
 
 def _build_refined_material_map(report_materials: list[dict[str, Any]]) -> dict[str, dict[str, Any]]:
     result: dict[str, dict[str, Any]] = {}
+    use_rewrite = _should_use_llm_material_rewrite()
     for material in list(report_materials or []):
         if not isinstance(material, dict):
             continue
         review_id = str(material.get("review_id", "")).strip()
+        source_text = str(material.get("source_text", "")).strip()
         refined_text = str(material.get("refined_text", "")).strip()
-        if not review_id or not refined_text:
+        evidence_text = refined_text if use_rewrite and refined_text else source_text
+        if not review_id or not evidence_text:
             continue
         result[review_id] = {
-            "refined_text": refined_text,
+            "evidence_text": evidence_text,
             "stance": str(material.get("stance", "")).strip().lower(),
         }
     return result
@@ -1593,13 +1613,17 @@ def _collect_global_stance_snippets_v2(items: list[dict[str, Any]]) -> dict[str,
 
 def _collect_global_material_snippets_v2(consensus_payload: dict[str, Any]) -> dict[str, list[str]]:
     collected = {"positive": [], "negative": []}
+    use_rewrite = _should_use_llm_material_rewrite()
     for material in list(consensus_payload.get("report_materials", []) or []):
         if not isinstance(material, dict):
             continue
         stance = str(material.get("stance", "")).strip().lower()
         if stance not in {"positive", "negative"}:
             continue
-        text = _prepare_evidence_source_text(str(material.get("refined_text", "")), limit=1200)
+        source_text = str(material.get("source_text", ""))
+        refined_text = str(material.get("refined_text", ""))
+        raw_text = refined_text if use_rewrite and refined_text else source_text
+        text = _prepare_evidence_source_text(raw_text, limit=1200)
         if not text:
             continue
         if text not in collected[stance]:
@@ -1618,6 +1642,7 @@ def _collect_aspect_material_snippets_v2(
         return []
 
     result: list[str] = []
+    use_rewrite = _should_use_llm_material_rewrite()
     for material in list(consensus_payload.get("report_materials", []) or []):
         if not isinstance(material, dict):
             continue
@@ -1631,7 +1656,10 @@ def _collect_aspect_material_snippets_v2(
         }
         if material_tags and aspect_set.isdisjoint(material_tags):
             continue
-        text = _prepare_evidence_source_text(str(material.get("refined_text", "")), limit=1200)
+        source_text = str(material.get("source_text", ""))
+        refined_text = str(material.get("refined_text", ""))
+        raw_text = refined_text if use_rewrite and refined_text else source_text
+        text = _prepare_evidence_source_text(raw_text, limit=1200)
         if text:
             result.append(text)
     return result

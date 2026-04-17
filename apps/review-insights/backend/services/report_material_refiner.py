@@ -204,6 +204,7 @@ def build_report_materials(
     stats = ReportMaterialRefinerStats()
     if not config.enabled:
         return [], stats
+    material_rewrite_enabled = _is_llm_material_rewrite_enabled()
 
     candidates = _select_candidates(processed_reviews, max_count=max(config.max_llm_reviews, 0))
     stats.considered = sum(1 for review in processed_reviews if review.included_in_analysis)
@@ -244,7 +245,7 @@ def build_report_materials(
                     category_tags=list(review.category_tags),
                     canonical_theme=review.canonical_theme,
                     source_text=source_text,
-                    refined_text=_fallback_refined_text(source_text),
+                    refined_text=source_text,
                     stance=_fallback_stance(review),
                     confidence=0.0,
                     llm_used=False,
@@ -264,7 +265,7 @@ def build_report_materials(
                     category_tags=list(review.category_tags),
                     canonical_theme=review.canonical_theme,
                     source_text=source_text,
-                    refined_text=_fallback_refined_text(source_text),
+                    refined_text=source_text,
                     stance=_fallback_stance(review),
                     confidence=round(decision.confidence, 4),
                     llm_used=llm_used,
@@ -282,7 +283,11 @@ def build_report_materials(
                 category_tags=list(review.category_tags),
                 canonical_theme=review.canonical_theme,
                 source_text=source_text,
-                refined_text=decision.refined_text,
+                refined_text=(
+                    decision.refined_text
+                    if material_rewrite_enabled
+                    else source_text
+                ),
                 stance=decision.stance,
                 confidence=round(decision.confidence, 4),
                 llm_used=llm_used,
@@ -345,6 +350,15 @@ def _candidate_sort_key(
         score_map.get(review.review_id, 0.0),
         int(review.timestamp_created or 0),
     )
+
+
+def _is_llm_material_rewrite_enabled() -> bool:
+    return os.getenv("USE_LLM_MATERIAL_REWRITE", "false").strip().lower() in {
+        "1",
+        "true",
+        "yes",
+        "on",
+    }
 
 
 def _build_candidate_score_map(processed_reviews: list[ProcessedReview]) -> dict[str, float]:
@@ -432,20 +446,6 @@ def _normalize_review_text(text: str) -> str:
     if not normalized:
         return ""
     return normalized
-
-
-def _fallback_refined_text(text: str) -> str:
-    source = _normalize_review_text(text)
-    if not source:
-        return ""
-    sentences = _split_sentences(source)
-    if not sentences:
-        return source[:360].rstrip()
-    selected = sentences[:4]
-    compact = " ".join(selected).strip()
-    if len(compact) > 360:
-        compact = compact[:360].rstrip()
-    return compact
 
 
 def _split_sentences(text: str) -> list[str]:
