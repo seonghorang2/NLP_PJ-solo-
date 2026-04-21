@@ -4,96 +4,9 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Steam 구매 판단 리포트</title>
-    <link rel="stylesheet" href="/styles.css?v=20260416-1" />
   </head>
   <body>
-    <main class="report-shell">
-      <header class="report-topbar">
-        <p class="brand">Steam 구매 판단 리포트</p>
-        <div class="topbar-actions">
-          <form id="report-form" class="picker">
-            <label for="game-select" class="sr-only">게임 선택</label>
-            <select id="game-select" required>
-              <option value="">리포트를 불러오는 중...</option>
-            </select>
-            <button id="load-button" type="submit">리포트 보기</button>
-          </form>
-        </div>
-      </header>
-
-      <section class="hero-card">
-        <div class="hero-meta">
-          <p id="game-name" class="game-title">게임을 선택하면 리포트가 표시됩니다</p>
-          <span id="buy-badge" class="buy-badge neutral">분석 전</span>
-        </div>
-        <h1 id="headline" class="headline">
-          많은 리뷰의 합의 신호를 바탕으로 구매 결정을 빠르게 정리합니다.
-        </h1>
-      </section>
-
-      <section class="decision-grid">
-        <article class="section-card">
-          <h2>지금 사도 될까?</h2>
-          <p id="buy-timing-summary" class="section-body">-</p>
-        </article>
-        <article class="section-card">
-          <h2>현재 상태</h2>
-          <p id="recent-state-summary" class="section-body">-</p>
-          <p id="recent-state-status" class="section-kicker">-</p>
-        </article>
-        <article class="section-card">
-          <h2>최종 추천</h2>
-          <p id="buy-recommendation" class="section-body">-</p>
-          <p id="generated-at" class="section-kicker">-</p>
-        </article>
-      </section>
-
-      <section class="fit-grid">
-        <article class="section-card">
-          <h2>잘 맞는 플레이어</h2>
-          <ul id="good-for-list" class="bullet-list">
-            <li>데이터 준비 중</li>
-          </ul>
-        </article>
-        <article class="section-card">
-          <h2>주의가 필요한 플레이어</h2>
-          <ul id="not-good-for-list" class="bullet-list">
-            <li>데이터 준비 중</li>
-          </ul>
-        </article>
-      </section>
-
-      <section class="strength-risk-grid">
-        <article class="section-card">
-          <h2>구매 이유</h2>
-          <div id="strengths" class="stack-list"></div>
-        </article>
-        <article class="section-card">
-          <h2>구매 리스크</h2>
-          <div id="risks" class="stack-list"></div>
-        </article>
-      </section>
-
-      <section class="section-card">
-        <h2>구매 근거</h2>
-        <div class="evidence-sections">
-          <article class="evidence-section">
-            <h3>강점 근거</h3>
-            <div id="evidence-positive-list" class="evidence-grid"></div>
-          </article>
-          <article class="evidence-section">
-            <h3>리스크 근거</h3>
-            <div id="evidence-negative-list" class="evidence-grid"></div>
-          </article>
-        </div>
-      </section>
-
-      <footer class="report-footer">
-        <p id="disclaimer">-</p>
-        <p id="status-line">리포트를 불러오는 중입니다...</p>
-      </footer>
-    </main>
-
-    <script src="/app.js?v=20260416-1"></script>
+    <div id="root"></div>
+    <script type="module" src="/src/main.jsx"></script>
   </body>
 </html>

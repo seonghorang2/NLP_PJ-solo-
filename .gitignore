@@ -21,3 +21,7 @@ _uvicorn_stderr.log
 
 # local test temp outputs
 apps/review-insights/tests/_tmp_*/
+
+# frontend build/deps
+node_modules/
+apps/review-insights/frontend/dist/

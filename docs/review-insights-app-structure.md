@@ -18,6 +18,13 @@ apps/review-insights/
     services/
     storage/
   frontend/
+    src/
+      api/
+      components/
+      pages/
+      styles/
+      utils/
+    dist/              # npm run build 결과물(배포 산출물)
   data/
     raw/
     processed/
@@ -35,7 +42,7 @@ apps/review-insights/
 - `services`: 수집 및 분석 orchestration
 - `analysis`: 규칙 기반 분석 코어
 - `storage`: 스냅샷 저장소 접근
-- `frontend`: 리포트 화면
+- `frontend`: React 기반 리포트 화면 및 정적 빌드 산출물
 
 ---
 

@@ -62,7 +62,7 @@
   - `services/korean_report_proofreader.py`
 - Steam 연동: `services/steam_reviews.py`
 - 저장소: `storage/file_store.py`
-- 프론트: `frontend/index.html`, `frontend/app.js`, `frontend/styles.css`
+- 프론트: `frontend/src/main.jsx`, `frontend/src/App.jsx`, `frontend/src/pages/ReportPage.jsx`, `frontend/src/styles/report.css`
 - 실행 스크립트: `scripts/run_offline_pipeline.py`
 
 ---
@@ -279,18 +279,22 @@
 
 ## 10. 프론트 렌더링 구조
 
-파일: `frontend/app.js`
+파일:
+- `frontend/src/pages/ReportPage.jsx`
+- `frontend/src/components/*`
+- `frontend/src/api/reportApi.js`
+- `frontend/src/utils/reportMappers.js`
 
 흐름:
-1. `/api/games` 로드 -> `report_ready` 게임만 셀렉트
-2. `/api/games/{appid}/report` 로드
-3. `report_display` + `evidence_sections` 렌더
+1. `fetchDemoGames()`로 `/api/games` 호출 후 `report_ready` 게임만 노출
+2. 선택 appid 기준 `fetchReport()`로 `/api/games/{appid}/report` 호출
+3. `report_display` + `evidence_sections`를 React 컴포넌트 트리로 렌더
 
 렌더 원칙:
 - dashboard형 수치판보다 구매결정 카드 중심
 - 근거는 strengths/risks 분리
-- 스니펫은 `textContent`로 넣어 HTML 인젝션 방지
-- 긴 스니펫은 줄바꿈 표시 허용, 텍스트 자체는 최대한 보존
+- React 문자열 렌더링으로 HTML 인젝션 경로 차단
+- 긴 스니펫은 줄바꿈 표시를 유지하되 텍스트 자체는 최대한 보존
 
 ---
 
@@ -347,4 +351,3 @@ uvicorn app:app --app-dir apps/review-insights/backend --reload
 
 현재 시스템은 **오프라인 선분석 + 온라인 읽기 전용** 경계를 잘 지키는 구조이며,  
 LLM은 전면 분류기가 아니라 **리포트 품질 보강 계층**으로 제한되어 운영되고 있다.
-

@@ -65,6 +65,18 @@
 
 ## 5. 서버 실행
 
+프론트 빌드(최초 1회 또는 변경 시):
+
+```bash
+cd apps/review-insights/frontend
+npm install
+npm run build
+```
+
+PowerShell 실행 정책으로 `npm`이 차단되면 `npm.cmd`를 사용한다.
+
+백엔드 실행:
+
 ```bash
 uvicorn app:app --app-dir apps/review-insights/backend --reload
 ```

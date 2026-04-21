@@ -6,15 +6,20 @@ from pathlib import Path
 
 try:
     from fastapi import FastAPI
-    from fastapi.responses import FileResponse
+    from fastapi.responses import FileResponse, HTMLResponse
+    from fastapi.staticfiles import StaticFiles
 except ImportError:  # pragma: no cover - exercised only when FastAPI is missing.
     FastAPI = None
     FileResponse = None
+    HTMLResponse = None
+    StaticFiles = None
 
 from api.routes import router
 
 APP_ROOT = Path(__file__).resolve().parents[1]
 FRONTEND_DIR = APP_ROOT / "frontend"
+FRONTEND_DIST_DIR = FRONTEND_DIR / "dist"
+FRONTEND_DIST_ASSETS_DIR = FRONTEND_DIST_DIR / "assets"
 NO_CACHE_HEADERS = {
     "Cache-Control": "no-store, no-cache, must-revalidate, max-age=0",
     "Pragma": "no-cache",
@@ -33,29 +38,27 @@ def create_app():
         app.include_router(router)
 
     if FileResponse is not None:
+        if StaticFiles is not None and FRONTEND_DIST_ASSETS_DIR.exists():
+            app.mount(
+                "/assets",
+                StaticFiles(directory=FRONTEND_DIST_ASSETS_DIR),
+                name="frontend-assets",
+            )
 
         @app.get("/")
         def index():
             """Serve the consumer-facing report page."""
-            return FileResponse(FRONTEND_DIR / "index.html", headers=NO_CACHE_HEADERS)
+            dist_index_path = FRONTEND_DIST_DIR / "index.html"
+            if dist_index_path.exists():
+                return FileResponse(dist_index_path, headers=NO_CACHE_HEADERS)
 
-        @app.get("/app.js")
-        def frontend_js():
-            """Serve the frontend script."""
-            return FileResponse(
-                FRONTEND_DIR / "app.js",
-                media_type="text/javascript",
-                headers=NO_CACHE_HEADERS,
+            message = (
+                "Frontend build not found. Run `npm install` and `npm run build` in "
+                "`apps/review-insights/frontend`, then restart the server."
             )
-
-        @app.get("/styles.css")
-        def frontend_css():
-            """Serve the report stylesheet."""
-            return FileResponse(
-                FRONTEND_DIR / "styles.css",
-                media_type="text/css",
-                headers=NO_CACHE_HEADERS,
-            )
+            if HTMLResponse is not None:
+                return HTMLResponse(content=message, status_code=503, headers=NO_CACHE_HEADERS)
+            return {"detail": message}
 
     return app
 
