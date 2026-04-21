@@ -99,20 +99,6 @@ button:disabled {
   cursor: wait;
 }
 
-.howworks-link {
-  color: #d7ecff;
-  text-decoration: none;
-  border: 1px solid rgba(102, 192, 244, 0.4);
-  border-radius: 10px;
-  padding: 10px 12px;
-  font-weight: 700;
-  font-size: 0.88rem;
-  white-space: nowrap;
-}
-
-.howworks-link:hover {
-  background: rgba(102, 192, 244, 0.12);
-}
 
 .hero-card,
 .section-card {
@@ -403,8 +389,4 @@ button:disabled {
     flex: 1;
   }
 
-  .howworks-link {
-    display: inline-flex;
-    justify-content: center;
-  }
 }
